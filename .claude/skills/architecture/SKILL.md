@@ -40,6 +40,9 @@ Rules every change must follow. Background and history: `docs/decisions.md`. Pro
 - **White label:** no store-specific text, image or color hardcoded — read it from the store settings (`/api/store`).
 - **Mobile first** (most clients use a phone); touch targets ≥ 44px; real `<button>`/`<a>`/`<label>`; icon-only buttons get an `aria-label`.
 - Icons from `@lucide/vue`, imported explicitly.
+- Dropdowns use the shadcn `Select` (via `OptionSelect` for numeric options), never the native `<select>`.
+- Native inputs (`date`, `time`) follow the theme through `color-scheme` in `brand.css`; keep it when adding themes.
+- After `shadcn-vue add`, restart the dev server: new components are registered only at startup.
 
 ## 5. Structure
 

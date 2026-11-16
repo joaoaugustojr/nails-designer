@@ -23,7 +23,7 @@ async function logout() {
     </PanelHeader>
 
     <section class="flex flex-col gap-2 p-5">
-      <h2 class="text-[13px] font-bold tracking-wide text-muted-foreground uppercase">Aparência</h2>
+      <PanelSectionTitle>Aparência</PanelSectionTitle>
       <ThemeToggle />
     </section>
   </div>

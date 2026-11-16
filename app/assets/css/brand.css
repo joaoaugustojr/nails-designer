@@ -1,12 +1,14 @@
 /*
  * Brand layer, loaded after main.css. main.css belongs to the shadcn-vue CLI, which
  * rewrites it on `init`/`add`, so every brand override lives here instead.
+ * `color-scheme` makes native controls (date/time pickers, scrollbars) follow the theme.
  * Light values come from the approved mockups; dark values are their counterpart.
  * A store's own accent color will override --primary at runtime (white label).
  */
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Parisienne&display=swap");
 
 :root {
+  color-scheme: light;
   --radius: 0.75rem;
   --background: #fbf8f7;
   --foreground: #221b1e;
@@ -30,6 +32,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: #171214;
   --foreground: #f5eef0;
   --card: #221b1e;

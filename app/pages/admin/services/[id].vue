@@ -95,11 +95,12 @@ useHead({ title });
         </Field>
         <Field :data-invalid="!!errors.durationMinutes || undefined">
           <FieldLabel for="duration">Duração</FieldLabel>
-          <NativeSelect id="duration" v-model="form.durationMinutes">
-            <option v-for="minutes in durations" :key="minutes" :value="minutes">
-              {{ formatDuration(minutes) }}
-            </option>
-          </NativeSelect>
+          <OptionSelect
+            id="duration"
+            v-model="form.durationMinutes"
+            :options="durations"
+            :format="formatDuration"
+          />
         </Field>
       </div>
       <FieldError v-if="errors.priceCents">{{ errors.priceCents }}</FieldError>

@@ -7,6 +7,10 @@ export default defineNuxtConfig({
   modules: ["@nuxt/eslint", "shadcn-nuxt", "nuxt-auth-utils", "@nuxtjs/color-mode"],
   css: ["~/assets/css/main.css", "~/assets/css/brand.css"],
 
+  app: {
+    head: { htmlAttrs: { lang: "pt-BR" } },
+  },
+
   // Overridden by env vars (NUXT_DB_URL, NUXT_ADMIN_EMAIL, …); see .env.example.
   runtimeConfig: {
     dbUrl: "file:.data/nails.db",
@@ -17,7 +21,10 @@ export default defineNuxtConfig({
   },
 
   // `dark` / `light` class on <html>, matching shadcn's `.dark` variant.
+  // Follows the device (light/dark) until the person picks a theme.
   colorMode: {
+    preference: "system",
+    fallback: "light",
     classSuffix: "",
     storageKey: "color-mode",
   },

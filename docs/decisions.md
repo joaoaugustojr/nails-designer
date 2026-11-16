@@ -78,10 +78,21 @@ Running record of decisions that are not derivable from the code. Newest entry w
 
 - **Uploads** (service photos now; logo and cover next) are stored in `NUXT_UPLOADS_DIR` (default `.data/uploads`, the app volume in production) under random UUID names, and served by `/uploads/<name>` with a one-year immutable cache. Only names matching the UUID pattern are served, so the route cannot reach any other file.
 - **An image is accepted by its bytes, not by its name or Content-Type:** JPEG, PNG and WebP signatures only (no SVG, which can carry scripts), up to 8 MB, at most 10 photos per service. All images of a request are validated before any is written. Deleting a photo or a service deletes its files. Images are stored as uploaded (no resizing yet).
+- **Pending decision — image processing:** phone photos carry EXIF metadata, including the GPS position where they were taken, and uploads keep it today. Proposal: re-encode every upload with `sharp` (strips all metadata, resizes to ≤ 1600 px, converts to WebP, ~200–300 KB instead of 4–8 MB). Postponed by the owner on 2026-11-16; check sharp's native binary on the dev machine (glibc 2.31) and on the ARM image before adopting it. Must be decided before real customer photos go live.
 - **The first photo is the cover.** Reordering photos is not built yet.
 - **Prices** are typed the Brazilian way ("45", "45,50", "1.234,56") and stored in cents; durations go in 15-minute steps up to 8 h. The service form schema (`shared/schemas/service.ts`) is shared by the form and the API.
 - New photos are uploaded when the form is saved; removing an existing photo is immediate (after a confirm). Deleting a service keeps its bookings, thanks to the snapshot columns.
 - Deletion confirmations use the browser's `confirm()`; the shadcn alert-dialog would have overwritten our edited Button.
+
+### Hours, rules and time off (phase 2)
+
+- **Working hours:** up to 4 ranges per weekday, edited per day and saved as a whole (the day's ranges are replaced in one transaction). Ranges are sorted and must not overlap — checked by the shared schema on both sides. Turning a day on starts it at 09:00–18:00; turning it off deletes its ranges.
+- **Rules save on change** (no Save button): gap between appointments (0–30 min), minimum notice (none to 1 day), agenda open for 7–90 days, client cancellation on/off and its deadline (1 h to 1 day). The slot step stays at 30 min and is not exposed yet.
+- **Time off** is entered as dates (whole days) or a date range with times, in the store's timezone, and stored as UTC instants; whole days run until midnight after the last day. Only upcoming entries are listed. The same table will hold the "block a time" from the agenda.
+- **Timezone conversion** (`shared/utils/time.ts`) uses `Intl` only, no library, and is tested across a UTC day boundary and daylight-saving changes; the booking engine (phase 3) will use it.
+- Admins and the owner can both edit hours, rules and time off.
+- **Selects use the shadcn Select (Reka UI), not the native `<select>`**: the native dropdown cannot be styled and looked out of place. `OptionSelect` wraps it for numeric options (rules, cancel deadline, service duration); sizes `default` (48px, forms) and `sm` (34px, settings rows). The `native-select` component was removed.
+- New shadcn components are registered only when the dev server starts: restart `pnpm dev` after `shadcn-vue add`.
 
 ### Conventions (architecture skill)
 
@@ -89,6 +100,8 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **English everywhere except user-facing text** (pt-BR). This includes routes: panel pages are `/admin/services`, `/admin/hours`, `/admin/store`.
 - **No comments in `.vue` files**; `.ts` comments only for the why.
 - Clean code rules (naming, small units, early returns, no magic values, no dead or speculative code).
+- **Theme defaults to the device setting (`system`)**, falling back to light when the browser does not tell; a choice made with either control is remembered in the browser (`color-mode` in localStorage).
+- **Native controls follow the theme** through `color-scheme` (light/dark) in `brand.css`; without it, date/time picker icons stayed dark in dark mode. The page declares `<html lang="pt-BR">`. Native time inputs show 12h or 24h according to the device's language, not the page's.
 - **Theme: light, dark and system** with `@nuxtjs/color-mode` (`.dark` class); dark tokens in `brand.css`; two controls: `ThemeToggle` (Claro / Escuro / Sistema) in the panel's Loja tab, and `ThemeSwitch` (a single 44px icon button, light ↔ dark) fixed at the top-right corner of the login page. Both render client-only, because the server cannot know the stored preference. The `ink` button inverts in dark mode.
 
 ### Agent skills
