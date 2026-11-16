@@ -149,6 +149,22 @@ A whole-project pass for duplication, hidden coupling and code outside the conve
 - **UI pieces:** `PanelCard`, `PanelHeader` with a bottom slot, Button `size="inline"` / `variant="quiet"` for text actions — which are now 44px tall (were 36px), per the touch-target rule.
 - Removed: the unused `card` component, `GET /api/admin/me` (no caller), unneeded exports, and comments that only restated the code. Deleting an upload now ignores only "file already gone" and logs anything else, without failing a change already saved.
 
+### Availability rules (2026-11-17)
+
+`availableStartMinutes` in `server/utils/availability.ts`, a pure function with tests:
+
+- Start times step by `slot_step_minutes` (30) from the start of each working range; the whole service must end by the range's end, so it never crosses a break.
+- The gap between appointments is kept free on **both sides of a booking**; time off needs no gap.
+- Minimum notice counts from now, so it can push the first slot into the next day.
+- The agenda is open from today through today + `max_days_ahead` (inclusive), "today" in the store's timezone.
+- Every comparison is in UTC instants, so bookings crossing midnight and daylight-saving changes are handled.
+
+### No double booking (2026-11-17)
+
+- **Atomic:** the booking is saved in a write transaction (`BEGIN IMMEDIATE`): SQLite takes the write lock before reading, so the slot check and the insert run alone; a second client asking for the same time waits, re-checks, and gets "horário indisponível".
+- **Last guard in the database:** a trigger aborts any insert (or un-cancel) of a confirmed booking that overlaps another confirmed one, whatever code path tries it.
+- **Idempotent:** the form sends an idempotency key generated when it opens (`bookings.idempotency_key`, unique). A double tap or a retry after a lost response returns the booking already made instead of creating a second one or reporting the slot as taken.
+
 ### Migrations before launch
 
 - **Until the first production deploy there is a single migration, `0000_init`, regenerated from the schema** (delete `server/db/migrations` and run `pnpm exec drizzle-kit generate --name init`). There is no real data to migrate, so correction migrations are noise. This supersedes the earlier `0001_user_roles`, `0002_clients` and `0003_session_version`; the notes above about hand-edited migrations describe that history.
