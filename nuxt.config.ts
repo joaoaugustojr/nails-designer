@@ -27,6 +27,7 @@ export default defineNuxtConfig({
     fallback: "light",
     classSuffix: "",
     storageKey: "color-mode",
+    disableTransition: true,
   },
 
   vite: {

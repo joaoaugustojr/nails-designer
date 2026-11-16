@@ -175,6 +175,10 @@ A whole-project pass for duplication, hidden coupling and code outside the conve
 - Chips (32px) and the card's "Agendar" (36px) keep the mockup size; an invisible extension makes their touch area 44px.
 - `PanelCard` became `SurfaceCard`, since the site uses the same card surface. Lucide no longer ships brand icons, so the Instagram icon is a small local SVG. The check marks use a `--success` colour token (light and dark).
 
+### Theme switch without animation (2026-11-17)
+
+- Switching the theme is instant: `colorMode.disableTransition` turns every CSS transition off for the frame of the switch, so colours no longer fade (buttons use `transition-all`). Applies to both theme controls, in the panel and on the site.
+
 ### Migrations before launch
 
 - **Until the first production deploy there is a single migration, `0000_init`, regenerated from the schema** (delete `server/db/migrations` and run `pnpm exec drizzle-kit generate --name init`). There is no real data to migrate, so correction migrations are noise. This supersedes the earlier `0001_user_roles`, `0002_clients` and `0003_session_version`; the notes above about hand-edited migrations describe that history.
