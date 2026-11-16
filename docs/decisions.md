@@ -13,7 +13,8 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **Available slots** = working hours of that weekday, minus time off, minus existing bookings (plus the configured gap between appointments), keeping only start times where the whole service duration fits. Re-checked inside a transaction on save, so two clients can never take the same slot.
 - **Scheduling rules are settings:** gap between appointments, minimum notice, how many days ahead the agenda is open.
 - **Cancellation is a setting:** "client may cancel through the link" on/off plus a deadline (hours before). Default **off**: only the owner cancels, from the agenda.
-- **Panel users:** more than one user may log in, with two roles: **owner** (exactly one, the store's owner, created at boot) and **admin** (invited users). Owner-only actions are decided with the panel screens (phase 2).
+- **Panel users:** more than one user may log in, with two roles: **owner** (exactly one, the store's owner, created at boot) and **admin** (created by the owner). **No invitations:** the owner registers a user with name, email and password, and that user can log in right away.
+- **Owner only:** create and remove panel users; edit store and brand (name, logo, cover, accent color, contacts, texts). **Owner and admin:** services, hours, rules, time off and the agenda. Admins see the Loja tab read-only. Enforced on the server, mirrored in the UI.
 - **Retention:** the thank-you page carries a personal message from the owner, add-to-calendar (.ics), directions and Instagram.
 
 ### Notifications
@@ -66,7 +67,7 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **Settings** is a single-row table (`CHECK id = 1`), created at boot.
 - **Constraints live in the database:** foreign keys (photos cascade with their service; bookings keep their snapshot when a service is deleted), unique lowercase user email, ranges and status checks.
 - **Migrations** are generated with `pnpm db:generate` into `server/db/migrations` and **applied at server boot**, before any request (every DB access awaits the same setup promise). The image must ship that folder at the same path relative to the working directory.
-- **First panel user = the owner**, created at boot from `NUXT_ADMIN_NAME/EMAIL/PASSWORD`, only while the users table is empty. Further users are admins, invited from the panel (phase 2).
+- **First panel user = the owner**, created at boot from `NUXT_ADMIN_NAME/EMAIL/PASSWORD`, only while the users table is empty. Further users are admins, created by the owner in the panel (phase 2).
 - **Roles** live in `users.role` (`owner` | `admin`, default `admin`); a partial unique index allows at most one owner. The role travels in the session and in the guard's user. Migration `0001_user_roles` promotes the oldest existing user to owner.
 - **Review every generated migration.** drizzle-kit rebuilds SQLite tables to add constraints and, for `0001`, copied a column the old table did not have; that file is hand-edited.
 - **Sessions:** nuxt-auth-utils sealed cookies (7 days), sealed with `NUXT_APP_SECRET`. Because they are stateless, the API guard re-checks that the user still exists, so removing a panel user cuts access immediately.
