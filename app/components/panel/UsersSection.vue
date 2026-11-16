@@ -31,7 +31,7 @@ const {
       </Button>
     </div>
 
-    <PanelCard
+    <SurfaceCard
       v-if="isAdding"
       as="form"
       class="flex flex-col gap-3 p-3.5"
@@ -82,11 +82,11 @@ const {
           pending-label="Cadastrando…"
         />
       </div>
-    </PanelCard>
+    </SurfaceCard>
 
     <p v-if="error" role="alert" class="text-sm text-destructive">{{ error }}</p>
 
-    <PanelCard as="ul" class="flex flex-col divide-y divide-border">
+    <SurfaceCard as="ul" class="flex flex-col divide-y divide-border">
       <li v-for="user in users" :key="user.id" class="flex flex-col gap-2 px-3.5 py-2.5">
         <div class="flex items-center gap-2.5">
           <span class="flex min-w-0 flex-1 flex-col">
@@ -134,6 +134,6 @@ const {
           </div>
         </form>
       </li>
-    </PanelCard>
+    </SurfaceCard>
   </section>
 </template>

@@ -1,10 +1,14 @@
 <script setup lang="ts">
 const props = withDefaults(
-  defineProps<{ name: string; logoPath?: string | null; size?: "md" | "lg" }>(),
+  defineProps<{ name: string; logoPath?: string | null; size?: "sm" | "md" | "lg" }>(),
   { logoPath: null, size: "lg" },
 );
 
-const SIZES = { md: "size-16 text-[25px]", lg: "size-[72px] text-[28px]" };
+const SIZES = {
+  sm: "size-[60px] text-[25px]",
+  md: "size-16 text-[25px]",
+  lg: "size-[72px] text-[28px]",
+};
 
 const letters = computed(() => initials(props.name) || "•");
 </script>

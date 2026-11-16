@@ -15,6 +15,19 @@ export async function getPublicStore() {
   };
 }
 
+export async function getStoreProfile() {
+  const store = await readSettings();
+  return {
+    name: store.storeName,
+    logoPath: store.logoPath,
+    coverPath: store.coverPath,
+    about: store.about,
+    address: store.address,
+    whatsapp: store.whatsapp,
+    instagram: store.instagram,
+  };
+}
+
 export async function getStoreSettings() {
   const store = await readSettings();
   return {

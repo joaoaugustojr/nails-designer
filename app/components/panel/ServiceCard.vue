@@ -15,7 +15,7 @@ const toggleLabel = computed(
 </script>
 
 <template>
-  <PanelCard class="flex items-center gap-3 p-2.5">
+  <SurfaceCard class="flex items-center gap-3 p-2.5">
     <img
       v-if="coverPath"
       :src="coverPath"
@@ -32,5 +32,5 @@ const toggleLabel = computed(
       :aria-label="toggleLabel"
       @update:model-value="emit('toggle', $event)"
     />
-  </PanelCard>
+  </SurfaceCard>
 </template>

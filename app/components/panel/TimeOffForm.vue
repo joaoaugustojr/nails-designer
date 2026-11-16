@@ -45,7 +45,7 @@ async function save() {
 </script>
 
 <template>
-  <PanelCard as="form" class="flex flex-col gap-3 p-3.5" novalidate @submit.prevent="save">
+  <SurfaceCard as="form" class="flex flex-col gap-3 p-3.5" novalidate @submit.prevent="save">
     <div class="grid grid-cols-2 gap-3">
       <Field>
         <FieldLabel for="time-off-start">De</FieldLabel>
@@ -87,5 +87,5 @@ async function save() {
         pending-label="Salvando…"
       />
     </div>
-  </PanelCard>
+  </SurfaceCard>
 </template>

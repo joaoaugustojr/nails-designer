@@ -105,12 +105,12 @@ useHead({ title });
       </div>
       <FieldError v-if="errors.priceCents">{{ errors.priceCents }}</FieldError>
 
-      <PanelCard class="p-3.5">
+      <SurfaceCard class="p-3.5">
         <Field orientation="horizontal" class="justify-between">
           <FieldLabel for="active" class="text-[15px]">Aparece no site</FieldLabel>
           <Switch id="active" v-model="form.active" />
         </Field>
-      </PanelCard>
+      </SurfaceCard>
     </FieldGroup>
 
     <footer

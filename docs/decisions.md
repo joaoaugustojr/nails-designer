@@ -165,6 +165,16 @@ A whole-project pass for duplication, hidden coupling and code outside the conve
 - **Last guard in the database:** a trigger aborts any insert (or un-cancel) of a confirmed booking that overlaps another confirmed one, whatever code path tries it.
 - **Idempotent:** the form sends an idempotency key generated when it opens (`bookings.idempotency_key`, unique). A double tap or a retry after a lost response returns the booking already made instead of creating a second one or reporting the slot as taken.
 
+### Client catalog (2026-11-17)
+
+- **`GET /api/catalog`** (public) returns the store profile (name, logo, cover, about, address, WhatsApp, Instagram — listed field by field) and the active services in panel order, with all photos and "what's included" split into lines.
+- **Header:** cover, logo, name, and the "Sobre" text as the subtitle (the panel describes it as "the short text at the top of the site"). Address, Instagram and WhatsApp chips appear only when filled; the address opens Google Maps.
+- **The client's theme:** a `ThemeSwitch` on the cover, as decided for the Loja tab ("each client picks their own theme").
+- **"Saiba mais" is a bottom `Sheet`** sized to its content, up to 90% of the screen. Photos swipe (CSS scroll snap) with dots and thumbnails; a service without photos shows no gallery.
+- **"Agendar" goes to `/book/<serviceId>`**, the day and time picker (next step).
+- Chips (32px) and the card's "Agendar" (36px) keep the mockup size; an invisible extension makes their touch area 44px.
+- `PanelCard` became `SurfaceCard`, since the site uses the same card surface. Lucide no longer ships brand icons, so the Instagram icon is a small local SVG. The check marks use a `--success` colour token (light and dark).
+
 ### Migrations before launch
 
 - **Until the first production deploy there is a single migration, `0000_init`, regenerated from the schema** (delete `server/db/migrations` and run `pnpm exec drizzle-kit generate --name init`). There is no real data to migrate, so correction migrations are noise. This supersedes the earlier `0001_user_roles`, `0002_clients` and `0003_session_version`; the notes above about hand-edited migrations describe that history.

@@ -33,7 +33,7 @@ async function onTimeOffSaved() {
       <p v-if="error" role="alert" class="text-sm text-destructive">{{ error }}</p>
 
       <PanelSectionTitle>Expediente da semana</PanelSectionTitle>
-      <PanelCard class="flex flex-col divide-y divide-border">
+      <SurfaceCard class="flex flex-col divide-y divide-border">
         <PanelWorkingDay
           v-for="day in week"
           :key="day.value"
@@ -41,11 +41,11 @@ async function onTimeOffSaved() {
           :ranges="day.ranges"
           @save="saveDay(day.value, $event)"
         />
-      </PanelCard>
+      </SurfaceCard>
 
       <template v-if="rules">
         <PanelSectionTitle class="mt-1.5">Regras</PanelSectionTitle>
-        <PanelCard class="flex flex-col divide-y divide-border">
+        <SurfaceCard class="flex flex-col divide-y divide-border">
           <div
             v-for="rule in numericRules"
             :key="rule.key"
@@ -61,10 +61,10 @@ async function onTimeOffSaved() {
               @update:model-value="updateRules({ [rule.key]: $event })"
             />
           </div>
-        </PanelCard>
+        </SurfaceCard>
 
         <PanelSectionTitle class="mt-1.5">Cancelamento</PanelSectionTitle>
-        <PanelCard class="flex flex-col divide-y divide-border">
+        <SurfaceCard class="flex flex-col divide-y divide-border">
           <div class="flex min-h-[46px] items-center justify-between gap-3 px-3.5 py-2 text-sm">
             <label for="client-can-cancel" class="flex flex-col">
               Cliente pode cancelar pelo link
@@ -94,7 +94,7 @@ async function onTimeOffSaved() {
               @update:model-value="updateRules({ cancelDeadlineMinutes: $event })"
             />
           </div>
-        </PanelCard>
+        </SurfaceCard>
       </template>
 
       <div class="mt-1.5 flex items-center justify-between">
@@ -114,7 +114,7 @@ async function onTimeOffSaved() {
         @saved="onTimeOffSaved"
         @cancel="isAddingTimeOff = false"
       />
-      <PanelCard v-if="timeOffItems.length" class="flex flex-col divide-y divide-border">
+      <SurfaceCard v-if="timeOffItems.length" class="flex flex-col divide-y divide-border">
         <div
           v-for="item in timeOffItems"
           :key="item.id"
@@ -133,7 +133,7 @@ async function onTimeOffSaved() {
             <XIcon aria-hidden="true" />
           </Button>
         </div>
-      </PanelCard>
+      </SurfaceCard>
       <p v-else-if="!isAddingTimeOff" class="text-sm text-muted-foreground">
         Nenhuma folga marcada.
       </p>

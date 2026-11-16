@@ -37,7 +37,7 @@ const cancellations = computed(() =>
 </script>
 
 <template>
-  <PanelCard as="article" class="flex flex-col gap-3 p-3.5">
+  <SurfaceCard as="article" class="flex flex-col gap-3 p-3.5">
     <div class="flex items-center gap-3">
       <div
         aria-hidden="true"
@@ -86,5 +86,5 @@ const cancellations = computed(() =>
       <span v-else class="text-xs text-muted-foreground">Sem agendamento futuro</span>
       <span v-if="cancellations" class="text-xs text-muted-foreground">{{ cancellations }}</span>
     </div>
-  </PanelCard>
+  </SurfaceCard>
 </template>

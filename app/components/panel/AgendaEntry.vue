@@ -25,7 +25,10 @@ const placeholder = computed(() => {
       <span v-if="entry.kind === 'booking'" class="text-muted-foreground">{{ end }}</span>
     </div>
 
-    <PanelCard v-if="entry.kind === 'booking'" class="flex flex-1 flex-col gap-1 px-3.5 pt-3 pb-1">
+    <SurfaceCard
+      v-if="entry.kind === 'booking'"
+      class="flex flex-1 flex-col gap-1 px-3.5 pt-3 pb-1"
+    >
       <span class="text-[15px] font-bold">{{ entry.clientName }}</span>
       <span class="text-[13px] text-muted-foreground">{{ entry.serviceName }}</span>
       <div class="flex gap-4">
@@ -36,7 +39,7 @@ const placeholder = computed(() => {
           Cancelar
         </Button>
       </div>
-    </PanelCard>
+    </SurfaceCard>
 
     <div
       v-else

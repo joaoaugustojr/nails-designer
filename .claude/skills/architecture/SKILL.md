@@ -26,7 +26,7 @@ Rules every change must follow. Background and history: `docs/decisions.md`. Pro
 - **No magic values.** Durations, limits and sizes get a named constant next to where they are used (or a setting, if the owner should change it).
 - **No dead code, no speculative code.** No unused props, params, exports, components or "for later" abstractions. Delete instead of commenting out.
 - **Reuse before writing.** Check `app/components`, `app/composables`, `app/utils`, `server/utils`, `shared/utils` and the shadcn components first. Known building blocks:
-  - UI: `PanelCard` (the panel's card surface, `as` any tag), `PanelHeader` (title, actions slot, `#bottom` slot), `PanelSectionTitle`, `SubmitButton`, `OptionSelect`, `ConfirmDialog` via `useConfirmDialog`, `StoreMark`.
+  - UI: `SurfaceCard` (the card surface of panel and site, `as` any tag), `PanelHeader` (title, actions slot, `#bottom` slot), `PanelSectionTitle`, `SubmitButton`, `OptionSelect`, `ConfirmDialog` via `useConfirmDialog`, `StoreMark`.
   - Buttons: text actions are `<Button variant="link" size="inline">` (accent) or `variant="quiet"` (muted) — 44px tall; header actions `size="md"`.
   - App: `usePanelUser()` (`user`, `isOwner`), `useStoreInfo()` / `useStoreTimezone()` (the store's timezone for every date shown), `fieldMessages(zodError, messages)`, `errorStatus(error)`.
   - Shared: `initials`, `plural`, `formatPrice(Short)`, `formatDuration`, `formatPhone`, `whatsappUrl`, date/time helpers, `ACCEPTED_IMAGE_TYPES` / `MAX_IMAGE_MEGABYTES`.

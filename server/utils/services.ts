@@ -19,6 +19,30 @@ export async function listServices() {
   });
 }
 
+export async function listCatalog() {
+  const db = await useDb();
+  const active = await db.query.services.findMany({
+    where: eq(services.active, true),
+    columns: {
+      id: true,
+      name: true,
+      details: true,
+      includes: true,
+      priceCents: true,
+      durationMinutes: true,
+    },
+    orderBy: servicesInOrder,
+    with: { photos: { columns: { id: true, path: true }, orderBy: photosInOrder } },
+  });
+  return active.map((service) => ({
+    ...service,
+    includes: service.includes
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean),
+  }));
+}
+
 export async function findService(id: number) {
   const db = await useDb();
   const service = await db.query.services.findFirst({

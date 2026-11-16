@@ -19,7 +19,7 @@ const {
   <section class="flex flex-col gap-3">
     <PanelSectionTitle>Minha conta</PanelSectionTitle>
 
-    <PanelCard as="form" class="flex flex-col gap-3 p-3.5" novalidate @submit.prevent="saveName">
+    <SurfaceCard as="form" class="flex flex-col gap-3 p-3.5" novalidate @submit.prevent="saveName">
       <Field :data-invalid="!!nameError || undefined">
         <FieldLabel for="account-name">Seu nome</FieldLabel>
         <Input
@@ -40,7 +40,7 @@ const {
         label="Salvar nome"
         pending-label="Salvando…"
       />
-    </PanelCard>
+    </SurfaceCard>
 
     <Button
       v-if="!isChangingPassword"
@@ -52,7 +52,7 @@ const {
       Alterar senha
     </Button>
 
-    <PanelCard
+    <SurfaceCard
       v-else
       as="form"
       class="flex flex-col gap-3 p-3.5"
@@ -110,6 +110,6 @@ const {
           pending-label="Salvando…"
         />
       </div>
-    </PanelCard>
+    </SurfaceCard>
   </section>
 </template>
