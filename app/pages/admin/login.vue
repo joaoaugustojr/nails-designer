@@ -28,9 +28,11 @@ async function login() {
 }
 </script>
 
-<!-- Mockup: "Painel · Login". -->
 <template>
   <main class="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-6">
+    <div class="fixed top-4 right-4">
+      <ThemeSwitch />
+    </div>
     <div class="flex flex-col items-center gap-2.5 text-center">
       <StoreMark :name="store?.name ?? ''" :logo-path="store?.logoPath" />
       <h1 class="text-[22px] font-extrabold">{{ title }}</h1>

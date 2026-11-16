@@ -1,4 +1,3 @@
-<!-- Mockup: white page header of every panel tab; actions go in the default slot. -->
 <script setup lang="ts">
 defineProps<{ title: string }>();
 </script>

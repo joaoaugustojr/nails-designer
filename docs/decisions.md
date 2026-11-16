@@ -74,6 +74,14 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **The security boundary is the server guard on `/api/admin/**`;** the page middleware only redirects. Login gives the same answer for an unknown email and a wrong password.
 - **Note:** the `nuxt` / `nitro` skills describe Nuxt 5; server code here uses the Nuxt 4 auto-imported h3 helpers, as documented in nuxt-auth-utils' own README.
 
+### Conventions (architecture skill)
+
+- Project conventions live in the project skill `.claude/skills/architecture/SKILL.md`, loaded before any code change.
+- **English everywhere except user-facing text** (pt-BR). This includes routes: panel pages are `/admin/services`, `/admin/hours`, `/admin/store`.
+- **No comments in `.vue` files**; `.ts` comments only for the why.
+- Clean code rules (naming, small units, early returns, no magic values, no dead or speculative code).
+- **Theme: light, dark and system** with `@nuxtjs/color-mode` (`.dark` class); dark tokens in `brand.css`; two controls: `ThemeToggle` (Claro / Escuro / Sistema) in the panel's Loja tab, and `ThemeSwitch` (a single 44px icon button, light ↔ dark) fixed at the top-right corner of the login page. Both render client-only, because the server cannot know the stored preference. The `ink` button inverts in dark mode.
+
 ### Agent skills
 
 - Installed **per project** in `.claude/skills/` (copied, versioned in the repo, pinned by commit in `skills-lock.json`): `nuxt` and `nitro` (onmax/nuxt-skills), `shadcn-vue` (official, unovue/shadcn-vue), `vitest` (antfu/skills). Reviewed before use: documentation only, no scripts.

@@ -18,8 +18,8 @@ export const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
-        // Dark call to action used across the panel (mockup: #221B1E on white text).
-        ink: "bg-foreground text-white hover:bg-foreground/90",
+        // Dark call to action used across the panel; inverts in dark mode.
+        ink: "bg-foreground text-background hover:bg-foreground/90",
       },
       size: {
         // Mockup: full-width actions, 52px tall, 14px radius, 16px bold.
@@ -35,7 +35,8 @@ export const buttonVariants = cva(
           "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*=size-])]:size-3",
         "icon-sm":
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
-        "icon-lg": "size-9",
+        // Touch-sized (44px) round icon button.
+        "icon-lg": "size-11 rounded-full [&_svg:not([class*=size-])]:size-5",
       },
     },
     defaultVariants: {

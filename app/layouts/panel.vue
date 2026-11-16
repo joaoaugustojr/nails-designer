@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import { CalendarIcon, ClockIcon, StoreIcon, TextAlignStartIcon } from "@lucide/vue";
 
-// Mockup: "Painel" bottom navigation.
 const tabs = [
   { to: "/admin", label: "Agenda", icon: CalendarIcon },
-  { to: "/admin/servicos", label: "Serviços", icon: TextAlignStartIcon },
-  { to: "/admin/horarios", label: "Horários", icon: ClockIcon },
-  { to: "/admin/loja", label: "Loja", icon: StoreIcon },
+  { to: "/admin/services", label: "Serviços", icon: TextAlignStartIcon },
+  { to: "/admin/hours", label: "Horários", icon: ClockIcon },
+  { to: "/admin/store", label: "Loja", icon: StoreIcon },
 ];
 </script>
 
 <template>
   <div class="flex min-h-dvh flex-col">
-    <!-- Bottom padding keeps content clear of the fixed navigation. -->
     <div class="flex flex-1 flex-col pb-[72px]">
       <slot />
     </div>

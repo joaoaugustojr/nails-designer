@@ -2,6 +2,7 @@
 
 White-label booking app for nail designers (first customer: Aline Prata).
 
+- **Conventions: load the `architecture` skill (`.claude/skills/architecture/SKILL.md`) before any code change.**
 - Decisions: `docs/decisions.md`. Append a dated entry for every new decision.
 - Plan and progress: `docs/plan.md`. Tick boxes as work lands.
 - Repo files are written in English; conversation is in Portuguese.

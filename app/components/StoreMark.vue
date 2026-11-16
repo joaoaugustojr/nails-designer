@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// The store's logo, or its initials in a ring while no logo is uploaded.
 const props = defineProps<{ name: string; logoPath?: string | null }>();
 
 const initials = computed(

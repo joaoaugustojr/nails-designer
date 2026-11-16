@@ -1,8 +1,8 @@
 /*
  * Brand layer, loaded after main.css. main.css belongs to the shadcn-vue CLI, which
  * rewrites it on `init`/`add`, so every brand override lives here instead.
- * Values come from the approved mockups. A store's own accent color will override
- * --primary at runtime (white label).
+ * Light values come from the approved mockups; dark values are their counterpart.
+ * A store's own accent color will override --primary at runtime (white label).
  */
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Parisienne&display=swap");
 
@@ -29,8 +29,23 @@
 }
 
 .dark {
+  --background: #171214;
+  --foreground: #f5eef0;
+  --card: #221b1e;
+  --card-foreground: #f5eef0;
+  --popover: #221b1e;
+  --popover-foreground: #f5eef0;
   --primary: #e9b9c8;
   --primary-foreground: #221b1e;
+  --secondary: #3a2830;
+  --secondary-foreground: #f4c9d7;
+  --muted: #2e2529;
+  --muted-foreground: #b3a5ab;
+  --accent: #3a2830;
+  --accent-foreground: #f4c9d7;
+  --destructive: #f97066;
+  --border: #3a3035;
+  --input: #4a3e44;
   --ring: #e9b9c8;
 }
 
