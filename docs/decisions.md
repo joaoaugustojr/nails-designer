@@ -179,6 +179,14 @@ A whole-project pass for duplication, hidden coupling and code outside the conve
 
 - Switching the theme is instant: `colorMode.disableTransition` turns every CSS transition off for the frame of the switch, so colours no longer fade (buttons use `transition-all`). Applies to both theme controls, in the panel and on the site.
 
+### Day and time picker (2026-11-17)
+
+- **`GET /api/services/:id/availability?from=&days=`** (public; 404 for an inactive or unknown service) returns the service summary, the open agenda (`firstDate` = today, `lastDate` = today + `max_days_ahead`) and, for each day, its free start minutes. One request per page of days: changing day does not hit the server.
+- **Six days per page**, as in the mockup, with arrows that stop at today and at the last open day. A day with no free time is dashed and disabled. On load (and on each new page) the first day with free time is selected; changing day clears the chosen time.
+- **The choice travels in the URL** (`/book/<id>?date=…&start=…` and step 2 at `/book/<id>/details?date=…&start=…`), so going back keeps it. The slot is checked again on save.
+- `todayIn` and `weekdayOf` moved to `shared/utils/time.ts`; the agenda and availability share them.
+- **Error page in Portuguese** (`app/error.vue`): a stale link shows "Página não encontrada" and a button back to the services, instead of Nuxt's English default.
+
 ### Migrations before launch
 
 - **Until the first production deploy there is a single migration, `0000_init`, regenerated from the schema** (delete `server/db/migrations` and run `pnpm exec drizzle-kit generate --name init`). There is no real data to migrate, so correction migrations are noise. This supersedes the earlier `0001_user_roles`, `0002_clients` and `0003_session_version`; the notes above about hand-edited migrations describe that history.

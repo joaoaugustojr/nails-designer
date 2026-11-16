@@ -67,6 +67,10 @@ export function utcToZoned(instant: number, timeZone: string) {
   return { date, minutes: zoned.hour * 60 + zoned.minute };
 }
 
+export const todayIn = (timeZone: string, now = Date.now()) => utcToZoned(now, timeZone).date;
+
+export const weekdayOf = (date: string) => new Date(`${date}T00:00:00Z`).getUTCDay();
+
 export function addDays(date: string, days: number) {
   const [year, month, day] = date.split("-").map(Number) as [number, number, number];
   return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);

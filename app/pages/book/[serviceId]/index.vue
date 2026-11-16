@@ -1,0 +1,106 @@
+<script setup lang="ts">
+const DAYS_PER_PAGE = 6;
+
+const route = useRoute("book-serviceId");
+const queryText = (value: unknown) => (typeof value === "string" ? value : undefined);
+
+const from = ref(queryText(route.query.date));
+const selectedDate = ref<string | null>(queryText(route.query.date) ?? null);
+const selectedStart = ref<number | null>(Number(route.query.start) || null);
+
+const { data, status } = await useFetch(`/api/services/${route.params.serviceId}/availability`, {
+  query: { from, days: DAYS_PER_PAGE },
+});
+if (!data.value) throw createError({ statusCode: 404, statusMessage: "Serviço não encontrado" });
+
+useHead({ title: "Escolha o horário" });
+
+const days = computed(() => data.value?.days ?? []);
+const selectedDay = computed(() => days.value.find((day) => day.date === selectedDate.value));
+const pageStart = computed(() => days.value[0]?.date ?? "");
+const canGoBack = computed(() => !!data.value && pageStart.value > data.value.firstDate);
+const canGoForward = computed(
+  () => !!data.value && addDays(pageStart.value, DAYS_PER_PAGE) <= data.value.lastDate,
+);
+
+watch(
+  days,
+  (list) => {
+    if (list.some((day) => day.date === selectedDate.value && day.startMinutes.length)) return;
+    selectedDate.value = list.find((day) => day.startMinutes.length)?.date ?? null;
+  },
+  { immediate: true },
+);
+
+watch(selectedDate, (date, previous) => {
+  if (previous !== undefined && date !== previous) selectedStart.value = null;
+});
+
+const summary = computed(() => {
+  if (!selectedDate.value || selectedStart.value === null || !data.value) {
+    return "Escolha um horário";
+  }
+  const end = selectedStart.value + data.value.service.durationMinutes;
+  return `${formatDayWithWeekday(selectedDate.value)} às ${minutesToTime(selectedStart.value)} · termina ${minutesToTime(end)}`;
+});
+
+const nextStep = computed(() =>
+  selectedDate.value && selectedStart.value !== null
+    ? `/book/${route.params.serviceId}/details?date=${selectedDate.value}&start=${selectedStart.value}`
+    : null,
+);
+
+function movePage(direction: 1 | -1) {
+  from.value = addDays(pageStart.value, direction * DAYS_PER_PAGE);
+}
+</script>
+
+<template>
+  <main v-if="data" class="mx-auto flex min-h-dvh w-full max-w-md flex-col">
+    <SiteStepHeader title="Escolha o horário" step="Passo 1 de 2" back-to="/" />
+
+    <div class="flex flex-col gap-5 px-5 pt-4 pb-6">
+      <SiteChosenService :service="data.service" />
+
+      <SiteDayPicker
+        v-model="selectedDate"
+        :days="days"
+        :can-go-back="canGoBack"
+        :can-go-forward="canGoForward"
+        :class="{ 'opacity-60': status === 'pending' }"
+        @back="movePage(-1)"
+        @forward="movePage(1)"
+      />
+
+      <section class="flex flex-col gap-2.5">
+        <div class="flex items-baseline justify-between">
+          <h2 class="text-[17px] font-bold">Horários livres</h2>
+          <span v-if="selectedDate" class="text-[13px] text-muted-foreground">
+            {{ formatDayWithWeekday(selectedDate) }}
+          </span>
+        </div>
+        <SiteSlotPicker
+          v-if="selectedDay"
+          v-model="selectedStart"
+          :start-minutes="selectedDay.startMinutes"
+        />
+        <p v-else class="text-sm text-muted-foreground">
+          Nenhum horário livre nestes dias. Veja os próximos.
+        </p>
+        <p class="text-xs leading-[1.45] text-muted-foreground">
+          Mostramos só os horários em que o serviço inteiro cabe na agenda.
+        </p>
+      </section>
+    </div>
+
+    <footer
+      class="sticky bottom-0 mt-auto flex flex-col gap-2.5 border-t border-border bg-card px-5 pt-3.5 pb-[calc(22px+env(safe-area-inset-bottom))]"
+    >
+      <span class="text-center text-[13px] text-muted-foreground">{{ summary }}</span>
+      <Button v-if="nextStep" as-child>
+        <NuxtLink :to="nextStep">Continuar</NuxtLink>
+      </Button>
+      <Button v-else disabled>Continuar</Button>
+    </footer>
+  </main>
+</template>

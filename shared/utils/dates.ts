@@ -2,7 +2,7 @@ import { addDays } from "./time";
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
-function dateParts(date: string) {
+export function dateParts(date: string) {
   const [year, month, day] = date.split("-").map(Number) as [number, number, number];
   const instant = Date.UTC(year, month - 1, day);
   const format = (options: Intl.DateTimeFormatOptions) =>
@@ -12,6 +12,7 @@ function dateParts(date: string) {
   return {
     day,
     month: format({ month: "short" }),
+    longMonth: capitalize(format({ month: "long" })),
     weekday: capitalize(format({ weekday: "short" })),
     longWeekday: format({ weekday: "long" }).split("-")[0]!,
   };

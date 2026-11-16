@@ -9,16 +9,12 @@ const toDayMinutes = (instant: Date, day: string, timezone: string) => {
   return zoned.minutes;
 };
 
-function todayIn(timezone: string) {
-  return utcToZoned(Date.now(), timezone).date;
-}
-
 export async function getAgenda(requestedDate: string | undefined) {
   const timezone = await storeTimezone();
   const date = requestedDate ?? todayIn(timezone);
   const dayStart = new Date(zonedToUtc(date, 0, timezone));
   const dayEnd = new Date(zonedToUtc(addDays(date, 1), 0, timezone));
-  const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
+  const weekday = weekdayOf(date);
   const db = await useDb();
 
   const [ranges, dayBookings, blocks] = await Promise.all([
