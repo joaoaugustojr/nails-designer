@@ -96,6 +96,7 @@ Running record of decisions that are not derivable from the code. Newest entry w
 
 ### Store and brand (phase 2)
 
+- **Switches follow the store's accent too** (the mockup's green was dropped); the thumb uses the primary foreground when on, so it stays visible in both themes.
 - **Panel buttons follow the store's accent** (primary variant), by the owner's choice: the dark `ink` buttons of the mockup were removed, so a store's brand color shows across the panel too.
 - **Owner-only on the server** (`requireOwner`, 403 for admins); admins see the Loja tab read-only (disabled fieldset, no upload or save). The theme is a personal, per-device preference (stored in the browser), so it sits at the top of the Loja tab, outside the owner-only form, with a note that it does not change the clients' site — each client picks their own theme there.
 - **Accent color: 5 curated options** (Rosé, Vinho, Nude, Lavanda, Grafite), each with a light value (stored, white text passes contrast) and a dark-theme counterpart. A free color picker was not offered: arbitrary colors break contrast.
@@ -104,6 +105,14 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **Feedback:** saving shows only in the button ("Salvando…" with a spinner, disabled to prevent double submits), via `SubmitButton`; there are no "saved" messages — only errors are shown.
 - WhatsApp is stored as digits and shown as `(11) 91234-5678`; Instagram is stored without `@`. Empty optional fields are stored as NULL.
 - The store's public identity (`/api/store`) is fetched once per page load and shared (`useStoreInfo`), refreshed after saving.
+
+### Agenda (phase 2)
+
+- **One day at a time**, in the store's timezone, navigated with previous/next (`/admin?date=YYYY-MM-DD`; no date = today in the store's timezone, not the server's).
+- **The timeline is computed** (`buildDayTimeline`, pure and tested): confirmed bookings and time-off blocks as they are, free time left inside working hours ("Livre até…"), and breaks between working ranges ("Intervalo"). Bookings outside working hours still show. Cancelled bookings are hidden.
+- **Cancel** marks the booking `cancelled` (with `cancelled_at`) instead of deleting it, after a confirm; the slot becomes free again. Notifying the client comes with phase 5.
+- **"Bloquear horário"** reuses the time-off form, opened on the day being viewed and in time-range mode; blocks are listed and removed in Horários.
+- **WhatsApp** opens `wa.me` with Brazil's code added to local numbers.
 
 ### Conventions (architecture skill)
 

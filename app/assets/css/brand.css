@@ -29,7 +29,6 @@
   --border: #eadfe2;
   --input: #dccdd2;
   --ring: #a8325a;
-  --success: #2f7a4f;
 }
 
 .dark {
@@ -52,7 +51,6 @@
   --border: #3a3035;
   --input: #4a3e44;
   --ring: #e9b9c8;
-  --success: #4caf7d;
 }
 
 body {

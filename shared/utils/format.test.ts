@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { formatDuration } from "./duration";
 import { centsToPriceInput, formatPrice, parsePrice } from "./money";
-import { formatPhone } from "./phone";
+import { formatPhone, whatsappUrl } from "./phone";
 
 describe("parsePrice", () => {
   it.each([
@@ -52,5 +52,18 @@ describe("formatPhone", () => {
     ["123", "123"],
   ])("formats %s as %s", (digits, label) => {
     expect(formatPhone(digits)).toBe(label);
+  });
+});
+
+describe("whatsappUrl", () => {
+  it("adds Brazil's code to local numbers", () => {
+    expect(whatsappUrl("11912345678")).toBe("https://wa.me/5511912345678");
+    expect(whatsappUrl("5511912345678")).toBe("https://wa.me/5511912345678");
+  });
+
+  it("encodes a prefilled message", () => {
+    expect(whatsappUrl("11912345678", "Olá, Maria!")).toBe(
+      "https://wa.me/5511912345678?text=Ol%C3%A1%2C%20Maria!",
+    );
   });
 });

@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { type TimeOffInput, timeOffSchema } from "#shared/schemas/schedule";
 
+const props = withDefaults(defineProps<{ date?: string; isWholeDay?: boolean }>(), {
+  date: () => new Date().toLocaleDateString("sv"),
+  isWholeDay: true,
+});
 const emit = defineEmits<{ save: [timeOff: TimeOffInput]; cancel: [] }>();
 
-const today = new Date().toLocaleDateString("sv");
 const form = reactive({
-  startDate: today,
-  endDate: today,
-  isWholeDay: true,
+  startDate: props.date,
+  endDate: props.date,
+  isWholeDay: props.isWholeDay,
   startTime: "09:00",
   endTime: "18:00",
   reason: "",

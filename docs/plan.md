@@ -24,7 +24,7 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [x] Store and brand (owner only; read-only for admins): name, logo, cover, accent color, address, WhatsApp, Instagram, about text, thank-you message.
 - [x] Services: list, active toggle, create/edit (photos, details, what's included, price, duration), delete.
 - [x] Hours: weekly working hours (several ranges per day), rules (gap, minimum notice, days ahead), cancellation setting, time off.
-- [ ] Agenda: day view with bookings and free gaps, cancel a booking, block a time.
+- [x] Agenda: day view with bookings and free gaps, cancel a booking, block a time.
 - [ ] Panel users: owner creates (name, email, password) and removes admins; the owner cannot be removed.
 
 ## Phase 3 — Client booking

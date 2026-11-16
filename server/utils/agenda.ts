@@ -1,0 +1,73 @@
+import { and, eq, gt, lt } from "drizzle-orm";
+
+import { bookings, timeOff, workingHours } from "../db/schema";
+
+const toDayMinutes = (instant: Date, day: string, timezone: string) => {
+  const zoned = utcToZoned(instant.getTime(), timezone);
+  if (zoned.date < day) return 0;
+  if (zoned.date > day) return MINUTES_PER_DAY;
+  return zoned.minutes;
+};
+
+export function todayIn(timezone: string) {
+  return utcToZoned(Date.now(), timezone).date;
+}
+
+export async function getAgenda(requestedDate: string | undefined) {
+  const timezone = await storeTimezone();
+  const date = requestedDate ?? todayIn(timezone);
+  const dayStart = new Date(zonedToUtc(date, 0, timezone));
+  const dayEnd = new Date(zonedToUtc(addDays(date, 1), 0, timezone));
+  const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
+  const db = await useDb();
+
+  const [ranges, dayBookings, blocks] = await Promise.all([
+    db.query.workingHours.findMany({
+      columns: { startMinute: true, endMinute: true },
+      where: eq(workingHours.weekday, weekday),
+    }),
+    db.query.bookings.findMany({
+      columns: {
+        id: true,
+        startsAt: true,
+        endsAt: true,
+        clientName: true,
+        clientPhone: true,
+        serviceName: true,
+      },
+      where: and(
+        eq(bookings.status, "confirmed"),
+        lt(bookings.startsAt, dayEnd),
+        gt(bookings.endsAt, dayStart),
+      ),
+    }),
+    db.query.timeOff.findMany({
+      columns: { id: true, startsAt: true, endsAt: true, reason: true },
+      where: and(lt(timeOff.startsAt, dayEnd), gt(timeOff.endsAt, dayStart)),
+    }),
+  ]);
+
+  const inDay = <T extends { startsAt: Date; endsAt: Date }>({ startsAt, endsAt, ...rest }: T) => ({
+    ...rest,
+    startMinute: toDayMinutes(startsAt, date, timezone),
+    endMinute: toDayMinutes(endsAt, date, timezone),
+  });
+
+  return {
+    date,
+    today: todayIn(timezone),
+    workingRanges: ranges.sort((first, second) => first.startMinute - second.startMinute),
+    bookingCount: dayBookings.length,
+    items: buildDayTimeline(ranges, dayBookings.map(inDay), blocks.map(inDay)),
+  };
+}
+
+export async function cancelBooking(id: number) {
+  const db = await useDb();
+  const [cancelled] = await db
+    .update(bookings)
+    .set({ status: "cancelled", cancelledAt: new Date() })
+    .where(and(eq(bookings.id, id), eq(bookings.status, "confirmed")))
+    .returning({ id: bookings.id });
+  if (!cancelled) throw createError({ statusCode: 404, statusMessage: "Booking not found" });
+}

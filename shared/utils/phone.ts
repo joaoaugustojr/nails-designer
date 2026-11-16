@@ -5,3 +5,11 @@ export function formatPhone(digits: string) {
   const [, country, area, prefix, line] = match;
   return `${country ? "+55 " : ""}(${area}) ${prefix}-${line}`;
 }
+
+const BRAZIL_CODE = "55";
+
+export function whatsappUrl(digits: string, message?: string) {
+  const international = digits.length <= 11 ? BRAZIL_CODE + digits : digits;
+  const text = message ? `?text=${encodeURIComponent(message)}` : "";
+  return `https://wa.me/${international}${text}`;
+}

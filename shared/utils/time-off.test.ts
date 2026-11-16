@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { formatAgendaDay } from "./dates";
 import { zonedToUtc } from "./time";
 import { describeTimeOff, formatLeadTime } from "./time-off";
 
@@ -42,5 +43,16 @@ describe("describeTimeOff", () => {
     expect(describeTimeOff(at("2026-12-24", 0), at("2026-12-27", 0), TZ)).toBe(
       "24 a 26 dez · dias inteiros",
     );
+  });
+});
+
+describe("formatAgendaDay", () => {
+  it.each([
+    ["2026-11-16", "Ontem, segunda 16 nov"],
+    ["2026-11-17", "Hoje, terça 17 nov"],
+    ["2026-11-18", "Amanhã, quarta 18 nov"],
+    ["2026-11-20", "Sexta, 20 nov"],
+  ])("labels %s", (date, label) => {
+    expect(formatAgendaDay(date, "2026-11-17")).toBe(label);
   });
 });
