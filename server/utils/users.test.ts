@@ -10,9 +10,11 @@ import { createPanelUser, deletePanelUser, listPanelUsers, resetPanelUserPasswor
 
 // createError is a Nuxt server auto-import; a plain stand-in is enough here.
 vi.stubGlobal("createError", (error: object) => Object.assign(new Error(), error));
+vi.stubGlobal("hashPassword", async (password: string) => `hashed:${password}`);
 
 const dir = mkdtempSync(join(tmpdir(), "nails-users-"));
 const db = createDatabase(`file:${join(dir, "test.db")}`);
+vi.stubGlobal("useDb", async () => db);
 let ownerId: number;
 
 beforeEach(async () => {
@@ -29,8 +31,8 @@ afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 describe("panel users", () => {
   it("creates admins and lists the owner first", async () => {
-    await createPanelUser(db, { name: "Ana", email: "ana@example.com", passwordHash: "x" });
-    const list = await listPanelUsers(db);
+    await createPanelUser({ name: "Ana", email: "ana@example.com", password: "x" });
+    const list = await listPanelUsers();
     expect(list.map((user) => [user.name, user.role])).toEqual([
       ["Owner", "owner"],
       ["Ana", "admin"],
@@ -39,32 +41,32 @@ describe("panel users", () => {
 
   it("refuses an email already in use", async () => {
     await expect(
-      createPanelUser(db, { name: "Copy", email: "owner@example.com", passwordHash: "x" }),
+      createPanelUser({ name: "Copy", email: "owner@example.com", password: "x" }),
     ).rejects.toMatchObject({ statusCode: 409 });
   });
 
   it("removes admins but never the owner", async () => {
-    const { id } = await createPanelUser(db, {
+    const { id } = await createPanelUser({
       name: "Ana",
       email: "ana@example.com",
-      passwordHash: "x",
+      password: "x",
     });
-    await deletePanelUser(db, id);
-    await expect(deletePanelUser(db, ownerId)).rejects.toMatchObject({ statusCode: 400 });
-    await expect(deletePanelUser(db, 9999)).rejects.toMatchObject({ statusCode: 404 });
-    expect((await listPanelUsers(db)).map((user) => user.name)).toEqual(["Owner"]);
+    await deletePanelUser(id);
+    await expect(deletePanelUser(ownerId)).rejects.toMatchObject({ statusCode: 400 });
+    await expect(deletePanelUser(9999)).rejects.toMatchObject({ statusCode: 404 });
+    expect((await listPanelUsers()).map((user) => user.name)).toEqual(["Owner"]);
   });
 
   it("resets an admin's password and ends her sessions, but not the owner's", async () => {
-    const { id } = await createPanelUser(db, {
+    const { id } = await createPanelUser({
       name: "Ana",
       email: "ana@example.com",
-      passwordHash: "old",
+      password: "old",
     });
-    await resetPanelUserPassword(db, id, "new");
+    await resetPanelUserPassword(id, "new");
     const [ana] = await db.select().from(users).where(eq(users.id, id));
-    expect(ana).toMatchObject({ passwordHash: "new", sessionVersion: 1 });
-    await expect(resetPanelUserPassword(db, ownerId, "x")).rejects.toMatchObject({
+    expect(ana).toMatchObject({ passwordHash: "hashed:new", sessionVersion: 1 });
+    await expect(resetPanelUserPassword(ownerId, "x")).rejects.toMatchObject({
       statusCode: 400,
     });
   });

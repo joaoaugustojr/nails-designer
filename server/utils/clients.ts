@@ -7,7 +7,6 @@ export const CLIENTS_PAGE_SIZE = 20;
 
 type Inserter = Pick<Database, "insert">;
 
-// The phone identifies the client; a new booking refreshes her name.
 export async function upsertClient(db: Inserter, client: { phone: string; name: string }) {
   const now = new Date();
   const [saved] = await db
@@ -28,10 +27,16 @@ function searchFilter(search: string | undefined): SQL | undefined {
   return digits ? or(byName, sql`${clients.phone} like ${`%${digits}%`}`) : byName;
 }
 
-export async function queryClients(
-  db: Database,
-  { search, offset = 0, now = new Date() }: { search?: string; offset?: number; now?: Date },
-) {
+export async function listClients({
+  search,
+  offset = 0,
+  now = new Date(),
+}: {
+  search?: string;
+  offset?: number;
+  now?: Date;
+}) {
+  const db = await useDb();
   const nowMs = now.getTime();
   const isVisit = sql`${bookings.status} = 'confirmed' and ${bookings.endsAt} <= ${nowMs}`;
   const isUpcoming = sql`${bookings.status} = 'confirmed' and ${bookings.startsAt} > ${nowMs}`;
@@ -67,10 +72,4 @@ export async function queryClients(
     items: rows.slice(0, CLIENTS_PAGE_SIZE),
     hasMore: rows.length > CLIENTS_PAGE_SIZE,
   };
-}
-
-export async function listClients(params: { search?: string; offset?: number }) {
-  const db = await useDb();
-  const [page, timezone] = await Promise.all([queryClients(db, params), storeTimezone()]);
-  return { ...page, timezone };
 }

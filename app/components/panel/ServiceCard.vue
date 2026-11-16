@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const props = defineProps<{ service: ServiceSummary }>();
+import type { ApiGet } from "~/types/api";
+
+const props = defineProps<{ service: ApiGet<"/api/admin/services">[number] }>();
 const emit = defineEmits<{ toggle: [active: boolean] }>();
 
 const coverPath = computed(() => props.service.photos[0]?.path);
@@ -13,7 +15,7 @@ const toggleLabel = computed(
 </script>
 
 <template>
-  <div class="flex items-center gap-3 rounded-[14px] border border-border bg-card p-2.5">
+  <PanelCard class="flex items-center gap-3 p-2.5">
     <img
       v-if="coverPath"
       :src="coverPath"
@@ -30,5 +32,5 @@ const toggleLabel = computed(
       :aria-label="toggleLabel"
       @update:model-value="emit('toggle', $event)"
     />
-  </div>
+  </PanelCard>
 </template>

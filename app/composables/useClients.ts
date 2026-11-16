@@ -21,7 +21,6 @@ export function useClients() {
 
   const clients = computed(() => [...(firstPage.value?.items ?? []), ...morePages.value]);
   const total = computed(() => firstPage.value?.total ?? 0);
-  const timezone = computed(() => firstPage.value?.timezone ?? "America/Sao_Paulo");
   const hasMore = computed(() => lastPageHasMore.value ?? firstPage.value?.hasMore ?? false);
 
   async function loadMore() {
@@ -37,5 +36,5 @@ export function useClients() {
     }
   }
 
-  return { search, clients, total, timezone, hasMore, isLoadingMore, loadMore };
+  return { search, clients, total, hasMore, isLoadingMore, loadMore };
 }

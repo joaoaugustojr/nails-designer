@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const SERVICE_DURATION_STEP_MINUTES = 15;
 export const SERVICE_MAX_DURATION_MINUTES = 8 * 60;
-export const SERVICE_MAX_PRICE_CENTS = 100_000_00;
+const SERVICE_MAX_PRICE_CENTS = 100_000_00;
 export const SERVICE_MAX_PHOTOS = 10;
 
 export const SERVICE_DURATIONS = Array.from(

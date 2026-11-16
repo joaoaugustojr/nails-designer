@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { type TimeOffInput, timeOffSchema } from "#shared/schemas/schedule";
+import { timeOffSchema } from "#shared/schemas/schedule";
 
 const props = withDefaults(defineProps<{ date?: string; isWholeDay?: boolean }>(), {
   date: () => new Date().toLocaleDateString("sv"),
   isWholeDay: true,
 });
-const emit = defineEmits<{ save: [timeOff: TimeOffInput]; cancel: [] }>();
+const emit = defineEmits<{ saved: []; cancel: [] }>();
 
 const form = reactive({
   startDate: props.date,
@@ -16,8 +16,9 @@ const form = reactive({
   reason: "",
 });
 const error = ref("");
+const isSaving = ref(false);
 
-function save() {
+async function save() {
   const parsed = timeOffSchema.safeParse({
     startDate: form.startDate,
     endDate: form.endDate,
@@ -25,21 +26,26 @@ function save() {
     endMinute: form.isWholeDay ? null : timeToMinutes(form.endTime),
     reason: form.reason,
   });
-  const isInOrder = form.endDate >= form.startDate;
-  if (!parsed.success || !isInOrder) {
+  if (!parsed.success || form.endDate < form.startDate) {
     error.value = "Confira as datas e os horários.";
     return;
   }
-  emit("save", parsed.data);
+
+  error.value = "";
+  isSaving.value = true;
+  try {
+    await $fetch("/api/admin/time-off", { method: "POST", body: parsed.data });
+    emit("saved");
+  } catch {
+    error.value = "Não foi possível salvar. Tente novamente.";
+  } finally {
+    isSaving.value = false;
+  }
 }
 </script>
 
 <template>
-  <form
-    class="flex flex-col gap-3 rounded-[14px] border border-border bg-card p-3.5"
-    novalidate
-    @submit.prevent="save"
-  >
+  <PanelCard as="form" class="flex flex-col gap-3 p-3.5" novalidate @submit.prevent="save">
     <div class="grid grid-cols-2 gap-3">
       <Field>
         <FieldLabel for="time-off-start">De</FieldLabel>
@@ -73,7 +79,13 @@ function save() {
       <Button type="button" variant="outline" size="md" class="flex-1" @click="emit('cancel')">
         Cancelar
       </Button>
-      <Button type="submit" size="md" class="flex-1">Salvar</Button>
+      <SubmitButton
+        size="md"
+        class="flex-1"
+        :is-pending="isSaving"
+        label="Salvar"
+        pending-label="Salvando…"
+      />
     </div>
-  </form>
+  </PanelCard>
 </template>

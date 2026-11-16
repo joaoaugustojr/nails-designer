@@ -9,8 +9,6 @@ defineProps<{
 }>();
 const emit = defineEmits<{ upload: [kind: StoreImageKind, file: File] }>();
 
-const ACCEPTED_TYPES = "image/jpeg,image/png,image/webp";
-
 function pick(kind: StoreImageKind, event: Event) {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
@@ -34,7 +32,7 @@ function pick(kind: StoreImageKind, event: Event) {
       <input
         v-if="canEdit"
         type="file"
-        :accept="ACCEPTED_TYPES"
+        :accept="ACCEPTED_IMAGE_TYPES"
         class="sr-only"
         @change="pick('logo', $event)"
       />
@@ -54,7 +52,7 @@ function pick(kind: StoreImageKind, event: Event) {
       <input
         v-if="canEdit"
         type="file"
-        :accept="ACCEPTED_TYPES"
+        :accept="ACCEPTED_IMAGE_TYPES"
         class="sr-only"
         @change="pick('cover', $event)"
       />

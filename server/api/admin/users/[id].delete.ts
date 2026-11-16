@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
   requireOwner(event);
-  await deletePanelUser(await useDb(), readIdParam(event));
+  await deletePanelUser(readIdParam(event));
   return { ok: true };
 });

@@ -1,16 +1,13 @@
 import { eq, sql } from "drizzle-orm";
 import type { H3Event } from "h3";
 
+import type { User } from "#auth-utils";
+
 import { users } from "../db/schema";
 
-type PanelUser = { id: number; name: string; email: string; role: "owner" | "admin" };
-
-// Writes the session for a panel user; the version ties it to her current password.
-// Only the listed fields go into the cookie: never pass the password hash along.
-export async function startPanelSession(
-  event: H3Event,
-  user: PanelUser & { sessionVersion: number },
-) {
+// Only these fields go into the cookie (never the password hash); the version ties the session
+// to the user's current password.
+export async function startPanelSession(event: H3Event, user: User & { sessionVersion: number }) {
   const { id, name, email, role, sessionVersion } = user;
   await replaceUserSession(event, { user: { id, name, email, role }, secure: { sessionVersion } });
 }
@@ -19,7 +16,7 @@ export async function startPanelSession(
  * The signed-in panel user. Sessions are sealed cookies with no server-side state, so a removed
  * user, or a session older than her last password change, would stay valid: check the database.
  */
-export async function requirePanelUser(event: H3Event) {
+export async function requirePanelUser(event: H3Event): Promise<User> {
   const { user, secure } = await requireUserSession(event);
   const db = await useDb();
   const current = await db.query.users.findFirst({
@@ -31,13 +28,20 @@ export async function requirePanelUser(event: H3Event) {
     await clearUserSession(event);
     throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
   }
-  const { sessionVersion: _version, ...profile } = current;
-  return profile;
+  const { id, name, email, role } = current;
+  return { id, name, email, role };
+}
+
+// Loaded by server/middleware/panel-auth.ts for every /api/admin/** request.
+export function currentPanelUser(event: H3Event) {
+  const user = event.context.panelUser;
+  if (!user) throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+  return user;
 }
 
 export function requireOwner(event: H3Event) {
-  const user = event.context.panelUser;
-  if (user?.role !== "owner") {
+  const user = currentPanelUser(event);
+  if (user.role !== "owner") {
     throw createError({ statusCode: 403, statusMessage: "Only the owner can do this" });
   }
   return user;
@@ -48,7 +52,7 @@ export async function updateOwnProfile(event: H3Event, name: string) {
   const [updated] = await db
     .update(users)
     .set({ name })
-    .where(eq(users.id, event.context.panelUser!.id))
+    .where(eq(users.id, currentPanelUser(event).id))
     .returning();
   await startPanelSession(event, updated!);
   return { name: updated!.name };
@@ -60,7 +64,7 @@ export async function changeOwnPassword(
   { currentPassword, newPassword }: { currentPassword: string; newPassword: string },
 ) {
   const db = await useDb();
-  const id = event.context.panelUser!.id;
+  const { id } = currentPanelUser(event);
   const user = await db.query.users.findFirst({ where: eq(users.id, id) });
   if (!user || !(await verifyPassword(user.passwordHash, currentPassword))) {
     throw createError({ statusCode: 400, statusMessage: "Current password is incorrect" });

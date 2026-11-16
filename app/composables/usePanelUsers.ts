@@ -9,8 +9,7 @@ const FIELD_ERRORS: Record<FieldName, string> = {
 };
 
 export function usePanelUsers() {
-  const { user } = useUserSession();
-  const canManage = computed(() => user.value?.role === "owner");
+  const { isOwner: canManage } = usePanelUser();
 
   const { data: users, refresh } = useFetch("/api/admin/users", { default: () => [] });
   const { confirmAction } = useConfirmDialog();
@@ -30,14 +29,8 @@ export function usePanelUsers() {
 
   async function addUser() {
     const parsed = newUserSchema.safeParse(form);
-    errors.value = {};
-    if (!parsed.success) {
-      for (const issue of parsed.error.issues) {
-        const field = issue.path[0] as FieldName;
-        errors.value[field] = FIELD_ERRORS[field];
-      }
-      return;
-    }
+    errors.value = parsed.success ? {} : fieldMessages(parsed.error, FIELD_ERRORS);
+    if (!parsed.success) return;
 
     error.value = "";
     isSaving.value = true;
@@ -46,8 +39,10 @@ export function usePanelUsers() {
       isAdding.value = false;
       await refresh();
     } catch (failure) {
-      const isTaken = (failure as { statusCode?: number }).statusCode === 409;
-      error.value = isTaken ? "Este email já tem acesso ao painel." : "Não foi possível cadastrar.";
+      error.value =
+        errorStatus(failure) === 409
+          ? "Este email já tem acesso ao painel."
+          : "Não foi possível cadastrar.";
     } finally {
       isSaving.value = false;
     }

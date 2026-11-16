@@ -2,11 +2,11 @@ import { randomUUID } from "node:crypto";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 
-import { detectImageType, type ImageExtension } from "./image-type";
+import { detectImageType } from "./image-type";
 
-export const UPLOADS_ROUTE = "/uploads/";
-export const UPLOAD_NAME_PATTERN = /^[0-9a-f-]{36}\.(jpg|png|webp)$/;
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+export const UPLOAD_NAME_PATTERN = new RegExp(
+  `^[0-9a-f-]{36}\\.(${Object.keys(IMAGE_CONTENT_TYPES).join("|")})$`,
+);
 
 export function uploadsDir() {
   return useRuntimeConfig().uploadsDir;
@@ -27,12 +27,19 @@ export async function saveImage(data: Uint8Array, extension: ImageExtension) {
   const name = `${randomUUID()}.${extension}`;
   await mkdir(uploadsDir(), { recursive: true });
   await writeFile(join(uploadsDir(), name), data);
-  return UPLOADS_ROUTE + name;
+  return `/uploads/${name}`;
 }
 
+// Runs after the database change is committed, so a failure must not fail the request:
+// a leftover file only wastes space.
 export async function deleteUpload(publicPath: string) {
   const name = basename(publicPath);
   if (!UPLOAD_NAME_PATTERN.test(name)) return;
-  // Already gone is fine: the goal is that the file does not exist.
-  await unlink(join(uploadsDir(), name)).catch(() => {});
+  try {
+    await unlink(join(uploadsDir(), name));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.error(`Could not delete upload ${name}:`, error);
+    }
+  }
 }

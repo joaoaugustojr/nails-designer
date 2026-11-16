@@ -1,26 +1,11 @@
 <script setup lang="ts">
 import { CalendarIcon } from "@lucide/vue";
 
-type Client = {
-  name: string;
-  phone: string;
-  visits: number;
-  spentCents: number;
-  lastVisitAt: number | null;
-  nextVisitAt: number | null;
-  cancellations: number;
-};
+import type { ApiGet } from "~/types/api";
 
-const props = defineProps<{ client: Client; timezone: string }>();
+const props = defineProps<{ client: ApiGet<"/api/admin/clients">["items"][number] }>();
 
-const initials = computed(() =>
-  props.client.name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]!.toUpperCase())
-    .join(""),
-);
+const timezone = useStoreTimezone();
 
 const isNew = computed(() => props.client.visits === 0);
 
@@ -32,7 +17,7 @@ const metrics = computed(() => [
   { value: formatPriceShort(props.client.spentCents), label: "total gasto" },
   {
     value: props.client.lastVisitAt
-      ? formatDay(utcToZoned(props.client.lastVisitAt, props.timezone).date)
+      ? formatDay(utcToZoned(props.client.lastVisitAt, timezone.value).date)
       : "—",
     label: "último",
   },
@@ -40,25 +25,25 @@ const metrics = computed(() => [
 
 const nextVisit = computed(() => {
   if (!props.client.nextVisitAt) return null;
-  const { date, minutes } = utcToZoned(props.client.nextVisitAt, props.timezone);
+  const { date, minutes } = utcToZoned(props.client.nextVisitAt, timezone.value);
   return `${formatDayWithWeekday(date)} · ${minutesToTime(minutes)}`;
 });
 
-const cancellations = computed(() => {
-  const count = props.client.cancellations;
-  if (!count) return null;
-  return count === 1 ? "1 cancelamento" : `${count} cancelamentos`;
-});
+const cancellations = computed(() =>
+  props.client.cancellations
+    ? plural(props.client.cancellations, "cancelamento", "cancelamentos")
+    : null,
+);
 </script>
 
 <template>
-  <article class="flex flex-col gap-3 rounded-[14px] border border-border bg-card p-3.5">
+  <PanelCard as="article" class="flex flex-col gap-3 p-3.5">
     <div class="flex items-center gap-3">
       <div
         aria-hidden="true"
         class="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-[15px] font-extrabold text-primary"
       >
-        {{ initials }}
+        {{ initials(client.name) }}
       </div>
       <div class="flex min-w-0 flex-1 flex-col gap-0.5">
         <h2 class="flex items-center gap-2 text-[15px] font-bold">
@@ -67,15 +52,16 @@ const cancellations = computed(() => {
         </h2>
         <span class="text-[13px] text-muted-foreground">{{ formatPhone(client.phone) }}</span>
       </div>
-      <a
-        :href="whatsappUrl(client.phone)"
-        target="_blank"
-        rel="noopener"
-        :aria-label="`Conversar com ${client.name} no WhatsApp`"
-        class="flex h-11 shrink-0 items-center text-[13px] font-bold text-primary"
-      >
-        WhatsApp
-      </a>
+      <Button as-child variant="link" size="inline" class="shrink-0">
+        <a
+          :href="whatsappUrl(client.phone)"
+          target="_blank"
+          rel="noopener"
+          :aria-label="`Conversar com ${client.name} no WhatsApp`"
+        >
+          WhatsApp
+        </a>
+      </Button>
     </div>
 
     <dl class="grid grid-cols-3 gap-2">
@@ -100,5 +86,5 @@ const cancellations = computed(() => {
       <span v-else class="text-xs text-muted-foreground">Sem agendamento futuro</span>
       <span v-if="cancellations" class="text-xs text-muted-foreground">{{ cancellations }}</span>
     </div>
-  </article>
+  </PanelCard>
 </template>

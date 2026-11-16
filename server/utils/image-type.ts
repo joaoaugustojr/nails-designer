@@ -1,10 +1,4 @@
-export const IMAGE_CONTENT_TYPES = {
-  jpg: "image/jpeg",
-  png: "image/png",
-  webp: "image/webp",
-} as const;
-
-export type ImageExtension = keyof typeof IMAGE_CONTENT_TYPES;
+import type { ImageExtension } from "../../shared/utils/images";
 
 const startsWith = (data: Uint8Array, bytes: number[], offset = 0) =>
   bytes.every((byte, index) => data[offset + index] === byte);

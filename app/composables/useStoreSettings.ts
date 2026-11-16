@@ -12,8 +12,7 @@ const FIELD_ERRORS: Record<FieldName, string> = {
 };
 
 export function useStoreSettings() {
-  const { user } = useUserSession();
-  const canEdit = computed(() => user.value?.role === "owner");
+  const { isOwner: canEdit } = usePanelUser();
 
   const { data: store, refresh } = useFetch("/api/admin/store");
 
@@ -49,13 +48,8 @@ export function useStoreSettings() {
 
   function validate() {
     const result = storeSchema.safeParse(form);
-    errors.value = {};
-    if (result.success) return result.data;
-    for (const issue of result.error.issues) {
-      const field = issue.path[0] as FieldName;
-      errors.value[field] = FIELD_ERRORS[field];
-    }
-    return null;
+    errors.value = result.success ? {} : fieldMessages(result.error, FIELD_ERRORS);
+    return result.success ? result.data : null;
   }
 
   async function reload() {
@@ -85,7 +79,7 @@ export function useStoreSettings() {
       await $fetch(`/api/admin/store/${kind}`, { method: "POST", body });
       await reload();
     } catch {
-      error.value = "Use uma imagem JPG, PNG ou WebP de até 8 MB.";
+      error.value = `Use uma imagem JPG, PNG ou WebP de até ${MAX_IMAGE_MEGABYTES} MB.`;
     }
   }
 

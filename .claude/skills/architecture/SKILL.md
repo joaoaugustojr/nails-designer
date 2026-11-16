@@ -25,9 +25,14 @@ Rules every change must follow. Background and history: `docs/decisions.md`. Pro
 - **Early returns** over nested `if`s. No `else` after `return`.
 - **No magic values.** Durations, limits and sizes get a named constant next to where they are used (or a setting, if the owner should change it).
 - **No dead code, no speculative code.** No unused props, params, exports, components or "for later" abstractions. Delete instead of commenting out.
-- **Reuse before writing.** Check `app/components`, `app/composables`, `server/utils` and the shadcn components first.
+- **Reuse before writing.** Check `app/components`, `app/composables`, `app/utils`, `server/utils`, `shared/utils` and the shadcn components first. Known building blocks:
+  - UI: `PanelCard` (the panel's card surface, `as` any tag), `PanelHeader` (title, actions slot, `#bottom` slot), `PanelSectionTitle`, `SubmitButton`, `OptionSelect`, `ConfirmDialog` via `useConfirmDialog`, `StoreMark`.
+  - Buttons: text actions are `<Button variant="link" size="inline">` (accent) or `variant="quiet"` (muted) — 44px tall; header actions `size="md"`.
+  - App: `usePanelUser()` (`user`, `isOwner`), `useStoreInfo()` / `useStoreTimezone()` (the store's timezone for every date shown), `fieldMessages(zodError, messages)`, `errorStatus(error)`.
+  - Shared: `initials`, `plural`, `formatPrice(Short)`, `formatDuration`, `formatPhone`, `whatsappUrl`, date/time helpers, `ACCEPTED_IMAGE_TYPES` / `MAX_IMAGE_MEGABYTES`.
 - **Logic out of templates.** Anything beyond a simple expression goes into a `computed` or a function.
-- **Types over `any`.** Validate at boundaries with zod and let types flow from the schema.
+- **Types over `any`.** Validate at boundaries with zod and let types flow from the schema. Props that receive API data are typed from the generated routes (`ApiGet<"/api/admin/…">` in `app/types/api.ts`), never hand-copied.
+- **Booleans read as questions everywhere, props included** (`isPending`, `isOwner`, `canEdit`).
 - Lint, format, typecheck and tests must pass (`pnpm lint && pnpm typecheck && pnpm test`).
 
 ## 4. UI
@@ -51,7 +56,7 @@ Rules every change must follow. Background and history: `docs/decisions.md`. Pro
 
 - `app/` — Vue app (Nuxt 4 `srcDir`): `pages/`, `layouts/` (`panel` for `/admin/**`), `components/` (`ui/` = shadcn, `panel/` = panel-only), `composables/`, `middleware/`.
 - `server/api/` — HTTP handlers, thin: validate input with zod (`readValidatedBody`, `getValidatedQuery`), call a `server/utils` function, return data.
-- `server/utils/` — auto-imported server helpers (`useDb`, `requirePanelUser`, domain logic).
+- `server/utils/` — auto-imported server helpers (`useDb`, `requirePanelUser`, `currentPanelUser`, domain logic). **Utils call `useDb()` themselves** (never take a `db` argument, except helpers that must join a caller's transaction); **the single settings row is read and written only through `readSettings()` / `writeSettings()`**. Tests stub Nuxt auto-imports with `vi.stubGlobal("useDb", …)` (and `createError`, `hashPassword` when used).
 - `server/db/` — `schema.ts`, `client.ts`, `migrations/`. Explicit imports so plain Vitest can load them.
 - `shared/` — code and types used by both app and server (e.g. zod schemas shared by form and API).
 - Tests sit next to the code as `*.test.ts`.

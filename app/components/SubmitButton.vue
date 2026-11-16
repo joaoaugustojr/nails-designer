@@ -2,7 +2,7 @@
 import { LoaderCircleIcon } from "@lucide/vue";
 
 defineProps<{
-  pending: boolean;
+  isPending: boolean;
   label: string;
   pendingLabel: string;
   size?: "default" | "md";
@@ -10,8 +10,8 @@ defineProps<{
 </script>
 
 <template>
-  <Button type="submit" :size="size" :disabled="pending" :aria-busy="pending">
-    <LoaderCircleIcon v-if="pending" class="animate-spin" aria-hidden="true" />
-    {{ pending ? pendingLabel : label }}
+  <Button type="submit" :size="size" :disabled="isPending" :aria-busy="isPending">
+    <LoaderCircleIcon v-if="isPending" class="animate-spin" aria-hidden="true" />
+    {{ isPending ? pendingLabel : label }}
   </Button>
 </template>

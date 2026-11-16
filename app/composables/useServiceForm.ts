@@ -1,6 +1,7 @@
-import { SERVICE_DURATIONS, SERVICE_MAX_PHOTOS, serviceSchema } from "#shared/schemas/service";
+import { serviceSchema } from "#shared/schemas/service";
 
-type ServiceDetails = ServiceSummary & { details: string; includes: string };
+import type { ApiGet } from "~/types/api";
+
 type FieldName = "name" | "details" | "includes" | "priceCents" | "durationMinutes";
 
 const DEFAULT_DURATION_MINUTES = 60;
@@ -25,9 +26,10 @@ export function useServiceForm(serviceId: string) {
   const isNew = serviceId === "new";
   const listPath = "/admin/services";
 
-  const { data: service, refresh } = useFetch<ServiceDetails>(`/api/admin/services/${serviceId}`, {
-    immediate: !isNew,
-  });
+  const { data: service, refresh } = useFetch<ApiGet<"/api/admin/services/:id">>(
+    `/api/admin/services/${serviceId}`,
+    { immediate: !isNew },
+  );
 
   const form = reactive({
     name: "",
@@ -75,14 +77,8 @@ export function useServiceForm(serviceId: string) {
       durationMinutes: Number(form.durationMinutes),
       active: form.active,
     });
-    errors.value = {};
-    if (result.success) return result.data;
-
-    for (const issue of result.error.issues) {
-      const field = issue.path[0] as FieldName;
-      errors.value[field] = FIELD_ERRORS[field];
-    }
-    return null;
+    errors.value = result.success ? {} : fieldMessages(result.error, FIELD_ERRORS);
+    return result.success ? result.data : null;
   }
 
   async function uploadPendingPhotos(id: number) {
@@ -147,8 +143,6 @@ export function useServiceForm(serviceId: string) {
     errors,
     formError,
     isSaving,
-    durations: SERVICE_DURATIONS,
-    maxPhotos: SERVICE_MAX_PHOTOS,
     save,
     removePhoto,
     removeService,

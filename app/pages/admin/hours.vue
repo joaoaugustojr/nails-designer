@@ -10,22 +10,18 @@ const {
   timeOffItems,
   error,
   numericRules,
-  cancelDeadlineOptions,
+  cancelDeadlineRule,
   saveDay,
   updateRules,
-  addTimeOff,
   removeTimeOff,
+  refreshTimeOff,
 } = useSchedule();
 
 const isAddingTimeOff = ref(false);
 
-async function saveTimeOff(input: Parameters<typeof addTimeOff>[0]) {
-  await addTimeOff(input);
+async function onTimeOffSaved() {
   isAddingTimeOff.value = false;
-}
-
-function formatCancelDeadline(minutes: number) {
-  return `${formatLeadTime(minutes)} antes`;
+  await refreshTimeOff();
 }
 </script>
 
@@ -37,7 +33,7 @@ function formatCancelDeadline(minutes: number) {
       <p v-if="error" role="alert" class="text-sm text-destructive">{{ error }}</p>
 
       <PanelSectionTitle>Expediente da semana</PanelSectionTitle>
-      <div class="flex flex-col divide-y divide-border rounded-[14px] border border-border bg-card">
+      <PanelCard class="flex flex-col divide-y divide-border">
         <PanelWorkingDay
           v-for="day in week"
           :key="day.value"
@@ -45,13 +41,11 @@ function formatCancelDeadline(minutes: number) {
           :ranges="day.ranges"
           @save="saveDay(day.value, $event)"
         />
-      </div>
+      </PanelCard>
 
       <template v-if="rules">
         <PanelSectionTitle class="mt-1.5">Regras</PanelSectionTitle>
-        <div
-          class="flex flex-col divide-y divide-border rounded-[14px] border border-border bg-card"
-        >
+        <PanelCard class="flex flex-col divide-y divide-border">
           <div
             v-for="rule in numericRules"
             :key="rule.key"
@@ -67,12 +61,10 @@ function formatCancelDeadline(minutes: number) {
               @update:model-value="updateRules({ [rule.key]: $event })"
             />
           </div>
-        </div>
+        </PanelCard>
 
         <PanelSectionTitle class="mt-1.5">Cancelamento</PanelSectionTitle>
-        <div
-          class="flex flex-col divide-y divide-border rounded-[14px] border border-border bg-card"
-        >
+        <PanelCard class="flex flex-col divide-y divide-border">
           <div class="flex min-h-[46px] items-center justify-between gap-3 px-3.5 py-2 text-sm">
             <label for="client-can-cancel" class="flex flex-col">
               Cliente pode cancelar pelo link
@@ -97,12 +89,12 @@ function formatCancelDeadline(minutes: number) {
               size="sm"
               :disabled="!rules.clientCanCancel"
               :model-value="rules.cancelDeadlineMinutes"
-              :options="cancelDeadlineOptions"
-              :format="formatCancelDeadline"
+              :options="cancelDeadlineRule.options"
+              :format="cancelDeadlineRule.format"
               @update:model-value="updateRules({ cancelDeadlineMinutes: $event })"
             />
           </div>
-        </div>
+        </PanelCard>
       </template>
 
       <div class="mt-1.5 flex items-center justify-between">
@@ -110,8 +102,7 @@ function formatCancelDeadline(minutes: number) {
         <Button
           v-if="!isAddingTimeOff"
           variant="link"
-          size="sm"
-          class="px-0"
+          size="inline"
           @click="isAddingTimeOff = true"
         >
           <PlusIcon aria-hidden="true" />
@@ -120,13 +111,10 @@ function formatCancelDeadline(minutes: number) {
       </div>
       <PanelTimeOffForm
         v-if="isAddingTimeOff"
-        @save="saveTimeOff"
+        @saved="onTimeOffSaved"
         @cancel="isAddingTimeOff = false"
       />
-      <div
-        v-if="timeOffItems.length"
-        class="flex flex-col divide-y divide-border rounded-[14px] border border-border bg-card"
-      >
+      <PanelCard v-if="timeOffItems.length" class="flex flex-col divide-y divide-border">
         <div
           v-for="item in timeOffItems"
           :key="item.id"
@@ -145,7 +133,7 @@ function formatCancelDeadline(minutes: number) {
             <XIcon aria-hidden="true" />
           </Button>
         </div>
-      </div>
+      </PanelCard>
       <p v-else-if="!isAddingTimeOff" class="text-sm text-muted-foreground">
         Nenhuma folga marcada.
       </p>

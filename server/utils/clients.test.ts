@@ -1,14 +1,16 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createDatabase, type Database, migrateDatabase } from "../db/client";
 import { bookings, clients } from "../db/schema";
-import { CLIENTS_PAGE_SIZE, queryClients, upsertClient } from "./clients";
+import { CLIENTS_PAGE_SIZE, listClients, upsertClient } from "./clients";
 
 const dir = mkdtempSync(join(tmpdir(), "nails-clients-"));
 const db: Database = createDatabase(`file:${join(dir, "test.db")}`);
+// useDb is a Nuxt server auto-import; point it at the test database.
+vi.stubGlobal("useDb", async () => db);
 const NOW = new Date("2026-11-17T12:00:00Z");
 const HOUR = 60 * 60 * 1000;
 let tokens = 0;
@@ -66,7 +68,7 @@ describe("queryClients", () => {
     await book(maria, -12, { status: "cancelled" });
     await book(maria, 30);
 
-    const { items } = await queryClients(db, { now: NOW });
+    const { items } = await listClients({ now: NOW });
     expect(items[0]).toMatchObject({
       name: "Maria",
       visits: 2,
@@ -85,7 +87,7 @@ describe("queryClients", () => {
       createdHoursAgo: 100,
     });
 
-    const { items } = await queryClients(db, { now: NOW });
+    const { items } = await listClients({ now: NOW });
     expect(items.map((item) => item.name)).toEqual([
       "Tomorrow",
       "Next week",
@@ -98,9 +100,9 @@ describe("queryClients", () => {
     await upsertClient(db, { phone: "11912345678", name: "Maria Souza" });
     await upsertClient(db, { phone: "21987654321", name: "Juliana" });
 
-    const byName = await queryClients(db, { search: "souza", now: NOW });
-    const byPhone = await queryClients(db, { search: "(21) 9876", now: NOW });
-    const literal = await queryClients(db, { search: "%", now: NOW });
+    const byName = await listClients({ search: "souza", now: NOW });
+    const byPhone = await listClients({ search: "(21) 9876", now: NOW });
+    const literal = await listClients({ search: "%", now: NOW });
     expect(byName.items.map((item) => item.name)).toEqual(["Maria Souza"]);
     expect(byPhone.items.map((item) => item.name)).toEqual(["Juliana"]);
     expect(literal.total).toBe(0);
@@ -113,8 +115,8 @@ describe("queryClients", () => {
         name: `C${index}`,
       });
     }
-    const first = await queryClients(db, { now: NOW });
-    const second = await queryClients(db, { offset: CLIENTS_PAGE_SIZE, now: NOW });
+    const first = await listClients({ now: NOW });
+    const second = await listClients({ offset: CLIENTS_PAGE_SIZE, now: NOW });
     expect(first).toMatchObject({ total: CLIENTS_PAGE_SIZE + 3, hasMore: true });
     expect(first.items).toHaveLength(CLIENTS_PAGE_SIZE);
     expect(second).toMatchObject({ hasMore: false });

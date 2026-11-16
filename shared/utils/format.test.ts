@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { formatDuration } from "./duration";
 import { centsToPriceInput, formatPrice, formatPriceShort, parsePrice } from "./money";
 import { formatPhone, whatsappUrl } from "./phone";
+import { initials, plural } from "./text";
 
 describe("parsePrice", () => {
   it.each([
@@ -70,5 +71,19 @@ describe("whatsappUrl", () => {
     expect(whatsappUrl("11912345678", "Olá, Maria!")).toBe(
       "https://wa.me/5511912345678?text=Ol%C3%A1%2C%20Maria!",
     );
+  });
+});
+
+describe("text helpers", () => {
+  it("takes the first letters of up to two words", () => {
+    expect(initials("Maria Souza Lima")).toBe("MS");
+    expect(initials("  ana ")).toBe("A");
+    expect(initials("")).toBe("");
+  });
+
+  it("picks the singular only for one", () => {
+    expect(plural(1, "cliente", "clientes")).toBe("1 cliente");
+    expect(plural(0, "cliente", "clientes")).toBe("0 clientes");
+    expect(plural(2, "cliente", "clientes")).toBe("2 clientes");
   });
 });

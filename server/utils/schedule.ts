@@ -2,33 +2,23 @@ import { asc, eq, gt } from "drizzle-orm";
 
 import type { RulesChanges, TimeOffInput, TimeRange } from "#shared/schemas/schedule";
 
-import { settings, timeOff, workingHours } from "../db/schema";
-
-export async function storeTimezone() {
-  const db = await useDb();
-  const row = await db.query.settings.findFirst({ columns: { timezone: true } });
-  return row!.timezone;
-}
+import { timeOff, workingHours } from "../db/schema";
 
 export async function getSchedule() {
   const db = await useDb();
-  const [hours, rules] = await Promise.all([
+  const [hours, settings] = await Promise.all([
     db.query.workingHours.findMany({
       columns: { weekday: true, startMinute: true, endMinute: true },
       orderBy: [asc(workingHours.weekday), asc(workingHours.startMinute)],
     }),
-    db.query.settings.findFirst({
-      columns: {
-        timezone: true,
-        gapMinutes: true,
-        minNoticeMinutes: true,
-        maxDaysAhead: true,
-        clientCanCancel: true,
-        cancelDeadlineMinutes: true,
-      },
-    }),
+    readSettings(),
   ]);
-  return { workingHours: hours, rules: rules! };
+  const { gapMinutes, minNoticeMinutes, maxDaysAhead, clientCanCancel, cancelDeadlineMinutes } =
+    settings;
+  return {
+    workingHours: hours,
+    rules: { gapMinutes, minNoticeMinutes, maxDaysAhead, clientCanCancel, cancelDeadlineMinutes },
+  };
 }
 
 export async function replaceDayRanges(weekday: number, ranges: TimeRange[]) {
@@ -42,8 +32,7 @@ export async function replaceDayRanges(weekday: number, ranges: TimeRange[]) {
 }
 
 export async function updateRules(changes: RulesChanges) {
-  const db = await useDb();
-  await db.update(settings).set(changes).where(eq(settings.id, 1));
+  await writeSettings(changes);
 }
 
 export async function listUpcomingTimeOff() {
@@ -58,7 +47,6 @@ export async function createTimeOff(input: TimeOffInput) {
   const timezone = await storeTimezone();
   const isWholeDays = input.startMinute === null;
   const startsAt = zonedToUtc(input.startDate, input.startMinute ?? 0, timezone);
-  // Whole days end at midnight after the last day.
   const endsAt = isWholeDays
     ? zonedToUtc(addDays(input.endDate, 1), 0, timezone)
     : zonedToUtc(input.endDate, input.endMinute!, timezone);

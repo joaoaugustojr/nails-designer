@@ -18,24 +18,21 @@ export const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
-        // Plain red text action ("Excluir").
         "destructive-ghost": "text-destructive hover:bg-destructive/10",
+        quiet: "text-muted-foreground hover:text-foreground",
       },
       size: {
-        // Mockup: full-width actions, 52px tall, 14px radius, 16px bold.
         default: "h-[52px] gap-2 rounded-[14px] px-6 text-base font-bold",
-        // Mockup: 40px pill ("Novo", chips).
         md: "h-10 gap-1.5 rounded-full px-3.5 text-sm font-bold",
         xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*=size-])]:size-3",
-        // Mockup: 36px pill ("Agendar" on a service card).
         sm: "h-9 gap-1.5 rounded-full px-4 text-[13px] font-bold",
+        inline: "h-11 gap-1.5 px-0 text-[13px] font-bold",
         lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         icon: "size-8",
         "icon-xs":
           "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*=size-])]:size-3",
         "icon-sm":
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
-        // Touch-sized (44px) round icon button.
         "icon-lg": "size-11 rounded-full [&_svg:not([class*=size-])]:size-5",
       },
     },

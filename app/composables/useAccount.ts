@@ -1,7 +1,8 @@
 import { PASSWORD_MIN_LENGTH, passwordChangeSchema, profileSchema } from "#shared/schemas/user";
 
 export function useAccount() {
-  const { user, fetch: refreshSession } = useUserSession();
+  const { user } = usePanelUser();
+  const { fetch: refreshSession } = useUserSession();
 
   const name = ref(user.value?.name ?? "");
   const nameError = ref("");
@@ -60,10 +61,10 @@ export function useAccount() {
       await $fetch("/api/admin/me/password", { method: "PUT", body });
       isChangingPassword.value = false;
     } catch (failure) {
-      const isWrongPassword = (failure as { statusCode?: number }).statusCode === 400;
-      passwordError.value = isWrongPassword
-        ? "A senha atual está incorreta."
-        : "Não foi possível alterar a senha.";
+      passwordError.value =
+        errorStatus(failure) === 400
+          ? "A senha atual está incorreta."
+          : "Não foi possível alterar a senha.";
     } finally {
       isSavingPassword.value = false;
     }

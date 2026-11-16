@@ -135,6 +135,20 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **Changing the password signs out every other device:** `users.session_version` is stored in the sealed session (server-only part) and checked by the API guard; a password change bumps it and gives the current device a fresh session. The session cookie carries only id, name, email and role — never the password hash.
 - **No "forgot my password" flow (owner's decision):** an admin who forgets asks the owner, who sets a new one with **"Redefinir senha"** next to the admin in "Quem acessa o painel"; the admin's open sessions end. The owner's own password is only changed in "Minha conta".
 
+### Codebase untangling (2026-11-17)
+
+A whole-project pass for duplication, hidden coupling and code outside the conventions, with no behaviour change apart from where the timezone travels (checked with an API status matrix and screenshots of every screen before and after):
+
+- **The store's timezone is public store info** (`/api/store`, `useStoreTimezone()`); the clients and schedule responses no longer carry it, and the fallback lives once in `DEFAULT_TIMEZONE`.
+- **One module owns the settings row** (`readSettings` / `writeSettings`); `/api/store` lists its public fields one by one so new columns can't leak.
+- **Server utils reach the database through `useDb()`**; tests point it at a temporary database.
+- **The panel user has one type** (`User` from `#auth-utils`) and one accessor (`currentPanelUser`); the client asks `usePanelUser().isOwner`.
+- **Shared rules:** image types and size limit (`shared/utils/images.ts`), user fields (`nameField`, `emailField`, `loginSchema`), text helpers (`initials`, `plural`), zod → field messages (`fieldMessages`).
+- **The time-off form saves itself** (used by Horários and the agenda's "Bloquear horário").
+- **API-shaped props are typed from Nitro's generated routes** (`ApiGet`), replacing hand-copied types.
+- **UI pieces:** `PanelCard`, `PanelHeader` with a bottom slot, Button `size="inline"` / `variant="quiet"` for text actions — which are now 44px tall (were 36px), per the touch-target rule.
+- Removed: the unused `card` component, `GET /api/admin/me` (no caller), unneeded exports, and comments that only restated the code. Deleting an upload now ignores only "file already gone" and logs anything else, without failing a change already saved.
+
 ### Migrations before launch
 
 - **Until the first production deploy there is a single migration, `0000_init`, regenerated from the schema** (delete `server/db/migrations` and run `pnpm exec drizzle-kit generate --name init`). There is no real data to migrate, so correction migrations are noise. This supersedes the earlier `0001_user_roles`, `0002_clients` and `0003_session_version`; the notes above about hand-edited migrations describe that history.

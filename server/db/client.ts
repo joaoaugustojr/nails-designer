@@ -8,7 +8,7 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 import * as schema from "./schema";
 
 // Relative to the working directory: the project root in dev, /app in the image.
-export const MIGRATIONS_FOLDER = "server/db/migrations";
+const MIGRATIONS_FOLDER = "server/db/migrations";
 
 // libsql turns foreign_keys on for every connection it opens; `timeout` is the busy timeout.
 export function createDatabase(url: string) {

@@ -15,7 +15,6 @@ export const toggleVariants = cva(
         default:
           "h-8 min-w-8 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         sm: "h-7 min-w-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*=size-])]:size-3.5",
-        // Touch-sized, 12px radius like the app inputs.
         lg: "h-11 min-w-11 gap-2 rounded-xl px-3.5",
       },
     },

@@ -4,7 +4,6 @@ export function formatPrice(cents: number) {
   return currency.format(cents / 100);
 }
 
-// "R$ 520" for whole amounts, "R$ 45,50" otherwise; for compact places such as cards.
 export function formatPriceShort(cents: number) {
   const digits = cents % 100 ? 2 : 0;
   return new Intl.NumberFormat("pt-BR", {

@@ -16,12 +16,14 @@ async function setup() {
   const db = createDatabase(config.dbUrl);
   await migrateDatabase(db);
   // The store name only seeds the settings row; afterwards it is edited in the panel.
-  await db.insert(settings).values({ id: 1, storeName: config.storeName }).onConflictDoNothing();
+  await db
+    .insert(settings)
+    .values({ id: SETTINGS_ID, storeName: config.storeName })
+    .onConflictDoNothing();
   await bootstrapAdmin(db, config.admin);
   return db;
 }
 
-// The owner (first panel user) comes from env vars, and only while the users table is empty.
 async function bootstrapAdmin(
   db: Database,
   admin: { name: string; email: string; password: string },

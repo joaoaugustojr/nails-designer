@@ -82,14 +82,9 @@ function save() {
       >
         {{ summary }}
       </span>
-      <button
-        v-if="isOpen && !isEditing"
-        type="button"
-        class="h-11 text-[13px] font-bold text-primary"
-        @click="startEditing"
-      >
+      <Button v-if="isOpen && !isEditing" variant="link" size="inline" @click="startEditing">
         Editar
-      </button>
+      </Button>
     </div>
 
     <div v-if="isEditing" class="flex flex-col gap-2.5 px-3.5 pb-3.5">

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { SERVICE_DURATIONS, SERVICE_MAX_PHOTOS } from "#shared/schemas/service";
+
 const route = useRoute();
 const {
   isNew,
@@ -9,8 +11,6 @@ const {
   errors,
   formError,
   isSaving,
-  durations,
-  maxPhotos,
   save,
   removePhoto,
   removeService,
@@ -40,7 +40,7 @@ useHead({ title });
         <PanelServicePhotos
           v-model:pending="pendingPhotos"
           :photos="photos"
-          :max="maxPhotos"
+          :max="SERVICE_MAX_PHOTOS"
           @remove="removePhoto"
         />
       </Field>
@@ -98,27 +98,31 @@ useHead({ title });
           <OptionSelect
             id="duration"
             v-model="form.durationMinutes"
-            :options="durations"
+            :options="SERVICE_DURATIONS"
             :format="formatDuration"
           />
         </Field>
       </div>
       <FieldError v-if="errors.priceCents">{{ errors.priceCents }}</FieldError>
 
-      <Field
-        orientation="horizontal"
-        class="justify-between rounded-[14px] border border-border bg-card p-3.5"
-      >
-        <FieldLabel for="active" class="text-[15px]">Aparece no site</FieldLabel>
-        <Switch id="active" v-model="form.active" />
-      </Field>
+      <PanelCard class="p-3.5">
+        <Field orientation="horizontal" class="justify-between">
+          <FieldLabel for="active" class="text-[15px]">Aparece no site</FieldLabel>
+          <Switch id="active" v-model="form.active" />
+        </Field>
+      </PanelCard>
     </FieldGroup>
 
     <footer
       class="sticky bottom-0 flex flex-col gap-2 border-t border-border bg-card px-5 pt-3.5 pb-5"
     >
       <p v-if="formError" role="alert" class="text-sm text-destructive">{{ formError }}</p>
-      <SubmitButton class="w-full" :pending="isSaving" label="Salvar" pending-label="Salvando…" />
+      <SubmitButton
+        class="w-full"
+        :is-pending="isSaving"
+        label="Salvar"
+        pending-label="Salvando…"
+      />
     </footer>
   </form>
 </template>

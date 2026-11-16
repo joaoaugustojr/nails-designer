@@ -6,15 +6,7 @@ const props = withDefaults(
 
 const SIZES = { md: "size-16 text-[25px]", lg: "size-[72px] text-[28px]" };
 
-const initials = computed(
-  () =>
-    props.name
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((word) => word[0]!.toUpperCase())
-      .join("") || "•",
-);
+const letters = computed(() => initials(props.name) || "•");
 </script>
 
 <template>
@@ -31,6 +23,6 @@ const initials = computed(
     class="flex shrink-0 items-center justify-center rounded-full border-[1.5px] border-primary font-[Georgia,serif] text-primary"
     :class="SIZES[size]"
   >
-    {{ initials }}
+    {{ letters }}
   </div>
 </template>

@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { PlusIcon, XIcon } from "@lucide/vue";
 
-const props = defineProps<{ photos: ServicePhoto[]; max: number }>();
+import type { ApiGet } from "~/types/api";
+
+const props = defineProps<{
+  photos: ApiGet<"/api/admin/services/:id">["photos"];
+  max: number;
+}>();
 const pending = defineModel<File[]>("pending", { required: true });
 const emit = defineEmits<{ remove: [photoId: number] }>();
-
-const ACCEPTED_TYPES = "image/jpeg,image/png,image/webp";
 
 const pendingUrls = computed(() => pending.value.map((file) => URL.createObjectURL(file)));
 watch(pendingUrls, (_, previous) => previous?.forEach((url) => URL.revokeObjectURL(url)));
@@ -71,7 +74,13 @@ function addFiles(event: Event) {
     >
       <PlusIcon :size="20" aria-hidden="true" />
       Adicionar
-      <input type="file" :accept="ACCEPTED_TYPES" multiple class="sr-only" @change="addFiles" />
+      <input
+        type="file"
+        :accept="ACCEPTED_IMAGE_TYPES"
+        multiple
+        class="sr-only"
+        @change="addFiles"
+      />
     </label>
   </div>
 </template>

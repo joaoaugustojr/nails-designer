@@ -1,4 +1,5 @@
 export const MINUTES_PER_DAY = 24 * 60;
+export const DEFAULT_TIMEZONE = "America/Sao_Paulo";
 const MS_PER_MINUTE = 60_000;
 
 export function minutesToTime(minutes: number) {

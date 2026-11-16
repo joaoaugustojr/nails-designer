@@ -1,12 +1,12 @@
 import { formatDay, formatDayRange, formatDayWithWeekday } from "./dates";
 import { formatDuration } from "./duration";
+import { plural } from "./text";
 import { addDays, MINUTES_PER_DAY, minutesToTime, utcToZoned } from "./time";
 
 export function formatLeadTime(minutes: number) {
   if (minutes === 0) return "Sem mínimo";
   if (minutes % MINUTES_PER_DAY) return formatDuration(minutes);
-  const days = minutes / MINUTES_PER_DAY;
-  return days === 1 ? "1 dia" : `${days} dias`;
+  return plural(minutes / MINUTES_PER_DAY, "dia", "dias");
 }
 
 // "Qui, 20 nov · 14:00 às 16:00", "24 a 26 dez · dia inteiro".

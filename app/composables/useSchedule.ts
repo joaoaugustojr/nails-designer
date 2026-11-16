@@ -4,7 +4,6 @@ import {
   MAX_DAYS_AHEAD_OPTIONS,
   MIN_NOTICE_OPTIONS,
   type RulesChanges,
-  type TimeOffInput,
   type TimeRange,
   WEEKDAYS,
 } from "#shared/schemas/schedule";
@@ -37,6 +36,11 @@ const NUMERIC_RULES: {
   },
 ];
 
+const CANCEL_DEADLINE_RULE = {
+  options: CANCEL_DEADLINE_OPTIONS,
+  format: (minutes: number) => `${formatLeadTime(minutes)} antes`,
+};
+
 export function useSchedule() {
   const { data: schedule, refresh: refreshSchedule } = useFetch("/api/admin/schedule");
   const { data: timeOffList, refresh: refreshTimeOff } = useFetch("/api/admin/time-off", {
@@ -54,7 +58,7 @@ export function useSchedule() {
     })),
   );
 
-  const timezone = computed(() => schedule.value?.rules.timezone ?? "America/Sao_Paulo");
+  const timezone = useStoreTimezone();
 
   const timeOffItems = computed(() =>
     timeOffList.value.map((item) => ({
@@ -88,11 +92,6 @@ export function useSchedule() {
       await $fetch("/api/admin/rules", { method: "PATCH", body: changes });
     }, refreshSchedule);
 
-  const addTimeOff = (input: TimeOffInput) =>
-    run(async () => {
-      await $fetch("/api/admin/time-off", { method: "POST", body: input });
-    }, refreshTimeOff);
-
   async function removeTimeOff(id: number, description: string) {
     const isRemoved = await confirmAction({
       title: "Remover esta folga?",
@@ -113,10 +112,10 @@ export function useSchedule() {
     timeOffItems,
     error,
     numericRules: NUMERIC_RULES,
-    cancelDeadlineOptions: CANCEL_DEADLINE_OPTIONS,
+    cancelDeadlineRule: CANCEL_DEADLINE_RULE,
     saveDay,
     updateRules,
-    addTimeOff,
     removeTimeOff,
+    refreshTimeOff,
   };
 }

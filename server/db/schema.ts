@@ -4,6 +4,8 @@
 import { relations, sql } from "drizzle-orm";
 import { check, index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
+import { DEFAULT_TIMEZONE } from "../../shared/utils/time";
+
 const timestamp = () => integer({ mode: "timestamp_ms" });
 const createdAt = () =>
   timestamp()
@@ -19,7 +21,7 @@ export const users = sqliteTable(
     passwordHash: text().notNull(),
     // Bumped on password change; sessions carrying an older value are rejected.
     sessionVersion: integer().notNull().default(0),
-    // owner: the store's owner, exactly one, created at boot. admin: invited panel users.
+    // owner: the store's owner, exactly one, created at boot. admin: created by the owner.
     role: text({ enum: ["owner", "admin"] })
       .notNull()
       .default("admin"),
@@ -28,7 +30,6 @@ export const users = sqliteTable(
   (t) => [
     check("users_email_lowercase", sql`${t.email} = lower(${t.email})`),
     check("users_role", sql`${t.role} in ('owner', 'admin')`),
-    // At most one owner.
     uniqueIndex("users_single_owner")
       .on(t.role)
       .where(sql`${t.role} = 'owner'`),
@@ -49,7 +50,7 @@ export const settings = sqliteTable(
     instagram: text(),
     about: text(),
     thankYouMessage: text(),
-    timezone: text().notNull().default("America/Sao_Paulo"),
+    timezone: text().notNull().default(DEFAULT_TIMEZONE),
     slotStepMinutes: integer().notNull().default(30),
     gapMinutes: integer().notNull().default(0),
     minNoticeMinutes: integer().notNull().default(120),

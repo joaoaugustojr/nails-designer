@@ -1,5 +1,3 @@
-import type { TimeOffInput } from "#shared/schemas/schedule";
-
 export function useAgenda() {
   const route = useRoute();
   const requestedDate = computed(() =>
@@ -9,7 +7,6 @@ export function useAgenda() {
   const { data: agenda, refresh } = useFetch("/api/admin/agenda", {
     query: computed(() => ({ date: requestedDate.value })),
   });
-  const error = ref("");
   const { confirmAction } = useConfirmDialog();
 
   const title = computed(() =>
@@ -19,7 +16,7 @@ export function useAgenda() {
   const summary = computed(() => {
     if (!agenda.value) return "";
     const { bookingCount, workingRanges } = agenda.value;
-    const count = `${bookingCount} ${bookingCount === 1 ? "atendimento" : "atendimentos"}`;
+    const count = plural(bookingCount, "atendimento", "atendimentos");
     if (!workingRanges.length) return `${count} · Fechado`;
     const opens = minutesToTime(workingRanges[0]!.startMinute);
     const closes = minutesToTime(workingRanges.at(-1)!.endMinute);
@@ -29,16 +26,6 @@ export function useAgenda() {
   function goToDay(offset: number) {
     if (!agenda.value) return;
     return navigateTo({ query: { date: addDays(agenda.value.date, offset) } });
-  }
-
-  async function run(action: () => Promise<void>) {
-    error.value = "";
-    try {
-      await action();
-    } catch {
-      error.value = "Não foi possível concluir. Tente novamente.";
-    }
-    await refresh();
   }
 
   async function cancelBooking(id: number, clientName: string) {
@@ -55,10 +42,5 @@ export function useAgenda() {
     if (isCancelled) await refresh();
   }
 
-  const blockTime = (input: TimeOffInput) =>
-    run(async () => {
-      await $fetch("/api/admin/time-off", { method: "POST", body: input });
-    });
-
-  return { agenda, title, summary, error, goToDay, cancelBooking, blockTime };
+  return { agenda, title, summary, goToDay, cancelBooking, refresh };
 }

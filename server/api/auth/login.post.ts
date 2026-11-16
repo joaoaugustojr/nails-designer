@@ -1,15 +1,11 @@
 import { eq } from "drizzle-orm";
-import { z } from "zod";
+
+import { loginSchema } from "#shared/schemas/user";
 
 import { users } from "../../db/schema";
 
-const body = z.object({
-  email: z.string().trim().toLowerCase().pipe(z.email()),
-  password: z.string().min(1).max(200),
-});
-
 export default defineEventHandler(async (event) => {
-  const { email, password } = await readValidatedBody(event, body.parse);
+  const { email, password } = await readValidatedBody(event, loginSchema.parse);
   const db = await useDb();
   const user = await db.query.users.findFirst({ where: eq(users.email, email) });
 

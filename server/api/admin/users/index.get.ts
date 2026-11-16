@@ -1,1 +1,1 @@
-export default defineEventHandler(async () => listPanelUsers(await useDb()));
+export default defineEventHandler(() => listPanelUsers());

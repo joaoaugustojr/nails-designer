@@ -8,11 +8,11 @@ useHead({ title });
 const email = ref("");
 const password = ref("");
 const error = ref("");
-const pending = ref(false);
+const isPending = ref(false);
 
 async function login() {
   error.value = "";
-  pending.value = true;
+  isPending.value = true;
   try {
     await $fetch("/api/auth/login", {
       method: "POST",
@@ -23,7 +23,7 @@ async function login() {
   } catch {
     error.value = "Email ou senha inválidos.";
   } finally {
-    pending.value = false;
+    isPending.value = false;
   }
 }
 </script>
@@ -67,7 +67,7 @@ async function login() {
       </FieldGroup>
       <SubmitButton
         class="mt-2 w-full"
-        :pending="pending"
+        :is-pending="isPending"
         label="Entrar"
         pending-label="Entrando…"
       />

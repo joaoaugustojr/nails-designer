@@ -25,15 +25,16 @@ const {
   <section class="flex flex-col gap-2.5">
     <div class="flex items-center justify-between">
       <PanelSectionTitle>Quem acessa o painel</PanelSectionTitle>
-      <Button v-if="canManage && !isAdding" variant="link" size="sm" class="px-0" @click="openForm">
+      <Button v-if="canManage && !isAdding" variant="link" size="inline" @click="openForm">
         <PlusIcon aria-hidden="true" />
         Cadastrar
       </Button>
     </div>
 
-    <form
+    <PanelCard
       v-if="isAdding"
-      class="flex flex-col gap-3 rounded-[14px] border border-border bg-card p-3.5"
+      as="form"
+      class="flex flex-col gap-3 p-3.5"
       novalidate
       @submit.prevent="addUser"
     >
@@ -76,16 +77,16 @@ const {
         <SubmitButton
           size="md"
           class="flex-1"
-          :pending="isSaving"
+          :is-pending="isSaving"
           label="Cadastrar"
           pending-label="Cadastrando…"
         />
       </div>
-    </form>
+    </PanelCard>
 
     <p v-if="error" role="alert" class="text-sm text-destructive">{{ error }}</p>
 
-    <ul class="flex flex-col divide-y divide-border rounded-[14px] border border-border bg-card">
+    <PanelCard as="ul" class="flex flex-col divide-y divide-border">
       <li v-for="user in users" :key="user.id" class="flex flex-col gap-2 px-3.5 py-2.5">
         <div class="flex items-center gap-2.5">
           <span class="flex min-w-0 flex-1 flex-col">
@@ -99,20 +100,10 @@ const {
           v-if="canManage && user.role !== 'owner' && resettingId !== user.id"
           class="flex gap-4"
         >
-          <button
-            type="button"
-            class="h-9 text-[13px] font-bold text-primary"
-            @click="startReset(user.id)"
-          >
-            Redefinir senha
-          </button>
-          <button
-            type="button"
-            class="h-9 text-[13px] font-bold text-muted-foreground"
-            @click="removeUser(user.id, user.name)"
-          >
+          <Button variant="link" size="inline" @click="startReset(user.id)">Redefinir senha</Button>
+          <Button variant="quiet" size="inline" @click="removeUser(user.id, user.name)">
             Remover
-          </button>
+          </Button>
         </div>
 
         <form
@@ -143,6 +134,6 @@ const {
           </div>
         </form>
       </li>
-    </ul>
+    </PanelCard>
   </section>
 </template>

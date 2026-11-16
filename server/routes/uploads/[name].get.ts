@@ -2,8 +2,6 @@ import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { extname, join } from "node:path";
 
-import { IMAGE_CONTENT_TYPES, type ImageExtension } from "../../utils/image-type";
-
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 
 export default defineEventHandler(async (event) => {

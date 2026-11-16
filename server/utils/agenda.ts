@@ -9,7 +9,7 @@ const toDayMinutes = (instant: Date, day: string, timezone: string) => {
   return zoned.minutes;
 };
 
-export function todayIn(timezone: string) {
+function todayIn(timezone: string) {
   return utcToZoned(Date.now(), timezone).date;
 }
 
