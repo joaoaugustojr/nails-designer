@@ -9,7 +9,8 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [x] **(you)** Create the public GitHub repository and `git init` locally.
 - [x] **(you)** Create the Nuxt 4 app with pnpm (Node 24, pnpm pinned through corepack). First commit pushed.
 - [x] Tooling: ESLint, Prettier, Husky + lint-staged, commitlint, Vitest, VS Code settings, CI checks.
-- [ ] Add Tailwind 4 + shadcn-nuxt (+ `prettier-plugin-tailwindcss`).
+- [x] Tailwind 4 + shadcn-nuxt (+ `prettier-plugin-tailwindcss`), brand layer in `brand.css`.
+- [x] Agent skills installed in the project.
 
 ## Phase 1 — Data and login
 
