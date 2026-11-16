@@ -11,6 +11,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     dbUrl: "file:.data/nails.db",
     storeName: "",
+    uploadsDir: ".data/uploads",
     admin: { name: "", email: "", password: "" },
     session: { maxAge: 60 * 60 * 24 * 7 },
   },

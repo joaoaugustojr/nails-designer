@@ -74,6 +74,15 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **The security boundary is the server guard on `/api/admin/**`;** the page middleware only redirects. Login gives the same answer for an unknown email and a wrong password.
 - **Note:** the `nuxt` / `nitro` skills describe Nuxt 5; server code here uses the Nuxt 4 auto-imported h3 helpers, as documented in nuxt-auth-utils' own README.
 
+### Services and uploads (phase 2)
+
+- **Uploads** (service photos now; logo and cover next) are stored in `NUXT_UPLOADS_DIR` (default `.data/uploads`, the app volume in production) under random UUID names, and served by `/uploads/<name>` with a one-year immutable cache. Only names matching the UUID pattern are served, so the route cannot reach any other file.
+- **An image is accepted by its bytes, not by its name or Content-Type:** JPEG, PNG and WebP signatures only (no SVG, which can carry scripts), up to 8 MB, at most 10 photos per service. All images of a request are validated before any is written. Deleting a photo or a service deletes its files. Images are stored as uploaded (no resizing yet).
+- **The first photo is the cover.** Reordering photos is not built yet.
+- **Prices** are typed the Brazilian way ("45", "45,50", "1.234,56") and stored in cents; durations go in 15-minute steps up to 8 h. The service form schema (`shared/schemas/service.ts`) is shared by the form and the API.
+- New photos are uploaded when the form is saved; removing an existing photo is immediate (after a confirm). Deleting a service keeps its bookings, thanks to the snapshot columns.
+- Deletion confirmations use the browser's `confirm()`; the shadcn alert-dialog would have overwritten our edited Button.
+
 ### Conventions (architecture skill)
 
 - Project conventions live in the project skill `.claude/skills/architecture/SKILL.md`, loaded before any code change.

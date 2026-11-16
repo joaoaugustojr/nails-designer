@@ -1,7 +1,7 @@
 // Time convention: instants (bookings, time off, audit columns) are UTC epoch milliseconds;
 // working hours are a weekday plus minutes from midnight in `settings.timezone`.
 // Column names are snake_case in SQL (drizzle `casing: "snake_case"`).
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { check, index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 const timestamp = () => integer({ mode: "timestamp_ms" });
@@ -90,6 +90,14 @@ export const servicePhotos = sqliteTable(
   },
   (t) => [index("service_photos_service_idx").on(t.serviceId)],
 );
+
+export const servicesRelations = relations(services, ({ many }) => ({
+  photos: many(servicePhotos),
+}));
+
+export const servicePhotosRelations = relations(servicePhotos, ({ one }) => ({
+  service: one(services, { fields: [servicePhotos.serviceId], references: [services.id] }),
+}));
 
 export const workingHours = sqliteTable(
   "working_hours",
