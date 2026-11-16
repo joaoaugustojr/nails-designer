@@ -198,6 +198,13 @@ Supersedes the "Atomic" point of "No double booking" above: `BEGIN IMMEDIATE` do
 - **Abuse:** `POST /api/bookings` allows 10 requests per IP per 10 minutes and `/api/auth/login` 10 per 15 minutes (in memory, per process; the IP comes from `X-Forwarded-For`, set by the proxy). A hidden "website" field must stay empty.
 - **Form:** name, mobile (Brazilian, 11 digits with the 9; formatted on leaving the field), optional email, reminders opt-in (on by default, as in the mockup). If the time was taken meanwhile, the page says so and links back to the picker on the same day. Success replaces the page with `/bookings/<token>/confirmed` (the thank-you page, next step), so going back does not show the form again.
 
+### Thank-you page (2026-11-17)
+
+- **`/bookings/<token>/confirmed`**, reached after booking. `GET /api/bookings/:token` (public: the 32-character random token is the secret) returns the client's first name, service, date and times in the store's timezone, and the public store profile (now also the thank-you message and timezone). Unknown or malformed tokens get 404.
+- **What it shows:** "Obrigada, <first name>!", the owner's thank-you message signed with the logo and store name (hidden when empty), service / when / where, "Salvar na agenda", "Como chegar" (Google Maps directions; hidden without an address) and "Seguir no Instagram" (hidden without a handle).
+- **"Salvar na agenda"** downloads `GET /api/bookings/:token/calendar` (`agendamento.ics`, RFC 5545: UTC times, escaped text, folded lines). Its description carries the "my booking" link.
+- **No "the confirmation was sent to your WhatsApp" line yet:** nothing is sent until phase 5, so the page only says the time is reserved. Add the line back with the notifications.
+
 ### Migrations before launch
 
 - **Until the first production deploy there is a single migration, `0000_init`, regenerated from the schema** (delete `server/db/migrations` and run `pnpm exec drizzle-kit generate --name init`). There is no real data to migrate, so correction migrations are noise. This supersedes the earlier `0001_user_roles`, `0002_clients` and `0003_session_version`; the notes above about hand-edited migrations describe that history.

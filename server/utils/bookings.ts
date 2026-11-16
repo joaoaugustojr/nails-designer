@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 
 import type { BookingInput } from "../../shared/schemas/booking";
-import { zonedToUtc } from "../../shared/utils/time";
+import { utcToZoned, zonedToUtc } from "../../shared/utils/time";
 import type { Database } from "../db/client";
 import { bookings, clients } from "../db/schema";
 import { findActiveService, freeStartMinutes } from "./availability";
@@ -77,4 +77,44 @@ export function createBooking(input: BookingInput) {
     }
     return { token };
   });
+}
+
+const TOKEN_PATTERN = /^[\w-]{32}$/;
+
+const bookingNotFound = () => createError({ statusCode: 404, statusMessage: "Booking not found" });
+
+export async function findBookingByToken(token: string) {
+  if (!TOKEN_PATTERN.test(token)) throw bookingNotFound();
+  const db = await useDb();
+  const booking = await db.query.bookings.findFirst({
+    where: eq(bookings.token, token),
+    columns: {
+      token: true,
+      status: true,
+      clientName: true,
+      serviceName: true,
+      startsAt: true,
+      endsAt: true,
+    },
+  });
+  if (!booking) throw bookingNotFound();
+  return booking;
+}
+
+export async function getBookingSummary(token: string) {
+  const [booking, store] = await Promise.all([findBookingByToken(token), getStoreProfile()]);
+  const start = utcToZoned(booking.startsAt.getTime(), store.timezone);
+  const end = utcToZoned(booking.endsAt.getTime(), store.timezone);
+  return {
+    booking: {
+      token: booking.token,
+      status: booking.status,
+      clientFirstName: booking.clientName.split(/\s+/)[0]!,
+      serviceName: booking.serviceName,
+      date: start.date,
+      startMinute: start.minutes,
+      endMinute: end.minutes,
+    },
+    store,
+  };
 }

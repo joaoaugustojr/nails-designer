@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { MapPinIcon, MessageCircleIcon } from "@lucide/vue";
 
-import type { ApiGet } from "~/types/api";
+import { SiteInstagramIcon } from "#components";
 
-import InstagramIcon from "./InstagramIcon.vue";
+import type { ApiGet } from "~/types/api";
 
 const props = defineProps<{ store: ApiGet<"/api/catalog">["store"] }>();
 
@@ -17,7 +17,7 @@ const links = computed(() => {
     },
     instagram && {
       label: "Instagram",
-      icon: InstagramIcon,
+      icon: SiteInstagramIcon,
       href: `https://instagram.com/${instagram}`,
     },
     whatsapp && { label: "WhatsApp", icon: MessageCircleIcon, href: whatsappUrl(whatsapp) },

@@ -36,7 +36,7 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [x] Catalog with the "Saiba mais" modal.
 - [x] Day and time picker.
 - [x] Booking form; saved one booking at a time (in-process queue) with an atomic batch that re-checks the slot with `availableStartMinutes` and upserts the client by phone (latest name wins). Idempotency key per form (unique column): a repeated submit returns the same booking. A database trigger rejects overlapping confirmed bookings as the last guard. Rate limit and honeypot on the public endpoint; the same rate limit on `/api/auth/login` (login throttling).
-- [ ] Thank-you page with .ics download and directions.
+- [x] Thank-you page with .ics download and directions.
 - [ ] "My booking" page by unguessable token; cancellation honoring the setting.
 - [ ] Brand applied from settings (accent color as CSS variable, logo, cover).
 
@@ -58,6 +58,7 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 
 ## Phase 5 — Notifications
 
+- [ ] Thank-you page: add back "A confirmação foi enviada para o seu WhatsApp." once confirmations are sent.
 - [ ] Notification module with one entry point and channels: `log` (default), `email` (optional), `whatsapp`.
 - [ ] Reminder task (Nitro scheduled task, every 5 min): day of, 1 h and 30 min before, each sent once.
 - [ ] **(you)** Meta Business account, app, number, utility templates approved.

@@ -25,6 +25,8 @@ export async function getStoreProfile() {
     address: store.address,
     whatsapp: store.whatsapp,
     instagram: store.instagram,
+    thankYouMessage: store.thankYouMessage,
+    timezone: store.timezone,
   };
 }
 
