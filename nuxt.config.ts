@@ -4,8 +4,16 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  modules: ["@nuxt/eslint", "shadcn-nuxt"],
+  modules: ["@nuxt/eslint", "shadcn-nuxt", "nuxt-auth-utils"],
   css: ["~/assets/css/main.css", "~/assets/css/brand.css"],
+
+  // Overridden by env vars (NUXT_DB_URL, NUXT_ADMIN_EMAIL, …); see .env.example.
+  runtimeConfig: {
+    dbUrl: "file:.data/nails.db",
+    storeName: "",
+    admin: { name: "", email: "", password: "" },
+    session: { maxAge: 60 * 60 * 24 * 7 },
+  },
 
   vite: {
     plugins: [tailwindcss()],

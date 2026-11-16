@@ -14,9 +14,9 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 
 ## Phase 1 — Data and login
 
-- [ ] Drizzle + SQLite, schema and migrations: `users`, `settings` (store info, brand, scheduling and cancellation rules), `services`, `service_photos`, `working_hours`, `time_off`, `bookings`.
-- [ ] nuxt-auth-utils: login, logout, route protection for `/admin/**` and `/api/admin/**`.
-- [ ] CLI/seed to create the first panel user.
+- [x] Drizzle + SQLite (libsql), schema and migrations: `users`, `settings` (store info, brand, scheduling and cancellation rules), `services`, `service_photos`, `working_hours`, `time_off`, `bookings`. Tests for FK, cascade and unique email.
+- [x] nuxt-auth-utils: login, logout, page redirect for `/admin/**`, server guard for `/api/admin/**` (re-checks the user exists).
+- [x] First panel user (role `owner`) created at boot from env vars; roles `owner` / `admin`.
 
 ## Phase 2 — Owner panel
 
@@ -24,21 +24,21 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [ ] Services: list, active toggle, create/edit (photos, details, what's included, price, duration).
 - [ ] Hours: weekly working hours (several ranges per day), rules (gap, minimum notice, days ahead), cancellation setting, time off.
 - [ ] Agenda: day view with bookings and free gaps, cancel a booking, block a time.
-- [ ] Panel users: invite and remove.
+- [ ] Panel users: invite and remove (owner only; the owner cannot be removed). Decide which other actions are owner-only (store, brand).
 
 ## Phase 3 — Client booking
 
 - [ ] Availability algorithm + unit tests (durations, gaps, time off, minimum notice, days ahead, day boundaries).
 - [ ] Catalog with the "Saiba mais" modal.
 - [ ] Day and time picker.
-- [ ] Booking form; save inside a transaction that re-checks the slot. Rate limit and honeypot on the public endpoint.
+- [ ] Booking form; save inside a transaction that re-checks the slot. Rate limit and honeypot on the public endpoint; the same rate limit on `/api/auth/login` (login throttling).
 - [ ] Thank-you page with .ics download and directions.
 - [ ] "My booking" page by unguessable token; cancellation honoring the setting.
 - [ ] Brand applied from settings (accent color as CSS variable, logo, cover).
 
 ## Phase 4 — Deploy
 
-- [ ] Dockerfile (Node 24, multi-stage, arm64).
+- [ ] Dockerfile (Node 24, multi-stage, arm64). Ship `server/db/migrations` next to `.output` (same relative path), set `NUXT_APP_SECRET`, `NUXT_DB_URL` on the volume.
 - [ ] `deploy/compose.yaml` (project `nails`, one service, one volume) and `deploy/server-deploy.sh`.
 - [ ] **(you)** On the box: `/srv/nails`, `.env`, dedicated deploy key restricted in `authorized_keys`, Caddy block, Cloudflare DNS record.
 - [ ] GitHub Actions: test → build arm64 → push GHCR → deploy on push to `main`. **(you)** add the repository secrets.
