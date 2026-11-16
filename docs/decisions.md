@@ -50,6 +50,12 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **pnpm pinned** through `packageManager` in package.json (corepack); Node 24 LTS locally, in CI and in the image.
 - **CI checks** on every push to `main` and every pull request: typecheck, lint, format check, tests.
 
+### Agent skills
+
+- Installed **per project** in `.claude/skills/` (copied, versioned in the repo, pinned by commit in `skills-lock.json`): `nuxt` and `nitro` (onmax/nuxt-skills), `shadcn-vue` (official, unovue/shadcn-vue), `vitest` (antfu/skills). Reviewed before use: documentation only, no scripts.
+- Not installed: Tailwind (generic or low-reputation options; shadcn-vue covers usage), Drizzle (the popular ones follow other projects' Postgres conventions), nuxt-auth-utils (none exists). WhatsApp: search again in phase 5.
+- Update with `npx skills update -p`; restore with `npx skills install`. Vendored files are excluded from Prettier.
+
 ### Brand (first customer)
 
 - **Logo: option C, script "Aline Prata" + "NAILS DESIGNER"** in tracked caps. Pink variants exist because the accent color is configurable.

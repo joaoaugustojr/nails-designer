@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "skills": {
+    "nitro": {
+      "source": "onmax/nuxt-skills",
+      "commit": "904ecc4dedb5a220796d6b345badc4eda2347eff",
+      "sourceType": "github",
+      "skillPath": "skills/nitro/SKILL.md",
+      "computedHash": "5594bbaea6a93f1038f65267554108e4d2be4fc68f6b8523a40bc4103086efcc",
+      "installMode": "copy"
+    },
+    "nuxt": {
+      "source": "onmax/nuxt-skills",
+      "commit": "904ecc4dedb5a220796d6b345badc4eda2347eff",
+      "sourceType": "github",
+      "skillPath": "skills/nuxt/SKILL.md",
+      "computedHash": "e5a8ab37c060456a4922dcce4b0e76a08ea32f479dcaf177f9139b4720182353",
+      "installMode": "copy"
+    },
+    "shadcn-vue": {
+      "source": "unovue/shadcn-vue",
+      "commit": "d1bf1b3a2d1a824b19f32d7253a28a43797b8253",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn-vue/SKILL.md",
+      "computedHash": "a5a9b576670e98117b103e966dccb833386d4a616cd7e42d338ea8fa7c3f32fe",
+      "installMode": "copy"
+    },
+    "vitest": {
+      "source": "antfu/skills",
+      "commit": "4a6bb39e7b45e26402eb215393c51ccf5df1ca4c",
+      "sourceType": "github",
+      "skillPath": "skills/vitest/SKILL.md",
+      "computedHash": "bd95e41d66d76da9008893c9bc48c30f0a68f352cd2b00017767f5e4c129501d",
+      "installMode": "copy"
+    }
+  }
+}
