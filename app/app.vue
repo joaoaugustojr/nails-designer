@@ -1,7 +1,3 @@
-<script setup lang="ts">
-import { Button } from "@/components/ui/button";
-</script>
-
 <template>
   <NuxtRouteAnnouncer />
   <main class="flex min-h-dvh flex-col items-center justify-center gap-4 p-4">

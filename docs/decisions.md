@@ -60,6 +60,7 @@ Running record of decisions that are not derivable from the code. Newest entry w
 
 - Installed **per project** in `.claude/skills/` (copied, versioned in the repo, pinned by commit in `skills-lock.json`): `nuxt` and `nitro` (onmax/nuxt-skills), `shadcn-vue` (official, unovue/shadcn-vue), `vitest` (antfu/skills). Reviewed before use: documentation only, no scripts.
 - Not installed: Tailwind (generic or low-reputation options; shadcn-vue covers usage), Drizzle (the popular ones follow other projects' Postgres conventions), nuxt-auth-utils (none exists). WhatsApp: search again in phase 5.
+- **The `nuxt` and `nitro` skills target Nuxt 5 / Nitro v3; this project runs Nuxt 4 (latest stable, 4.6).** Nuxt-5-only advice does not apply until we upgrade: importing server utils from `nuxt/server`, h3 v2 / Web `Request`-`Response` handlers, Vite 8, typed `$fetch` from generated routes. Directory layout, aliases, auto-imports and data fetching are the same.
 - Update with `npx skills update -p`; restore with `npx skills install`. Vendored files are excluded from Prettier.
 
 ### Brand (first customer)

@@ -1,75 +1,18 @@
-# Nuxt Minimal Starter
+# nails-designer
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+White-label online booking for nail designers: clients pick a service and a free time slot from their phone; the owner manages services, hours, bookings and branding in a password-protected panel.
 
-## Setup
+- Plan: [docs/plan.md](docs/plan.md)
+- Decisions: [docs/decisions.md](docs/decisions.md)
 
-Make sure to install dependencies:
+## Development
+
+Requires Node 24 and pnpm (pinned through `packageManager`, enable with `corepack enable pnpm`).
 
 ```bash
-# npm
-npm install
-
-# pnpm
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
+pnpm dev          # http://localhost:3000
+pnpm test
+pnpm lint
+pnpm typecheck
 ```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
