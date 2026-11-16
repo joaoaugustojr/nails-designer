@@ -17,6 +17,8 @@ export const users = sqliteTable(
     name: text().notNull(),
     email: text().notNull().unique(),
     passwordHash: text().notNull(),
+    // Bumped on password change; sessions carrying an older value are rejected.
+    sessionVersion: integer().notNull().default(0),
     // owner: the store's owner, exactly one, created at boot. admin: invited panel users.
     role: text({ enum: ["owner", "admin"] })
       .notNull()

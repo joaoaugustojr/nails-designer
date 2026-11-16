@@ -134,5 +134,10 @@ async function logout() {
         pending-label="Salvando…"
       />
     </form>
+
+    <div class="flex flex-col gap-6 px-5 pb-6">
+      <PanelAccountSection />
+      <PanelUsersSection />
+    </div>
   </div>
 </template>

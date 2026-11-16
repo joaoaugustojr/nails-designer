@@ -123,6 +123,24 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **"Clientes" is a fifth tab** in the panel's bottom navigation, after Agenda. WhatsApp is a text link, as in the agenda.
 - **Later:** owner's notes, ratings (owner → client, client → service), client detail page.
 
+### Panel users (phase 2)
+
+- Listed at the end of the Loja tab ("Quem acessa o painel"), owner first with a "Dona" badge. Every panel user sees the list; **only the owner registers and removes** (403 otherwise).
+- **Register = name, email (stored lowercase, unique: 409 when taken) and a password of at least 8 characters**, which the owner passes on; the new user is an `admin` and logs in right away. There is no invitation flow and, for now, no password change or reset.
+- **The owner cannot be removed** (400). Removing an admin ends her access at her next request, because the API guard re-checks the user in the database.
+
+### My account (phase 2)
+
+- Every panel user edits **her own name** and **changes her own password** in "Minha conta" (Loja tab): current password required (400 when wrong), new one with at least 8 characters, typed twice.
+- **Changing the password signs out every other device:** `users.session_version` is stored in the sealed session (server-only part) and checked by the API guard; a password change bumps it and gives the current device a fresh session. The session cookie carries only id, name, email and role — never the password hash.
+- Forgotten passwords are not handled yet (see plan).
+
+### Migrations before launch
+
+- **Until the first production deploy there is a single migration, `0000_init`, regenerated from the schema** (delete `server/db/migrations` and run `pnpm exec drizzle-kit generate --name init`). There is no real data to migrate, so correction migrations are noise. This supersedes the earlier `0001_user_roles`, `0002_clients` and `0003_session_version`; the notes above about hand-edited migrations describe that history.
+- Local databases are realigned instead of recreated: compare their structure with a fresh database built from `0000_init`, then record that migration as applied.
+- **From the first deploy on, every schema change is a new migration** (generated, reviewed, never rewritten).
+
 ### Conventions (architecture skill)
 
 - Project conventions live in the project skill `.claude/skills/architecture/SKILL.md`, loaded before any code change.

@@ -18,8 +18,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, statusMessage: "Invalid email or password" });
   }
 
-  await setUserSession(event, {
-    user: { id: user.id, name: user.name, email: user.email, role: user.role },
-  });
+  await startPanelSession(event, user);
   return { ok: true };
 });

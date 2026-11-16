@@ -62,7 +62,7 @@ Rules every change must follow. Background and history: `docs/decisions.md`. Pro
 - **Time:** instants are UTC epoch ms; working hours are weekday + minutes from midnight in `settings.timezone`. Never use the server's local time.
 - **Money:** integer cents.
 - **Constraints belong in the database** (FK, unique, check) as well as in zod.
-- **Migrations:** change `schema.ts`, run `pnpm exec drizzle-kit generate --name <what>`, **read the generated SQL** (drizzle-kit rebuilds SQLite tables and can get it wrong), then let the server apply it at boot.
+- **Migrations:** **before the first production deploy, keep one `0000_init`**: after changing `schema.ts`, delete `server/db/migrations`, run `pnpm exec drizzle-kit generate --name init` and realign local databases (see decisions.md). **After launch**, run `pnpm exec drizzle-kit generate --name <what>` for each change and **read the generated SQL** (drizzle-kit rebuilds SQLite tables and can get it wrong); the server applies migrations at boot.
 - Never commit secrets; config comes from `NUXT_*` env vars (see `.env.example`).
 
 ## 7. Repository hygiene

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "4156eb54-f5ea-4f69-b913-ca82daac551e",
+  "id": "2bd98ef2-7432-441e-836d-5dcdfd265cf3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "bookings": {
@@ -19,6 +19,13 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
+          "autoincrement": false
+        },
+        "client_id": {
+          "name": "client_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         },
         "service_name": {
@@ -146,6 +153,11 @@
           "name": "bookings_starts_idx",
           "columns": ["starts_at"],
           "isUnique": false
+        },
+        "bookings_client_idx": {
+          "name": "bookings_client_idx",
+          "columns": ["client_id"],
+          "isUnique": false
         }
       },
       "foreignKeys": {
@@ -156,6 +168,15 @@
           "columnsFrom": ["service_id"],
           "columnsTo": ["id"],
           "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "bookings_client_id_clients_id_fk": {
+          "name": "bookings_client_id_clients_id_fk",
+          "tableFrom": "bookings",
+          "tableTo": "clients",
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
           "onUpdate": "no action"
         }
       },
@@ -169,6 +190,62 @@
         "bookings_status": {
           "name": "bookings_status",
           "value": "\"bookings\".\"status\" in ('confirmed', 'cancelled')"
+        }
+      }
+    },
+    "clients": {
+      "name": "clients",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "clients_phone_unique": {
+          "name": "clients_phone_unique",
+          "columns": ["phone"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "clients_phone_digits": {
+          "name": "clients_phone_digits",
+          "value": "\"clients\".\"phone\" <> '' and \"clients\".\"phone\" not glob '*[^0-9]*'"
         }
       }
     },
@@ -537,6 +614,22 @@
           "notNull": true,
           "autoincrement": false
         },
+        "session_version": {
+          "name": "session_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'admin'"
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -550,6 +643,12 @@
           "name": "users_email_unique",
           "columns": ["email"],
           "isUnique": true
+        },
+        "users_single_owner": {
+          "name": "users_single_owner",
+          "columns": ["role"],
+          "isUnique": true,
+          "where": "\"users\".\"role\" = 'owner'"
         }
       },
       "foreignKeys": {},
@@ -559,6 +658,10 @@
         "users_email_lowercase": {
           "name": "users_email_lowercase",
           "value": "\"users\".\"email\" = lower(\"users\".\"email\")"
+        },
+        "users_role": {
+          "name": "users_role",
+          "value": "\"users\".\"role\" in ('owner', 'admin')"
         }
       }
     },

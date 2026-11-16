@@ -5,6 +5,10 @@ declare module "#auth-utils" {
     email: string;
     role: "owner" | "admin";
   }
+
+  interface SecureSessionData {
+    sessionVersion: number;
+  }
 }
 
 export {};

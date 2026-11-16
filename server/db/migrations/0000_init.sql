@@ -1,6 +1,7 @@
 CREATE TABLE `bookings` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`service_id` integer,
+	`client_id` integer NOT NULL,
 	`service_name` text NOT NULL,
 	`service_duration_minutes` integer NOT NULL,
 	`service_price_cents` integer NOT NULL,
@@ -18,12 +19,24 @@ CREATE TABLE `bookings` (
 	`reminder1h_sent_at` integer,
 	`reminder30m_sent_at` integer,
 	FOREIGN KEY (`service_id`) REFERENCES `services`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`client_id`) REFERENCES `clients`(`id`) ON UPDATE no action ON DELETE restrict,
 	CONSTRAINT "bookings_range" CHECK("bookings"."starts_at" < "bookings"."ends_at"),
 	CONSTRAINT "bookings_status" CHECK("bookings"."status" in ('confirmed', 'cancelled'))
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `bookings_token_unique` ON `bookings` (`token`);--> statement-breakpoint
 CREATE INDEX `bookings_starts_idx` ON `bookings` (`starts_at`);--> statement-breakpoint
+CREATE INDEX `bookings_client_idx` ON `bookings` (`client_id`);--> statement-breakpoint
+CREATE TABLE `clients` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`phone` text NOT NULL,
+	`name` text NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	CONSTRAINT "clients_phone_digits" CHECK("clients"."phone" <> '' and "clients"."phone" not glob '*[^0-9]*')
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `clients_phone_unique` ON `clients` (`phone`);--> statement-breakpoint
 CREATE TABLE `service_photos` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`service_id` integer NOT NULL,
@@ -82,11 +95,15 @@ CREATE TABLE `users` (
 	`name` text NOT NULL,
 	`email` text NOT NULL,
 	`password_hash` text NOT NULL,
+	`session_version` integer DEFAULT 0 NOT NULL,
+	`role` text DEFAULT 'admin' NOT NULL,
 	`created_at` integer NOT NULL,
-	CONSTRAINT "users_email_lowercase" CHECK("users"."email" = lower("users"."email"))
+	CONSTRAINT "users_email_lowercase" CHECK("users"."email" = lower("users"."email")),
+	CONSTRAINT "users_role" CHECK("users"."role" in ('owner', 'admin'))
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
+CREATE UNIQUE INDEX `users_single_owner` ON `users` (`role`) WHERE "users"."role" = 'owner';--> statement-breakpoint
 CREATE TABLE `working_hours` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`weekday` integer NOT NULL,
