@@ -70,7 +70,7 @@ function save() {
       <Button type="button" variant="outline" size="md" class="flex-1" @click="emit('cancel')">
         Cancelar
       </Button>
-      <Button type="submit" variant="ink" size="md" class="flex-1">Salvar</Button>
+      <Button type="submit" size="md" class="flex-1">Salvar</Button>
     </div>
   </form>
 </template>

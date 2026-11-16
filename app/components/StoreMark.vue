@@ -1,5 +1,10 @@
 <script setup lang="ts">
-const props = defineProps<{ name: string; logoPath?: string | null }>();
+const props = withDefaults(
+  defineProps<{ name: string; logoPath?: string | null; size?: "md" | "lg" }>(),
+  { logoPath: null, size: "lg" },
+);
+
+const SIZES = { md: "size-16 text-[25px]", lg: "size-[72px] text-[28px]" };
 
 const initials = computed(
   () =>
@@ -13,11 +18,18 @@ const initials = computed(
 </script>
 
 <template>
-  <img v-if="logoPath" :src="logoPath" :alt="name" class="size-[72px] rounded-full object-cover" />
+  <img
+    v-if="logoPath"
+    :src="logoPath"
+    :alt="name"
+    class="shrink-0 rounded-full object-cover"
+    :class="SIZES[size]"
+  />
   <div
     v-else
     aria-hidden="true"
-    class="flex size-[72px] items-center justify-center rounded-full border-[1.5px] border-primary font-[Georgia,serif] text-[28px] text-primary"
+    class="flex shrink-0 items-center justify-center rounded-full border-[1.5px] border-primary font-[Georgia,serif] text-primary"
+    :class="SIZES[size]"
   >
     {{ initials }}
   </div>

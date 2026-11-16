@@ -8,7 +8,7 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
@@ -20,8 +20,6 @@ export const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         // Plain red text action ("Excluir").
         "destructive-ghost": "text-destructive hover:bg-destructive/10",
-        // Dark call to action used across the panel; inverts in dark mode.
-        ink: "bg-foreground text-background hover:bg-foreground/90",
       },
       size: {
         // Mockup: full-width actions, 52px tall, 14px radius, 16px bold.

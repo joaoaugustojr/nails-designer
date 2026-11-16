@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { fetch: refreshSession } = useUserSession();
-const { data: store } = await useFetch("/api/store");
+const { data: store } = await useStoreInfo();
 
 const title = computed(() => (store.value?.name ? `${store.value.name} · Painel` : "Painel"));
 useHead({ title });
@@ -65,7 +65,12 @@ async function login() {
           <FieldError v-if="error">{{ error }}</FieldError>
         </Field>
       </FieldGroup>
-      <Button type="submit" variant="ink" class="mt-2 w-full" :disabled="pending">Entrar</Button>
+      <SubmitButton
+        class="mt-2 w-full"
+        :pending="pending"
+        label="Entrar"
+        pending-label="Entrando…"
+      />
     </form>
   </main>
 </template>

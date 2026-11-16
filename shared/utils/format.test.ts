@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { formatDuration } from "./duration";
 import { centsToPriceInput, formatPrice, parsePrice } from "./money";
+import { formatPhone } from "./phone";
 
 describe("parsePrice", () => {
   it.each([
@@ -40,5 +41,16 @@ describe("formatDuration", () => {
     [135, "2h15"],
   ])("formats %i minutes as %s", (minutes, label) => {
     expect(formatDuration(minutes)).toBe(label);
+  });
+});
+
+describe("formatPhone", () => {
+  it.each([
+    ["11912345678", "(11) 91234-5678"],
+    ["1133334444", "(11) 3333-4444"],
+    ["5511912345678", "+55 (11) 91234-5678"],
+    ["123", "123"],
+  ])("formats %s as %s", (digits, label) => {
+    expect(formatPhone(digits)).toBe(label);
   });
 });

@@ -3,7 +3,8 @@
  * rewrites it on `init`/`add`, so every brand override lives here instead.
  * `color-scheme` makes native controls (date/time pickers, scrollbars) follow the theme.
  * Light values come from the approved mockups; dark values are their counterpart.
- * A store's own accent color will override --primary at runtime (white label).
+ * A store's accent color overrides --primary at runtime (app/plugins/brand.ts); the tints
+ * below derive from it with color-mix, so every accent gets matching tones.
  */
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Parisienne&display=swap");
 
@@ -18,12 +19,12 @@
   --popover-foreground: #221b1e;
   --primary: #a8325a;
   --primary-foreground: #ffffff;
-  --secondary: #f6e7ec;
-  --secondary-foreground: #82243f;
-  --muted: #f6e7ec;
+  --secondary: color-mix(in srgb, var(--primary) 12%, white);
+  --secondary-foreground: color-mix(in srgb, var(--primary) 78%, black);
+  --muted: var(--secondary);
   --muted-foreground: #6b5f64;
-  --accent: #f6e7ec;
-  --accent-foreground: #82243f;
+  --accent: var(--secondary);
+  --accent-foreground: var(--secondary-foreground);
   --destructive: #b42318;
   --border: #eadfe2;
   --input: #dccdd2;
@@ -41,12 +42,12 @@
   --popover-foreground: #f5eef0;
   --primary: #e9b9c8;
   --primary-foreground: #221b1e;
-  --secondary: #3a2830;
-  --secondary-foreground: #f4c9d7;
+  --secondary: color-mix(in srgb, var(--primary) 16%, #221b1e);
+  --secondary-foreground: color-mix(in srgb, var(--primary) 85%, white);
   --muted: #2e2529;
   --muted-foreground: #b3a5ab;
-  --accent: #3a2830;
-  --accent-foreground: #f4c9d7;
+  --accent: var(--secondary);
+  --accent-foreground: var(--secondary-foreground);
   --destructive: #f97066;
   --border: #3a3035;
   --input: #4a3e44;

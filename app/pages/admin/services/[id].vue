@@ -118,7 +118,7 @@ useHead({ title });
       class="sticky bottom-0 flex flex-col gap-2 border-t border-border bg-card px-5 pt-3.5 pb-5"
     >
       <p v-if="formError" role="alert" class="text-sm text-destructive">{{ formError }}</p>
-      <Button type="submit" variant="ink" class="w-full" :disabled="isSaving">Salvar</Button>
+      <SubmitButton class="w-full" :pending="isSaving" label="Salvar" pending-label="Salvando…" />
     </footer>
   </form>
 </template>

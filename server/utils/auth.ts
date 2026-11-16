@@ -21,3 +21,11 @@ export async function requirePanelUser(event: H3Event) {
   }
   return current;
 }
+
+export function requireOwner(event: H3Event) {
+  const user = event.context.panelUser;
+  if (user?.role !== "owner") {
+    throw createError({ statusCode: 403, statusMessage: "Only the owner can do this" });
+  }
+  return user;
+}

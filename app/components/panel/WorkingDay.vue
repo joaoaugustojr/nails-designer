@@ -123,7 +123,7 @@ function save() {
         <Button type="button" variant="outline" size="md" class="flex-1" @click="isEditing = false">
           Cancelar
         </Button>
-        <Button type="button" variant="ink" size="md" class="flex-1" @click="save">Salvar</Button>
+        <Button type="button" size="md" class="flex-1" @click="save">Salvar</Button>
       </div>
     </div>
   </div>

@@ -15,7 +15,7 @@ async function setActive(id: number, active: boolean) {
 <template>
   <div>
     <PanelHeader title="Serviços">
-      <Button as-child variant="ink" size="md">
+      <Button as-child size="md">
         <NuxtLink to="/admin/services/new">
           <PlusIcon aria-hidden="true" />
           Novo
