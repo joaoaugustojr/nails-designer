@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { CalendarIcon, ClockIcon, StoreIcon, TextAlignStartIcon } from "@lucide/vue";
+import { CalendarIcon, ClockIcon, StoreIcon, TextAlignStartIcon, UsersIcon } from "@lucide/vue";
 
 const tabs = [
   { to: "/admin", label: "Agenda", icon: CalendarIcon },
+  { to: "/admin/clients", label: "Clientes", icon: UsersIcon },
   { to: "/admin/services", label: "Serviços", icon: TextAlignStartIcon },
   { to: "/admin/hours", label: "Horários", icon: ClockIcon },
   { to: "/admin/store", label: "Loja", icon: StoreIcon },
@@ -17,13 +18,13 @@ const tabs = [
 
     <nav
       aria-label="Painel"
-      class="fixed inset-x-0 bottom-0 grid h-[72px] grid-cols-4 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]"
+      class="fixed inset-x-0 bottom-0 grid h-[72px] grid-cols-5 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]"
     >
       <NuxtLink
         v-for="tab in tabs"
         :key="tab.to"
         :to="tab.to"
-        class="flex flex-col items-center justify-center gap-1 text-xs font-semibold text-muted-foreground"
+        class="flex flex-col items-center justify-center gap-1 text-[11px] font-semibold text-muted-foreground"
         exact-active-class="font-bold !text-primary"
       >
         <component :is="tab.icon" :size="22" :stroke-width="2" aria-hidden="true" />

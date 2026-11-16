@@ -114,6 +114,15 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **"Bloquear horário"** reuses the time-off form, opened on the day being viewed and in time-range mode; blocks are listed and removed in Horários.
 - **WhatsApp** opens `wa.me` with Brazil's code added to local numbers.
 
+### Clients (phase 2)
+
+- **A client is identified by her phone** (required on every booking, digits only, Brazilian local format). A new phone creates a client; a known phone reuses her. **Her name is the one given in her latest booking**; each booking keeps the name used that day.
+- **Own table (`clients`)** instead of deriving clients from bookings, because notes and ratings will attach to the client. Every booking links to a client (`client_id`, `ON DELETE RESTRICT`: a client with history cannot be deleted).
+- **Metrics per client:** visits (confirmed bookings already ended), total spent (their snapshot prices), last visit, next confirmed booking, cancellations. Computed in SQL on read, nothing stored.
+- **List order (owner's choice): clients with an upcoming booking first, soonest first; then everyone else by most recent activity** (latest booking made, or when the client was created). Search by name or phone on the server; **20 per page with a "Mostrar mais" button** (offset pagination — fine at this scale; infinite scroll was not chosen).
+- **"Clientes" is a fifth tab** in the panel's bottom navigation, after Agenda. WhatsApp is a text link, as in the agenda.
+- **Later:** owner's notes, ratings (owner → client, client → service), client detail page.
+
 ### Conventions (architecture skill)
 
 - Project conventions live in the project skill `.claude/skills/architecture/SKILL.md`, loaded before any code change.

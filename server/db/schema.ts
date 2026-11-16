@@ -132,12 +132,32 @@ export const timeOff = sqliteTable(
   ],
 );
 
+// A client is identified by her phone (digits only, Brazilian local format). Her name is the
+// one given in her latest booking; each booking keeps the name used that day.
+export const clients = sqliteTable(
+  "clients",
+  {
+    id: integer().primaryKey({ autoIncrement: true }),
+    phone: text().notNull().unique(),
+    name: text().notNull(),
+    createdAt: createdAt(),
+    updatedAt: timestamp()
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (t) => [check("clients_phone_digits", sql`${t.phone} <> '' and ${t.phone} not glob '*[^0-9]*'`)],
+);
+
 export const bookings = sqliteTable(
   "bookings",
   {
     id: integer().primaryKey({ autoIncrement: true }),
     // Null once the service is deleted; the snapshot below keeps the history readable.
     serviceId: integer().references(() => services.id, { onDelete: "set null" }),
+    // A client with bookings cannot be deleted: her history would be lost.
+    clientId: integer()
+      .notNull()
+      .references(() => clients.id, { onDelete: "restrict" }),
     serviceName: text().notNull(),
     serviceDurationMinutes: integer().notNull(),
     servicePriceCents: integer().notNull(),
@@ -162,5 +182,14 @@ export const bookings = sqliteTable(
     check("bookings_range", sql`${t.startsAt} < ${t.endsAt}`),
     check("bookings_status", sql`${t.status} in ('confirmed', 'cancelled')`),
     index("bookings_starts_idx").on(t.startsAt),
+    index("bookings_client_idx").on(t.clientId),
   ],
 );
+
+export const clientsRelations = relations(clients, ({ many }) => ({
+  bookings: many(bookings),
+}));
+
+export const bookingsRelations = relations(bookings, ({ one }) => ({
+  client: one(clients, { fields: [bookings.clientId], references: [clients.id] }),
+}));

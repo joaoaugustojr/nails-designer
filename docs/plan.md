@@ -25,6 +25,7 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [x] Services: list, active toggle, create/edit (photos, details, what's included, price, duration), delete.
 - [x] Hours: weekly working hours (several ranges per day), rules (gap, minimum notice, days ahead), cancellation setting, time off.
 - [x] Agenda: day view with bookings and free gaps, cancel a booking, block a time.
+- [x] Clients: `clients` table keyed by phone, bookings linked to a client, list with search and "Mostrar mais" pagination, metrics per card (visits, total spent, last visit, next booking, cancellations), new "Clientes" tab. Upcoming bookings first, then most recent activity.
 - [ ] Panel users: owner creates (name, email, password) and removes admins; the owner cannot be removed.
 
 ## Phase 3 — Client booking
@@ -32,10 +33,14 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [ ] Availability algorithm + unit tests (durations, gaps, time off, minimum notice, days ahead, day boundaries).
 - [ ] Catalog with the "Saiba mais" modal.
 - [ ] Day and time picker.
-- [ ] Booking form; save inside a transaction that re-checks the slot. Rate limit and honeypot on the public endpoint; the same rate limit on `/api/auth/login` (login throttling).
+- [ ] Booking form; save inside a transaction that re-checks the slot and upserts the client by phone (latest name wins). Rate limit and honeypot on the public endpoint; the same rate limit on `/api/auth/login` (login throttling).
 - [ ] Thank-you page with .ics download and directions.
 - [ ] "My booking" page by unguessable token; cancellation honoring the setting.
 - [ ] Brand applied from settings (accent color as CSS variable, logo, cover).
+
+## Later (not scheduled)
+
+- Client notes by the owner; ratings (owner rates the client, client rates the service); client detail page with full history.
 
 ## Pending decisions
 

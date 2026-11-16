@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { formatDuration } from "./duration";
-import { centsToPriceInput, formatPrice, parsePrice } from "./money";
+import { centsToPriceInput, formatPrice, formatPriceShort, parsePrice } from "./money";
 import { formatPhone, whatsappUrl } from "./phone";
 
 describe("parsePrice", () => {
@@ -25,6 +25,11 @@ describe("parsePrice", () => {
 describe("price formatting", () => {
   it("formats cents as reais", () => {
     expect(formatPrice(123456).replace(/\s/g, " ")).toBe("R$ 1.234,56");
+  });
+
+  it("drops the cents of whole amounts in the short format", () => {
+    expect(formatPriceShort(52000).replace(/\s/g, " ")).toBe("R$ 520");
+    expect(formatPriceShort(4550).replace(/\s/g, " ")).toBe("R$ 45,50");
   });
 
   it("round-trips the form input", () => {
