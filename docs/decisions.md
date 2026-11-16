@@ -24,8 +24,8 @@ Running record of decisions that are not derivable from the code. Newest entry w
 
 ### Stack
 
-- **Nuxt 4 full stack** (pages + Nitro server routes) in one app, one container. Next.js rejected: the team already runs Nuxt in career-talk.
-- **UI:** shadcn-nuxt + Tailwind 4 (same kit as career-talk). **Validation:** zod, shared by client and server.
+- **Nuxt 4 full stack** (pages + Nitro server routes) in one app, one container. Next.js rejected: the team already knows Nuxt.
+- **UI:** shadcn-nuxt + Tailwind 4. **Validation:** zod, shared by client and server.
 - **Database: SQLite** with Drizzle ORM. Postgres rejected as unnecessary for one business.
 - **Auth:** nuxt-auth-utils (sealed cookie session, built-in password hashing).
 - **Reminders:** Nitro scheduled tasks inside the app process. No Redis, no queue.
@@ -34,12 +34,21 @@ Running record of decisions that are not derivable from the code. Newest entry w
 
 ### Infrastructure
 
-- **Same ARM64 box as career-talk.** One compose project (`nails`) with a single `web` service and one volume (SQLite + uploads). Caddy (its own project) joins the `nails` network.
-- **Domain:** `alineprata.careerfreetalk.com` for now (Cloudflare proxied, first-level subdomain so the universal certificate covers it).
+- **An existing ARM64 server** that already runs Docker Compose and Caddy. One compose project (`nails`) with a single `web` service and one volume (SQLite + uploads). Caddy (its own project) joins the `nails` network.
+- **Domain:** a temporary subdomain of a domain we already own, until the customer has her own. Cloudflare proxied; it must be a first-level subdomain so the universal certificate covers it. The actual hostname lives in the server config, not in this repo.
 - **No staging.** Personal use; production only.
 - **Auto-deploy on push to `main`:** GitHub Actions → tests → arm64 image built on `ubuntu-24.04-arm` → GHCR → SSH deploy.
 - **Public GitHub repository.** Consequences: no secret ever committed (`.env` lives only on the server, CI secrets in GitHub Secrets); deploy runs only on push to `main`; the deploy SSH key is dedicated to this project and restricted in `authorized_keys` to the deploy script.
-- **Backups:** nightly copy of the SQLite file (`sqlite3 .backup`) and uploads to the existing R2 bucket under `nails/`, with a healthchecks.io ping, mirroring career-talk's `pg-backup.sh`.
+- **Backups:** nightly copy of the SQLite file (`sqlite3 .backup`) and uploads to a private Cloudflare R2 bucket under `nails/`, with a healthchecks.io ping so a missed night raises an alert.
+
+### Tooling
+
+- **Lint and format:** ESLint (`@nuxt/eslint`, stylistic off, `simple-import-sort`, `eslint-config-prettier`), Prettier (double quotes, semicolons, trailing commas, width 100), Husky + lint-staged on pre-commit, commitlint with Conventional Commits on commit-msg, shared VS Code settings.
+- `prettier-plugin-tailwindcss` is added together with Tailwind (it needs the stylesheet path).
+- **lint-staged pinned to 15:** v16+ needs git ≥ 2.32 and the dev machine runs git 2.25. Unpin after upgrading git.
+- **TypeScript pinned to 5.9:** TS 7 is not supported yet by vue-tsc and typescript-eslint.
+- **pnpm pinned** through `packageManager` in package.json (corepack); Node 24 LTS locally, in CI and in the image.
+- **CI checks** on every push to `main` and every pull request: typecheck, lint, format check, tests.
 
 ### Brand (first customer)
 

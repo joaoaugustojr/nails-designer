@@ -6,11 +6,10 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 
 ## Phase 0 — Setup
 
-- [ ] **(you)** Create the public GitHub repository and `git init` locally.
-- [ ] **(you)** Create the Nuxt 4 app with pnpm in this folder (exact command given at that step, checked against the current `create nuxt` behavior so `docs/` survives).
-- [ ] **(you)** Add tooling: `@nuxt/eslint`, Prettier, Vitest.
-- [ ] **(you)** Add Tailwind 4 + shadcn-nuxt.
-- [ ] First commit and push.
+- [x] **(you)** Create the public GitHub repository and `git init` locally.
+- [x] **(you)** Create the Nuxt 4 app with pnpm (Node 24, pnpm pinned through corepack). First commit pushed.
+- [x] Tooling: ESLint, Prettier, Husky + lint-staged, commitlint, Vitest, VS Code settings, CI checks.
+- [ ] Add Tailwind 4 + shadcn-nuxt (+ `prettier-plugin-tailwindcss`).
 
 ## Phase 1 — Data and login
 
