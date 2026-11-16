@@ -23,12 +23,15 @@ export async function getSchedule() {
 
 export async function replaceDayRanges(weekday: number, ranges: TimeRange[]) {
   const db = await useDb();
-  await db.transaction(async (tx) => {
-    await tx.delete(workingHours).where(eq(workingHours.weekday, weekday));
-    if (ranges.length) {
-      await tx.insert(workingHours).values(ranges.map((range) => ({ weekday, ...range })));
-    }
-  });
+  const clearDay = db.delete(workingHours).where(eq(workingHours.weekday, weekday));
+  if (!ranges.length) {
+    await clearDay;
+    return;
+  }
+  await db.batch([
+    clearDay,
+    db.insert(workingHours).values(ranges.map((range) => ({ weekday, ...range }))),
+  ]);
 }
 
 export async function updateRules(changes: RulesChanges) {

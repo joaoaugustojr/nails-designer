@@ -24,7 +24,9 @@ async function book(
     createdHoursAgo = 0,
   } = {},
 ) {
-  const { id } = await upsertClient(db, client);
+  const [{ id }] = (await upsertClient(db, client).returning({ id: clients.id })) as [
+    { id: number },
+  ];
   const startsAt = new Date(NOW.getTime() + hoursFromNow * HOUR);
   await db.insert(bookings).values({
     clientId: id,
@@ -51,9 +53,11 @@ afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 describe("upsertClient", () => {
   it("keeps one client per phone with the latest name", async () => {
-    const first = await upsertClient(db, { phone: "11912345678", name: "Maria" });
-    const second = await upsertClient(db, { phone: "11912345678", name: "Maria Souza" });
-    expect(second.id).toBe(first.id);
+    const save = (name: string) =>
+      upsertClient(db, { phone: "11912345678", name }).returning({ id: clients.id });
+    const [first] = await save("Maria");
+    const [second] = await save("Maria Souza");
+    expect(second!.id).toBe(first!.id);
     expect(await db.select({ name: clients.name }).from(clients)).toEqual([
       { name: "Maria Souza" },
     ]);

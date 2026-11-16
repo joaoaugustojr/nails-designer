@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "2bd98ef2-7432-441e-836d-5dcdfd265cf3",
+  "id": "8a90a8e4-7b3b-4e87-9832-0fb6a396a800",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "bookings": {
@@ -107,6 +107,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "idempotency_key": {
+          "name": "idempotency_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -147,6 +154,11 @@
         "bookings_token_unique": {
           "name": "bookings_token_unique",
           "columns": ["token"],
+          "isUnique": true
+        },
+        "bookings_idempotencyKey_unique": {
+          "name": "bookings_idempotencyKey_unique",
+          "columns": ["idempotency_key"],
           "isUnique": true
         },
         "bookings_starts_idx": {

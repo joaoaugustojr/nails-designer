@@ -5,6 +5,7 @@ import { loginSchema } from "#shared/schemas/user";
 import { users } from "../../db/schema";
 
 export default defineEventHandler(async (event) => {
+  enforceRateLimit(event, "login", { limit: 10, windowMinutes: 15 });
   const { email, password } = await readValidatedBody(event, loginSchema.parse);
   const db = await useDb();
   const user = await db.query.users.findFirst({ where: eq(users.email, email) });

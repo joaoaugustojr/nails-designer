@@ -3,6 +3,7 @@ import { and, eq, gt, lt } from "drizzle-orm";
 import type { AvailabilityQuery } from "../../shared/schemas/booking";
 import type { DaySpan } from "../../shared/utils/day-timeline";
 import { addDays, todayIn, weekdayOf, zonedToUtc } from "../../shared/utils/time";
+import type { Database } from "../db/client";
 import { bookings, servicePhotos, services, timeOff } from "../db/schema";
 
 const MS_PER_MINUTE = 60_000;
@@ -76,8 +77,10 @@ const toInterval = (event: { startsAt: Date; endsAt: Date }) => ({
   endsAt: event.endsAt.getTime(),
 });
 
-export async function findServiceAvailability(serviceId: number, query: AvailabilityQuery) {
-  const db = await useDb();
+type Reader = Pick<Database, "query">;
+type Settings = Awaited<ReturnType<typeof readSettings>>;
+
+export async function findActiveService(db: Reader, serviceId: number) {
   const service = await db.query.services.findFirst({
     where: and(eq(services.id, serviceId), eq(services.active, true)),
     columns: { id: true, name: true, durationMinutes: true, priceCents: true },
@@ -90,20 +93,27 @@ export async function findServiceAvailability(serviceId: number, query: Availabi
     },
   });
   if (!service) throw createError({ statusCode: 404, statusMessage: "Service not found" });
+  return service;
+}
 
-  const settings = await readSettings();
+export async function freeStartMinutes(
+  db: Reader,
+  {
+    dates,
+    durationMinutes,
+    settings,
+    now,
+  }: {
+    dates: string[];
+    durationMinutes: number;
+    settings: Settings;
+    now: number;
+  },
+) {
   const { timezone } = settings;
-  const now = Date.now();
-  const firstDate = todayIn(timezone, now);
-  const lastDate = addDays(firstDate, settings.maxDaysAhead);
-  const from = query.from && query.from > firstDate ? query.from : firstDate;
-  const dates = Array.from({ length: query.days }, (_, index) => addDays(from, index)).filter(
-    (date) => date <= lastDate,
-  );
-
   const gap = settings.gapMinutes * MS_PER_MINUTE;
-  const windowStart = new Date(zonedToUtc(from, 0, timezone) - gap);
-  const windowEnd = new Date(zonedToUtc(addDays(from, query.days), 0, timezone) + gap);
+  const windowStart = new Date(zonedToUtc(dates[0]!, 0, timezone) - gap);
+  const windowEnd = new Date(zonedToUtc(addDays(dates.at(-1)!, 1), 0, timezone) + gap);
   const [hours, busyBookings, blocks] = await Promise.all([
     db.query.workingHours.findMany({
       columns: { weekday: true, startMinute: true, endMinute: true },
@@ -122,6 +132,32 @@ export async function findServiceAvailability(serviceId: number, query: Availabi
     }),
   ]);
 
+  return dates.map((date) => ({
+    date,
+    startMinutes: availableStartMinutes({
+      date,
+      durationMinutes,
+      workingRanges: hours.filter((range) => range.weekday === weekdayOf(date)),
+      bookings: busyBookings.map(toInterval),
+      timeOff: blocks.map(toInterval),
+      rules: settings,
+      timezone,
+      now,
+    }),
+  }));
+}
+
+export async function findServiceAvailability(serviceId: number, query: AvailabilityQuery) {
+  const db = await useDb();
+  const [service, settings] = await Promise.all([findActiveService(db, serviceId), readSettings()]);
+  const now = Date.now();
+  const firstDate = todayIn(settings.timezone, now);
+  const lastDate = addDays(firstDate, settings.maxDaysAhead);
+  const from = query.from && query.from > firstDate ? query.from : firstDate;
+  const dates = Array.from({ length: query.days }, (_, index) => addDays(from, index)).filter(
+    (date) => date <= lastDate,
+  );
+
   return {
     service: {
       id: service.id,
@@ -132,18 +168,13 @@ export async function findServiceAvailability(serviceId: number, query: Availabi
     },
     firstDate,
     lastDate,
-    days: dates.map((date) => ({
-      date,
-      startMinutes: availableStartMinutes({
-        date,
-        durationMinutes: service.durationMinutes,
-        workingRanges: hours.filter((range) => range.weekday === weekdayOf(date)),
-        bookings: busyBookings.map(toInterval),
-        timeOff: blocks.map(toInterval),
-        rules: settings,
-        timezone,
-        now,
-      }),
-    })),
+    days: dates.length
+      ? await freeStartMinutes(db, {
+          dates,
+          durationMinutes: service.durationMinutes,
+          settings,
+          now,
+        })
+      : [],
   };
 }

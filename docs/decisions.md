@@ -187,6 +187,17 @@ A whole-project pass for duplication, hidden coupling and code outside the conve
 - `todayIn` and `weekdayOf` moved to `shared/utils/time.ts`; the agenda and availability share them.
 - **Error page in Portuguese** (`app/error.vue`): a stale link shows "Página não encontrada" and a button back to the services, instead of Nuxt's English default.
 
+### Booking form and no double booking, as built (2026-11-17)
+
+Supersedes the "Atomic" point of "No double booking" above: `BEGIN IMMEDIATE` does not work here. SQLite runs inside the Node process and blocks the thread while it waits for a lock, so a second open transaction froze the first one until both failed with "database is locked" after 5 s (a test with two simultaneous bookings caught it).
+
+- **One booking at a time:** `createBooking` runs in an in-process queue: check the idempotency key, re-check the slot with the same rule as the picker, then write client + booking in one `db.batch`, which begins and commits in a single call without yielding to other requests. A second client asking for the same time waits in the queue, sees the slot taken and gets 409 ("Esse horário acabou de ser reservado"). This holds for one app process, which is how the app is deployed.
+- **Database guards stay:** the overlap trigger (migration `0001_booking_overlap_guard`, hand-written SQL, so regenerating `0000_init` must keep it) and the unique idempotency key.
+- **Idempotent:** the form creates its key on the first submit and reuses it on retries; a repeated submit returns the same booking.
+- **No open transactions anywhere:** saving a day's working hours now uses one `db.batch` too, for the same reason.
+- **Abuse:** `POST /api/bookings` allows 10 requests per IP per 10 minutes and `/api/auth/login` 10 per 15 minutes (in memory, per process; the IP comes from `X-Forwarded-For`, set by the proxy). A hidden "website" field must stay empty.
+- **Form:** name, mobile (Brazilian, 11 digits with the 9; formatted on leaving the field), optional email, reminders opt-in (on by default, as in the mockup). If the time was taken meanwhile, the page says so and links back to the picker on the same day. Success replaces the page with `/bookings/<token>/confirmed` (the thank-you page, next step), so going back does not show the form again.
+
 ### Migrations before launch
 
 - **Until the first production deploy there is a single migration, `0000_init`, regenerated from the schema** (delete `server/db/migrations` and run `pnpm exec drizzle-kit generate --name init`). There is no real data to migrate, so correction migrations are noise. This supersedes the earlier `0001_user_roles`, `0002_clients` and `0003_session_version`; the notes above about hand-edited migrations describe that history.

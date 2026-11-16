@@ -175,6 +175,8 @@ export const bookings = sqliteTable(
       .default("confirmed"),
     // Unguessable token for the client's "my booking" link.
     token: text().notNull().unique(),
+    // Sent by the booking form; a repeated submit finds the booking already made.
+    idempotencyKey: text().unique(),
     createdAt: createdAt(),
     cancelledAt: timestamp(),
     reminderDaySentAt: timestamp(),

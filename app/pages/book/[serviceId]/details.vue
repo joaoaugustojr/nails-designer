@@ -1,0 +1,139 @@
+<script setup lang="ts">
+const route = useRoute("book-serviceId-details");
+const date = String(route.query.date ?? "");
+const startMinute = Number(route.query.start);
+const serviceId = Number(route.params.serviceId);
+const backTo = `/book/${serviceId}?date=${date}&start=${startMinute}`;
+
+const { data } = await useFetch(`/api/services/${serviceId}/availability`, {
+  query: { from: date, days: 1 },
+});
+if (!data.value) throw createError({ statusCode: 404, statusMessage: "Serviço não encontrado" });
+useHead({ title: "Seus dados" });
+
+const isStillFree = computed(
+  () => data.value?.days[0]?.date === date && data.value.days[0].startMinutes.includes(startMinute),
+);
+
+const { form, errors, error, isSlotTaken, isSaving, formatPhoneField, confirm } = useBookingForm({
+  serviceId,
+  date,
+  startMinute,
+});
+
+const when = computed(() => {
+  if (!data.value) return "";
+  const end = startMinute + data.value.service.durationMinutes;
+  return `${formatDayWithWeekday(date)} · ${minutesToTime(startMinute)} às ${minutesToTime(end)} · ${formatPriceShort(data.value.service.priceCents)}`;
+});
+</script>
+
+<template>
+  <form
+    v-if="data"
+    class="mx-auto flex min-h-dvh w-full max-w-md flex-col"
+    novalidate
+    @submit.prevent="confirm"
+  >
+    <SiteStepHeader title="Seus dados" step="Passo 2 de 2" :back-to="backTo" />
+
+    <div class="flex flex-col gap-5 px-5 pt-4 pb-6">
+      <div class="flex flex-col gap-1 rounded-[14px] bg-secondary p-3.5">
+        <span class="text-[15px] font-bold">{{ data.service.name }}</span>
+        <span class="text-sm text-foreground/80">{{ when }}</span>
+      </div>
+
+      <div
+        v-if="!isStillFree || isSlotTaken"
+        role="alert"
+        class="flex flex-col items-start gap-1 text-sm text-destructive"
+      >
+        {{ isSlotTaken ? error : "Esse horário não está mais livre. Escolha outro." }}
+        <Button as-child variant="link" size="inline">
+          <NuxtLink :to="`/book/${serviceId}?date=${date}`">Escolher outro horário</NuxtLink>
+        </Button>
+      </div>
+
+      <FieldGroup>
+        <Field :data-invalid="!!errors.name || undefined">
+          <FieldLabel for="booking-name">Nome</FieldLabel>
+          <Input
+            id="booking-name"
+            v-model="form.name"
+            maxlength="80"
+            autocomplete="name"
+            placeholder="Como você gostaria de ser chamada"
+            :aria-invalid="!!errors.name || undefined"
+          />
+          <FieldError v-if="errors.name">{{ errors.name }}</FieldError>
+        </Field>
+        <Field :data-invalid="!!errors.phone || undefined">
+          <FieldLabel for="booking-phone">Celular (WhatsApp)</FieldLabel>
+          <Input
+            id="booking-phone"
+            v-model="form.phone"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel-national"
+            placeholder="(00) 00000-0000"
+            :aria-invalid="!!errors.phone || undefined"
+            @blur="formatPhoneField"
+          />
+          <FieldDescription>A confirmação e os lembretes chegam no seu WhatsApp.</FieldDescription>
+          <FieldError v-if="errors.phone">{{ errors.phone }}</FieldError>
+        </Field>
+        <Field :data-invalid="!!errors.email || undefined">
+          <FieldLabel for="booking-email" class="gap-1">
+            Email
+            <span class="font-medium text-muted-foreground">(opcional)</span>
+          </FieldLabel>
+          <Input
+            id="booking-email"
+            v-model="form.email"
+            type="email"
+            autocomplete="email"
+            placeholder="voce@email.com"
+            :aria-invalid="!!errors.email || undefined"
+          />
+          <FieldError v-if="errors.email">{{ errors.email }}</FieldError>
+        </Field>
+      </FieldGroup>
+
+      <SurfaceCard as="label" class="flex cursor-pointer items-start gap-3 p-3.5">
+        <input
+          v-model="form.remindersOptIn"
+          type="checkbox"
+          class="size-[22px] shrink-0 accent-(--primary)"
+        />
+        <span class="flex flex-col gap-1">
+          <span class="text-[15px] font-bold">Quero receber lembretes</span>
+          <span class="text-[13px] leading-[1.4] text-muted-foreground">
+            No dia do atendimento, 1 hora antes e 30 minutos antes.
+          </span>
+        </span>
+      </SurfaceCard>
+
+      <div aria-hidden="true" class="absolute -left-[9999px]">
+        <label for="booking-website">Site</label>
+        <input id="booking-website" v-model="form.website" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <p v-if="error && !isSlotTaken" role="alert" class="text-sm text-destructive">
+        {{ error }}
+      </p>
+    </div>
+
+    <footer
+      class="sticky bottom-0 mt-auto flex flex-col gap-2.5 border-t border-border bg-card px-5 pt-3.5 pb-[calc(22px+env(safe-area-inset-bottom))]"
+    >
+      <SubmitButton
+        :is-pending="isSaving"
+        label="Confirmar agendamento"
+        pending-label="Confirmando…"
+      />
+      <span class="text-center text-xs text-muted-foreground">
+        Imprevisto? A mensagem de confirmação explica como desmarcar.
+      </span>
+    </footer>
+  </form>
+</template>

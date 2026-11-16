@@ -13,6 +13,7 @@ CREATE TABLE `bookings` (
 	`reminders_opt_in` integer DEFAULT false NOT NULL,
 	`status` text DEFAULT 'confirmed' NOT NULL,
 	`token` text NOT NULL,
+	`idempotency_key` text,
 	`created_at` integer NOT NULL,
 	`cancelled_at` integer,
 	`reminder_day_sent_at` integer,
@@ -25,6 +26,7 @@ CREATE TABLE `bookings` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `bookings_token_unique` ON `bookings` (`token`);--> statement-breakpoint
+CREATE UNIQUE INDEX `bookings_idempotencyKey_unique` ON `bookings` (`idempotency_key`);--> statement-breakpoint
 CREATE INDEX `bookings_starts_idx` ON `bookings` (`starts_at`);--> statement-breakpoint
 CREATE INDEX `bookings_client_idx` ON `bookings` (`client_id`);--> statement-breakpoint
 CREATE TABLE `clients` (

@@ -5,16 +5,13 @@ import { bookings, clients } from "../db/schema";
 
 export const CLIENTS_PAGE_SIZE = 20;
 
-type Inserter = Pick<Database, "insert">;
-
-export async function upsertClient(db: Inserter, client: { phone: string; name: string }) {
+// Not awaited here, so it can run on its own or inside a batch.
+export function upsertClient(db: Database, client: { phone: string; name: string }) {
   const now = new Date();
-  const [saved] = await db
+  return db
     .insert(clients)
     .values({ ...client, updatedAt: now })
-    .onConflictDoUpdate({ target: clients.phone, set: { name: client.name, updatedAt: now } })
-    .returning({ id: clients.id });
-  return saved!;
+    .onConflictDoUpdate({ target: clients.phone, set: { name: client.name, updatedAt: now } });
 }
 
 const escapeLike = (term: string) => term.replace(/[\\%_]/g, "\\$&");
