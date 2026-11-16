@@ -88,6 +88,10 @@ const directionsUrl = computed(() =>
       </Button>
     </div>
 
+    <Button as-child variant="link" size="inline" class="self-center text-sm">
+      <NuxtLink :to="`/bookings/${token}`">Ver meu agendamento</NuxtLink>
+    </Button>
+
     <div class="mt-auto flex flex-col items-center gap-2.5">
       <template v-if="store.instagram">
         <span class="text-center text-[13px] text-muted-foreground">

@@ -203,6 +203,7 @@ Supersedes the "Atomic" point of "No double booking" above: `BEGIN IMMEDIATE` do
 - **`/bookings/<token>/confirmed`**, reached after booking. `GET /api/bookings/:token` (public: the 32-character random token is the secret) returns the client's first name, service, date and times in the store's timezone, and the public store profile (now also the thank-you message and timezone). Unknown or malformed tokens get 404.
 - **What it shows:** "Obrigada, <first name>!", the owner's thank-you message signed with the logo and store name (hidden when empty), service / when / where, "Salvar na agenda", "Como chegar" (Google Maps directions; hidden without an address) and "Seguir no Instagram" (hidden without a handle).
 - **"Salvar na agenda"** downloads `GET /api/bookings/:token/calendar` (`agendamento.ics`, RFC 5545: UTC times, escaped text, folded lines). Its description carries the "my booking" link.
+- **"Ver meu agendamento"** links to `/bookings/<token>` (the page sent in the WhatsApp confirmation), so the client can keep it before notifications exist. Not in the mockup; asked for by the owner.
 - **No "the confirmation was sent to your WhatsApp" line yet:** nothing is sent until phase 5, so the page only says the time is reserved. Add the line back with the notifications.
 
 ### Migrations before launch
