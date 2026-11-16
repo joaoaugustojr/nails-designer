@@ -43,6 +43,7 @@ export function useSchedule() {
     default: () => [],
   });
   const error = ref("");
+  const { confirmAction } = useConfirmDialog();
 
   const week = computed(() =>
     WEEKDAYS.map((weekday) => ({
@@ -92,11 +93,18 @@ export function useSchedule() {
       await $fetch("/api/admin/time-off", { method: "POST", body: input });
     }, refreshTimeOff);
 
-  async function removeTimeOff(id: number) {
-    if (!confirm("Remover esta folga?")) return;
-    await run(async () => {
-      await $fetch(`/api/admin/time-off/${id}`, { method: "DELETE" });
-    }, refreshTimeOff);
+  async function removeTimeOff(id: number, description: string) {
+    const isRemoved = await confirmAction({
+      title: "Remover esta folga?",
+      description,
+      confirmLabel: "Remover",
+      pendingLabel: "Removendo…",
+      isDestructive: true,
+      action: async () => {
+        await $fetch(`/api/admin/time-off/${id}`, { method: "DELETE" });
+      },
+    });
+    if (isRemoved) await refreshTimeOff();
   }
 
   return {

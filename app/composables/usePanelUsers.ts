@@ -13,6 +13,7 @@ export function usePanelUsers() {
   const canManage = computed(() => user.value?.role === "owner");
 
   const { data: users, refresh } = useFetch("/api/admin/users", { default: () => [] });
+  const { confirmAction } = useConfirmDialog();
 
   const form = reactive({ name: "", email: "", password: "" });
   const errors = ref<Partial<Record<FieldName, string>>>({});
@@ -53,20 +54,22 @@ export function usePanelUsers() {
   }
 
   async function removeUser(id: number, name: string) {
-    if (!confirm(`Remover o acesso de ${name}? Ela sai do painel na hora.`)) return;
-    error.value = "";
-    try {
-      await $fetch(`/api/admin/users/${id}`, { method: "DELETE" });
-    } catch {
-      error.value = "Não foi possível remover.";
-    }
-    await refresh();
+    const isRemoved = await confirmAction({
+      title: `Remover ${name}?`,
+      description: "O acesso ao painel termina na hora.",
+      confirmLabel: "Remover",
+      pendingLabel: "Removendo…",
+      isDestructive: true,
+      action: async () => {
+        await $fetch(`/api/admin/users/${id}`, { method: "DELETE" });
+      },
+    });
+    if (isRemoved) await refresh();
   }
 
   const resettingId = ref<number | null>(null);
   const newPassword = ref("");
   const resetError = ref("");
-  const isResetting = ref(false);
 
   function startReset(id: number) {
     resettingId.value = id;
@@ -84,19 +87,17 @@ export function usePanelUsers() {
       resetError.value = FIELD_ERRORS.password;
       return;
     }
-    if (!confirm(`Trocar a senha de ${name}?`)) return;
-    isResetting.value = true;
-    try {
-      await $fetch(`/api/admin/users/${resettingId.value}/password`, {
-        method: "PUT",
-        body: parsed.data,
-      });
-      resettingId.value = null;
-    } catch {
-      resetError.value = "Não foi possível trocar a senha.";
-    } finally {
-      isResetting.value = false;
-    }
+    const id = resettingId.value;
+    const isChanged = await confirmAction({
+      title: `Trocar a senha de ${name}?`,
+      description: "Quem estiver conectado com esta conta sai do painel.",
+      confirmLabel: "Trocar senha",
+      pendingLabel: "Trocando…",
+      action: async () => {
+        await $fetch(`/api/admin/users/${id}/password`, { method: "PUT", body: parsed.data });
+      },
+    });
+    if (isChanged) resettingId.value = null;
   }
 
   return {
@@ -113,7 +114,6 @@ export function usePanelUsers() {
     resettingId,
     newPassword,
     resetError,
-    isResetting,
     startReset,
     cancelReset,
     saveReset,

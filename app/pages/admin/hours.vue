@@ -140,7 +140,7 @@ function formatCancelDeadline(minutes: number) {
             variant="ghost"
             size="icon-lg"
             :aria-label="`Remover folga: ${item.description}`"
-            @click="removeTimeOff(item.id)"
+            @click="removeTimeOff(item.id, item.description)"
           >
             <XIcon aria-hidden="true" />
           </Button>

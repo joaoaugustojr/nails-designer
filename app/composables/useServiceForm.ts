@@ -41,6 +41,7 @@ export function useServiceForm(serviceId: string) {
   const errors = ref<Partial<Record<FieldName, string>>>({});
   const formError = ref("");
   const isSaving = ref(false);
+  const { confirmAction } = useConfirmDialog();
 
   watch(
     service,
@@ -111,15 +112,30 @@ export function useServiceForm(serviceId: string) {
   }
 
   async function removePhoto(photoId: number) {
-    if (!confirm("Remover esta foto?")) return;
-    await $fetch(`/api/admin/services/${serviceId}/photos/${photoId}`, { method: "DELETE" });
-    await refresh();
+    const isRemoved = await confirmAction({
+      title: "Remover esta foto?",
+      confirmLabel: "Remover",
+      pendingLabel: "Removendo…",
+      isDestructive: true,
+      action: async () => {
+        await $fetch(`/api/admin/services/${serviceId}/photos/${photoId}`, { method: "DELETE" });
+      },
+    });
+    if (isRemoved) await refresh();
   }
 
   async function removeService() {
-    if (!confirm("Excluir este serviço? Os agendamentos já feitos continuam na agenda.")) return;
-    await $fetch(`/api/admin/services/${serviceId}`, { method: "DELETE" });
-    await navigateTo(listPath);
+    const isRemoved = await confirmAction({
+      title: `Excluir ${form.name || "este serviço"}?`,
+      description: "Os agendamentos já feitos continuam na agenda.",
+      confirmLabel: "Excluir",
+      pendingLabel: "Excluindo…",
+      isDestructive: true,
+      action: async () => {
+        await $fetch(`/api/admin/services/${serviceId}`, { method: "DELETE" });
+      },
+    });
+    if (isRemoved) await navigateTo(listPath);
   }
 
   return {

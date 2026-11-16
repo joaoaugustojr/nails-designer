@@ -82,7 +82,7 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **The first photo is the cover.** Reordering photos is not built yet.
 - **Prices** are typed the Brazilian way ("45", "45,50", "1.234,56") and stored in cents; durations go in 15-minute steps up to 8 h. The service form schema (`shared/schemas/service.ts`) is shared by the form and the API.
 - New photos are uploaded when the form is saved; removing an existing photo is immediate (after a confirm). Deleting a service keeps its bookings, thanks to the snapshot columns.
-- Deletion confirmations use the browser's `confirm()`; the shadcn alert-dialog would have overwritten our edited Button.
+- Confirmations use the app's async dialog (see Conventions); the browser's `confirm()` is no longer used.
 
 ### Hours, rules and time off (phase 2)
 
@@ -133,7 +133,7 @@ Running record of decisions that are not derivable from the code. Newest entry w
 
 - Every panel user edits **her own name** and **changes her own password** in "Minha conta" (Loja tab): current password required (400 when wrong), new one with at least 8 characters, typed twice.
 - **Changing the password signs out every other device:** `users.session_version` is stored in the sealed session (server-only part) and checked by the API guard; a password change bumps it and gives the current device a fresh session. The session cookie carries only id, name, email and role — never the password hash.
-- Forgotten passwords are not handled yet (see plan).
+- **No "forgot my password" flow (owner's decision):** an admin who forgets asks the owner, who sets a new one with **"Redefinir senha"** next to the admin in "Quem acessa o painel"; the admin's open sessions end. The owner's own password is only changed in "Minha conta".
 
 ### Migrations before launch
 
@@ -142,6 +142,8 @@ Running record of decisions that are not derivable from the code. Newest entry w
 - **From the first deploy on, every schema change is a new migration** (generated, reviewed, never rewritten).
 
 ### Conventions (architecture skill)
+
+- **Confirmations use one async dialog** (`useConfirmDialog` + `ConfirmDialog`, mounted once in `app.vue`, built on the shadcn AlertDialog). The caller passes title, description, labels ("Remover" / "Removendo…") and the action; the action runs from the dialog, the confirm button shows the pending label with a spinner, the dialog cannot be dismissed while it runs, closes only on success and shows the error otherwise. It resolves to true when the action ran. The alert-dialog was added declining the CLI's offer to overwrite our edited Button.
 
 - Project conventions live in the project skill `.claude/skills/architecture/SKILL.md`, loaded before any code change.
 - **English everywhere except user-facing text** (pt-BR). This includes routes: panel pages are `/admin/services`, `/admin/hours`, `/admin/store`.

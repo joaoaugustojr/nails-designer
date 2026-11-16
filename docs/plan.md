@@ -28,6 +28,7 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [x] Clients: `clients` table keyed by phone, bookings linked to a client, list with search and "Mostrar mais" pagination, metrics per card (visits, total spent, last visit, next booking, cancellations), new "Clientes" tab. Upcoming bookings first, then most recent activity.
 - [x] Panel users: owner creates (name, email, password) and removes admins; the owner cannot be removed.
 - [x] My account: every panel user changes her own name and password (current password required; other sessions end).
+- [x] Owner resets an admin's password (no "forgot password" flow).
 
 ## Phase 3 — Client booking
 
@@ -44,8 +45,6 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - Client notes by the owner; ratings (owner rates the client, client rates the service); client detail page with full history.
 
 ## Pending decisions
-
-- [ ] Forgotten password for panel users (reset by the owner, or by email once email exists). Changing one's own password and name is built.
 
 - [ ] Image processing on upload (strip EXIF/GPS, resize, WebP) — see decisions.md, "Services and uploads". Decide before going live.
 
