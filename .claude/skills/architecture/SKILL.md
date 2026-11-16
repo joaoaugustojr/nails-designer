@@ -41,6 +41,7 @@ Rules every change must follow. Background and history: `docs/decisions.md`. Pro
 - **Mobile first** (most clients use a phone); touch targets ≥ 44px; real `<button>`/`<a>`/`<label>`; icon-only buttons get an `aria-label`.
 - Icons from `@lucide/vue`, imported explicitly.
 - **Buttons:** header actions ("+ Novo", "+ Bloquear horário") are `<Button size="md">` (primary pill, 40px); full-width form actions use the default size (52px). Everything follows the store's accent; no fixed-color buttons.
+- **Confirm before destructive or sensitive actions with `useConfirmDialog().confirmAction({ title, description, confirmLabel, pendingLabel, isDestructive, action })`** — never the browser's `confirm()`. The action runs inside the dialog (pending label, no dismiss while running, closes on success, error shown otherwise); refresh the page data when it resolves to `true`. Write `action: async () => { await $fetch(...); }` with a block body (returning `$fetch` directly overloads the typed-route checker).
 - **Async submits use `SubmitButton`**: while pending it is disabled and shows a spinner with a pending label ("Salvando…", "Entrando…"), then returns to its label. No success toasts or "saved" messages; only errors are shown, in red (`role="alert"`).
 - Dropdowns use the shadcn `Select` (via `OptionSelect` for numeric options), never the native `<select>`.
 - Native inputs (`date`, `time`) follow the theme through `color-scheme` in `brand.css`; keep it when adding themes.

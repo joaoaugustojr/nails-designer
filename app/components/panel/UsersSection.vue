@@ -15,7 +15,6 @@ const {
   resettingId,
   newPassword,
   resetError,
-  isResetting,
   startReset,
   cancelReset,
   saveReset,
@@ -132,7 +131,7 @@ const {
               :aria-invalid="!!resetError || undefined"
             />
             <FieldDescription>
-              Passe a nova senha para ela. As sessões abertas dela terminam.
+              Passe a nova senha para a pessoa. Quem estiver conectado com esta conta sai do painel.
             </FieldDescription>
             <FieldError v-if="resetError">{{ resetError }}</FieldError>
           </Field>
@@ -140,13 +139,7 @@ const {
             <Button type="button" variant="outline" size="md" class="flex-1" @click="cancelReset">
               Cancelar
             </Button>
-            <SubmitButton
-              size="md"
-              class="flex-1"
-              :pending="isResetting"
-              label="Salvar senha"
-              pending-label="Salvando…"
-            />
+            <Button type="submit" size="md" class="flex-1">Salvar senha</Button>
           </div>
         </form>
       </li>
