@@ -1,0 +1,17 @@
+.git
+.github
+.husky
+.claude
+.vscode
+.data
+.env
+.env.*
+.nuxt
+.nitro
+.output
+.cache
+node_modules
+docs
+*.log
+Dockerfile
+.dockerignore

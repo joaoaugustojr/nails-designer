@@ -330,3 +330,10 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 
 - `0001_booking_overlap_guard` to `0004_reminder_day_before` are folded into a regenerated `0000_init`; the overlap triggers are appended by hand at its end. Local databases were realigned, not recreated: their structure (columns, foreign keys, indexes, triggers, CHECK constraints) matches a fresh database built from `0000_init` except for column order, so `__drizzle_migrations` now holds only the new `0000_init` row.
 - This is the last regeneration: from the first deploy on, every schema change is a new migration.
+
+### Docker image (2026-11-17)
+
+- Two stages on `node:24-slim` (Debian, glibc: the prebuilt `sharp` and libsql binaries need it, so no Alpine). The build stage runs `pnpm fetch` on the lockfile alone, so dependencies are a cached layer, then installs offline and runs `nuxt build`. The final image carries only `.output` (Nitro traces the server's own `node_modules` into it) and `server/db/migrations`, about 270 MB, and runs as the `node` user.
+- Native packages are traced for the platform that builds, so the production image is built natively on GitHub's arm64 runner, never cross-built from x86.
+- `/data` is the volume: `NUXT_DB_URL=file:/data/nails.db` and `NUXT_UPLOADS_DIR=/data/uploads` are set in the image. The rest (`NUXT_APP_SECRET`, `NUXT_SITE_URL`, store name, first admin) comes from the server's `.env`.
+- Checked locally (x86): boot runs the migrations and creates the first admin, pages and API answer, a logo upload is re-encoded to WebP by `sharp`, and the reminder task is scheduled in the build. The session cookie is `Secure` in production, so logging in over plain HTTP (e.g. `localhost` against the image) does not keep the session; behind Cloudflare it is HTTPS.
