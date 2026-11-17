@@ -82,6 +82,13 @@ function cancelBooking() {
         <span v-if="store.address">{{ store.address }}</span>
       </SurfaceCard>
 
+      <SiteBookingLinks
+        v-if="!booking.hasStarted"
+        :token="booking.token"
+        :store="store"
+        class="mt-3.5"
+      />
+
       <template v-if="booking.hasStarted">
         <div class="mt-auto flex flex-col pt-6">
           <Button as-child>

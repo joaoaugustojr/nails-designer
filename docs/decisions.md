@@ -391,3 +391,7 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - Tapping the day title in the Agenda opens a calendar (shadcn-vue `Calendar` in a `Popover`, pt-BR, 40px day cells) and picking a day goes straight to it; the arrows stay.
 - Only days clients can book are offered: weekdays with no working hours and days after the last bookable date (`today + maxDaysAhead`) are disabled, and "Próximo dia" stops at that last date. Past days stay selectable to look at history. `GET /api/admin/agenda` now also returns `lastOpenDate` and `openWeekdays`.
 - Adding `calendar` brought `popover`, `native-select` (used by the calendar's month/year layouts) and the `@internationalized/date` dependency.
+
+### Calendar and directions on "my booking" (2026-11-17)
+
+- "Salvar na agenda" and "Como chegar" also appear on `/bookings/<token>` under the booking card, while the booking has not started (hidden once cancelled or under way). Both pages use the same `SiteBookingLinks` component.

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CalendarPlusIcon, CheckIcon, NavigationIcon } from "@lucide/vue";
+import { CheckIcon } from "@lucide/vue";
 
 const route = useRoute("bookings-token-confirmed");
 const token = route.params.token;
@@ -14,7 +14,6 @@ const booking = computed(() => data.value!.booking);
 const when = computed(
   () => `${formatDayWithWeekday(booking.value.date)} · ${minutesToTime(booking.value.startMinute)}`,
 );
-const directions = computed(() => directionsUrl(store.value));
 </script>
 
 <template>
@@ -56,20 +55,7 @@ const directions = computed(() => directionsUrl(store.value));
       </div>
     </SurfaceCard>
 
-    <div class="grid auto-cols-fr grid-flow-col gap-2.5">
-      <Button as-child variant="outline" class="h-12 rounded-xl bg-card text-sm">
-        <a :href="`/api/bookings/${token}/calendar`" download="agendamento.ics">
-          <CalendarPlusIcon aria-hidden="true" />
-          Salvar na agenda
-        </a>
-      </Button>
-      <Button v-if="directions" as-child variant="outline" class="h-12 rounded-xl bg-card text-sm">
-        <a :href="directions" target="_blank" rel="noopener">
-          <NavigationIcon aria-hidden="true" />
-          Como chegar
-        </a>
-      </Button>
-    </div>
+    <SiteBookingLinks :token="booking.token" :store="store" />
 
     <Button as-child variant="link" size="inline" class="self-center text-sm">
       <NuxtLink :to="`/bookings/${token}`">Ver meu agendamento</NuxtLink>
