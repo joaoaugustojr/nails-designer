@@ -310,3 +310,12 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - When the owner cancels a booking (agenda or clients list), the confirm dialog has an "Avisar a cliente no WhatsApp" switch, on by default. If on, the client gets the `booking_cancelled` message (same variables as the confirmation; the link opens the "my booking" page, which shows the cancellation and offers a new booking). If off, nothing is sent. This settles "Notifying the client comes with phase 5" in the agenda notes.
 - `useConfirmDialog` takes an optional `toggle` (`label`, `isOn`) and passes its state to the action.
 - A client who cancels by herself gets no message: she did it.
+
+### Reminder task (2026-11-17)
+
+- The Nitro scheduled task `reminders:send` runs every minute (`sendDueReminders` in `server/utils/reminders.ts`), so a reminder goes out at most 1 minute late (5 minutes was too coarse for the owner; the query is cheap). Only confirmed bookings with the reminders opt-in get them.
+- When each is due: **1 day before** = 24 h before the start; **day of** = 08:00 store time on the booking day; **1 h** and **30 min** before the start. A reminder due after the start is never sent (a 07:00 booking has no "day of").
+- **No bursts:** if several reminders are due at once (for example, the app was down), only the latest goes out and the earlier ones are marked sent with it. **A reminder already due when the booking was made is skipped**: the confirmation covers it (booked at 09:00 for 14:00 the same day → only 1 h and 30 min).
+- The sent-at column is written before the message goes out: if the process dies in between, a reminder is lost rather than sent twice.
+- **One WhatsApp template for all four** (`booking_reminder`, same variables as the confirmation, the date and time spelled out), so Meta approves one template instead of four.
+- New column `reminder_day_before_sent_at` (migration `0004_reminder_day_before`).

@@ -179,6 +179,7 @@ export const bookings = sqliteTable(
     idempotencyKey: text().unique(),
     createdAt: createdAt(),
     cancelledAt: timestamp(),
+    reminderDayBeforeSentAt: timestamp(),
     reminderDaySentAt: timestamp(),
     reminder1hSentAt: timestamp(),
     reminder30mSentAt: timestamp(),

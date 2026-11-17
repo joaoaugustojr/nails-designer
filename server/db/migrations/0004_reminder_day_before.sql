@@ -1,0 +1,1 @@
+ALTER TABLE `bookings` ADD `reminder_day_before_sent_at` integer;

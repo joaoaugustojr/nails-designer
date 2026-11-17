@@ -31,6 +31,12 @@ export default defineNuxtConfig({
     disableTransition: true,
   },
 
+  nitro: {
+    experimental: { tasks: true },
+    // Each run sends what is due; reminders go out at most 1 minute late.
+    scheduledTasks: { "* * * * *": ["reminders:send"] },
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },

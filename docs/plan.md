@@ -48,7 +48,7 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 
 - [ ] Thank-you page: add back "A confirmação foi enviada para o seu WhatsApp." once confirmations are sent.
 - [x] Notification module with one entry point (`notify`) and the `log` channel; the booking confirmation goes through it. The `whatsapp` channel comes with the Cloud API item.
-- [ ] Reminder task (Nitro scheduled task, every 5 min): 1 day before, day of, 1 h and 30 min before, each sent once (add `reminder_day_before_sent_at` next to the other sent-at columns).
+- [x] Reminder task (Nitro scheduled task, every minute): 1 day before, day of, 1 h and 30 min before, each sent once (add `reminder_day_before_sent_at` next to the other sent-at columns).
 - [ ] **(you)** Meta Business account, app, number, utility templates approved.
 - [ ] WhatsApp Cloud API channel: confirmation + reminders.
 

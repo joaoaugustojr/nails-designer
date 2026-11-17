@@ -6,7 +6,7 @@ import { utcToZoned } from "../../shared/utils/time";
 // the app only fills its variables.
 export type Notification = {
   to: string;
-  template: "booking_confirmation" | "booking_cancelled";
+  template: "booking_confirmation" | "booking_cancelled" | "booking_reminder";
   variables: Record<string, string>;
 };
 
