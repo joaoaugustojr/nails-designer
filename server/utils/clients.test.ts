@@ -84,6 +84,7 @@ describe("queryClients", () => {
       lastVisitAt: NOW.getTime() - 24 * HOUR,
       nextVisitAt: NOW.getTime() + 30 * HOUR,
       nextBookingId: next.id,
+      nextServiceName: "Manicure",
       cancellations: 1,
     });
   });
@@ -106,7 +107,11 @@ describe("queryClients", () => {
     await book({ phone: "11900000001", name: "Maria" }, 30, { status: "cancelled" });
 
     const { items } = await listClients({ now: NOW });
-    expect(items[0]).toMatchObject({ nextVisitAt: null, nextBookingId: null });
+    expect(items[0]).toMatchObject({
+      nextVisitAt: null,
+      nextBookingId: null,
+      nextServiceName: null,
+    });
   });
 
   it("lists clients with upcoming bookings first, soonest first, then the most recently active", async () => {

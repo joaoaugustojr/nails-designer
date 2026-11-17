@@ -46,6 +46,12 @@ export async function listClients({
       and upcoming.starts_at > ${nowMs}
     order by upcoming.starts_at limit 1
   )`;
+  const nextServiceName = sql<string | null>`(
+    select upcoming.service_name from bookings upcoming
+    where upcoming.client_id = ${clients.id} and upcoming.status = 'confirmed'
+      and upcoming.starts_at > ${nowMs}
+    order by upcoming.starts_at limit 1
+  )`;
   const lastActivity = sql`coalesce(max(${bookings.createdAt}), ${clients.createdAt})`;
   const where = searchFilter(search);
 
@@ -59,6 +65,7 @@ export async function listClients({
       lastVisitAt: sql<number | null>`max(case when ${isVisit} then ${bookings.startsAt} end)`,
       nextVisitAt,
       nextBookingId,
+      nextServiceName,
       cancellations: sql<number>`coalesce(sum(case when ${bookings.status} = 'cancelled' then 1 else 0 end), 0)`,
     })
     .from(clients)

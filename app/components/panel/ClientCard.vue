@@ -27,7 +27,9 @@ const metrics = computed(() => [
 const nextVisit = computed(() => {
   if (!props.client.nextVisitAt) return null;
   const { date, minutes } = utcToZoned(props.client.nextVisitAt, timezone.value);
-  return `${formatDayWithWeekday(date)} · ${minutesToTime(minutes)}`;
+  return [props.client.nextServiceName, formatDayWithWeekday(date), minutesToTime(minutes)]
+    .filter(Boolean)
+    .join(" · ");
 });
 
 const cancellations = computed(() =>
@@ -82,7 +84,7 @@ const cancellations = computed(() =>
           class="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1.5 text-xs font-bold text-secondary-foreground"
         >
           <CalendarIcon :size="14" aria-hidden="true" />
-          Próximo: {{ nextVisit }}
+          {{ nextVisit }}
         </span>
         <Button
           variant="quiet"
