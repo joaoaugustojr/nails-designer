@@ -222,6 +222,15 @@ Supersedes the "Atomic" point of "No double booking" above: `BEGIN IMMEDIATE` do
 - **Link preview** (WhatsApp, Instagram, etc.): every page answers with `og:title` / `og:site_name` = store name, `og:description` = "Sobre", `og:image` = the cover (or the logo) as an absolute URL built from the proxy's forwarded host and protocol. Link previews can only be checked for real after deploy. `/api/store` now also returns the cover and "Sobre" (both already public in the catalog).
 - **Mobile browser bar colour** (`theme-color`) follows the page background of the theme in use, read from the CSS after each switch.
 
+### Client site on wider screens (2026-11-17)
+
+The mockups are portrait phones; the site must also work sideways, on tablets and desktops:
+
+- **Full-bleed bars, centred content:** the cover, the step header and the step footer span the whole width; their content sits in a centred column (catalog up to `max-w-5xl`, booking steps and booking pages up to `max-w-2xl`). No dark bands on the sides.
+- **More per row when there is room:** services in 1 / 2 / 3 columns (phone / ≥640px / ≥1024px), free times in 4 / 6 columns, cover 140px tall on phones and 200px from 640px.
+- **Short screens** (height ≤ 500px, a phone held sideways; `[@media(max-height:500px)]:`, since brand.css is not processed by Tailwind): the step footer stops being sticky, and the "Saiba mais" sheet scrolls photos and text together, so the button and the text stay reachable.
+- Portrait at 390×844 is unchanged.
+
 ### Migrations before launch
 
 - **Until the first production deploy there is a single migration, `0000_init`, regenerated from the schema** (delete `server/db/migrations` and run `pnpm exec drizzle-kit generate --name init`). There is no real data to migrate, so correction migrations are noise. This supersedes the earlier `0001_user_roles`, `0002_clients` and `0003_session_version`; the notes above about hand-edited migrations describe that history.

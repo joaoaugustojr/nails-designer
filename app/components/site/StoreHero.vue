@@ -27,14 +27,14 @@ const links = computed(() => {
 
 <template>
   <header>
-    <div class="relative h-[140px] bg-secondary">
+    <div class="relative h-[140px] bg-secondary sm:h-[200px]">
       <img v-if="store.coverPath" :src="store.coverPath" alt="" class="size-full object-cover" />
       <div class="absolute top-3 right-3 rounded-full bg-background/80 backdrop-blur-sm">
         <ThemeSwitch />
       </div>
     </div>
 
-    <div class="relative -mt-10 flex flex-col gap-2.5 px-5">
+    <div class="relative mx-auto -mt-10 flex w-full max-w-5xl flex-col gap-2.5 px-5">
       <div
         class="flex size-20 items-center justify-center rounded-full border-4 border-background bg-card shadow-sm"
       >

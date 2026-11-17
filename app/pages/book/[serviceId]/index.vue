@@ -56,10 +56,10 @@ function movePage(direction: 1 | -1) {
 </script>
 
 <template>
-  <main v-if="data" class="mx-auto flex min-h-dvh w-full max-w-md flex-col">
+  <main v-if="data" class="flex min-h-dvh w-full flex-col">
     <SiteStepHeader title="Escolha o horário" step="Passo 1 de 2" back-to="/" />
 
-    <div class="flex flex-col gap-5 px-5 pt-4 pb-6">
+    <div class="mx-auto flex w-full max-w-2xl flex-col gap-5 px-5 pt-4 pb-6">
       <SiteChosenService :service="data.service" />
 
       <SiteDayPicker
@@ -94,13 +94,15 @@ function movePage(direction: 1 | -1) {
     </div>
 
     <footer
-      class="sticky bottom-0 mt-auto flex flex-col gap-2.5 border-t border-border bg-card px-5 pt-3.5 pb-[calc(22px+env(safe-area-inset-bottom))]"
+      class="sticky bottom-0 mt-auto border-t border-border bg-card pt-3.5 pb-[calc(22px+env(safe-area-inset-bottom))] [@media(max-height:500px)]:static"
     >
-      <span class="text-center text-[13px] text-muted-foreground">{{ summary }}</span>
-      <Button v-if="nextStep" as-child>
-        <NuxtLink :to="nextStep">Continuar</NuxtLink>
-      </Button>
-      <Button v-else disabled>Continuar</Button>
+      <div class="mx-auto flex w-full max-w-2xl flex-col gap-2.5 px-5">
+        <span class="text-center text-[13px] text-muted-foreground">{{ summary }}</span>
+        <Button v-if="nextStep" as-child>
+          <NuxtLink :to="nextStep">Continuar</NuxtLink>
+        </Button>
+        <Button v-else disabled>Continuar</Button>
+      </div>
     </footer>
   </main>
 </template>

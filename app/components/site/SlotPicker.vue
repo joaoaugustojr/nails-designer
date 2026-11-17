@@ -4,7 +4,7 @@ const selected = defineModel<number | null>({ required: true });
 </script>
 
 <template>
-  <div class="grid grid-cols-4 gap-2">
+  <div class="grid grid-cols-4 gap-2 sm:grid-cols-6">
     <button
       v-for="start in startMinutes"
       :key="start"

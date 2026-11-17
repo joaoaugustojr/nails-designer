@@ -24,7 +24,7 @@ const directionsUrl = computed(() =>
 <template>
   <main
     v-if="data"
-    class="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-[18px] px-5 pt-9 pb-[22px]"
+    class="mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-[18px] px-5 pt-9 pb-[22px]"
   >
     <div class="flex flex-col items-center gap-2.5 text-center">
       <div

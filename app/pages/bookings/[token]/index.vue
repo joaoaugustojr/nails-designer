@@ -56,7 +56,7 @@ function cancelBooking() {
 </script>
 
 <template>
-  <main v-if="data" class="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pt-14 pb-[22px]">
+  <main v-if="data" class="mx-auto flex min-h-dvh w-full max-w-2xl flex-col px-5 pt-14 pb-[22px]">
     <div
       v-if="isCancelled"
       class="flex flex-1 flex-col items-center justify-center gap-3 text-center"
@@ -84,17 +84,20 @@ function cancelBooking() {
       </SurfaceCard>
 
       <template v-if="booking.hasStarted">
-        <Button as-child class="mt-auto">
-          <NuxtLink to="/">Agendar outro horário</NuxtLink>
-        </Button>
+        <div class="mt-auto flex flex-col pt-6">
+          <Button as-child>
+            <NuxtLink to="/">Agendar outro horário</NuxtLink>
+          </Button>
+        </div>
       </template>
 
       <template v-else-if="cancellation.canCancelNow">
         <p
           class="mt-3.5 rounded-xl bg-(--warning) px-3.5 py-3 text-[13px] leading-[1.45] text-(--warning-foreground)"
         >
-          Você pode cancelar por aqui até {{ formatLeadTime(cancellation.deadlineMinutes) }} antes.
-          Depois disso, entre em contato pelo WhatsApp.
+          Você pode cancelar por aqui até
+          {{ formatLeadTime(cancellation.deadlineMinutes) }} antes. Depois disso, entre em contato
+          pelo WhatsApp.
         </p>
         <div class="mt-auto flex flex-col gap-2.5 pt-6">
           <Button v-if="whatsappLink" as-child>
@@ -117,12 +120,14 @@ function cancelBooking() {
           <MessageCircleIcon class="mt-0.5 size-[18px] shrink-0 text-primary" aria-hidden="true" />
           <span>{{ contactNote }}</span>
         </SurfaceCard>
-        <Button v-if="whatsappLink" as-child class="mt-auto">
-          <a :href="whatsappLink" target="_blank" rel="noopener">
-            <MessageCircleIcon aria-hidden="true" />
-            Falar comigo no WhatsApp
-          </a>
-        </Button>
+        <div v-if="whatsappLink" class="mt-auto flex flex-col pt-6">
+          <Button as-child>
+            <a :href="whatsappLink" target="_blank" rel="noopener">
+              <MessageCircleIcon aria-hidden="true" />
+              Falar comigo no WhatsApp
+            </a>
+          </Button>
+        </div>
       </template>
     </template>
   </main>
