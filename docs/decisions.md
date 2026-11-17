@@ -178,6 +178,8 @@ A whole-project pass for duplication, hidden coupling and code outside the conve
 ### Theme switch without animation (2026-11-17)
 
 - Switching the theme is instant: `colorMode.disableTransition` turns every CSS transition off for the frame of the switch, so colours no longer fade (buttons use `transition-all`). Applies to both theme controls, in the panel and on the site.
+- Buttons no longer shift 1px down when pressed (shadcn's `active:translate-y-px`, removed from the base button): with `transition-all` it read as a sliding animation on the theme switch. (2026-11-17)
+- Panel "Sair" is a header action (`size="md"`, primary pill), like "+ Novo". The client cancellation deadline goes up to 7 days (2 to 7 days added). (2026-11-17)
 
 ### Day and time picker (2026-11-17)
 

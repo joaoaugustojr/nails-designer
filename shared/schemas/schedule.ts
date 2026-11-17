@@ -21,7 +21,7 @@ const MAX_RULE_MINUTES = 7 * MINUTES_PER_DAY;
 export const GAP_OPTIONS = [0, 10, 15, 20, 30];
 export const MIN_NOTICE_OPTIONS = [0, 30, 60, 120, 240, 720, 1440];
 export const MAX_DAYS_AHEAD_OPTIONS = [7, 15, 30, 60, 90];
-export const CANCEL_DEADLINE_OPTIONS = [60, 120, 720, 1440];
+export const CANCEL_DEADLINE_OPTIONS = [60, 120, 720, 1440, 2880, 4320, 5760, 7200, 8640, 10080];
 
 const minuteOfDay = z.number().int().min(0).max(MINUTES_PER_DAY);
 

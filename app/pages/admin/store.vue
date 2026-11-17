@@ -14,7 +14,7 @@ async function logout() {
 <template>
   <div>
     <PanelHeader title="Loja">
-      <Button variant="quiet" size="inline" class="text-sm" @click="logout">Sair</Button>
+      <Button size="md" @click="logout">Sair</Button>
     </PanelHeader>
 
     <form class="flex flex-col gap-4 px-5 py-4" novalidate @submit.prevent="save">
