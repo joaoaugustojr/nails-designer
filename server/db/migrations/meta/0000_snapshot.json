@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "8a90a8e4-7b3b-4e87-9832-0fb6a396a800",
+  "id": "83e5a5c2-2d0a-4376-b344-fe2d6a1b8f29",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "bookings": {
@@ -77,13 +77,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "client_email": {
-          "name": "client_email",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "reminders_opt_in": {
           "name": "reminders_opt_in",
           "type": "integer",
@@ -123,6 +116,13 @@
         },
         "cancelled_at": {
           "name": "cancelled_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "reminder_day_before_sent_at": {
+          "name": "reminder_day_before_sent_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -428,12 +428,13 @@
           "notNull": false,
           "autoincrement": false
         },
-        "cover_path": {
-          "name": "cover_path",
+        "cover_paths": {
+          "name": "cover_paths",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
         },
         "accent_color": {
           "name": "accent_color",

@@ -53,6 +53,7 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 ## Phase 5 — Deploy
 
 - [x] Until phase 6, the site promises nothing it does not send: `NUXT_PUBLIC_IS_WHATSAPP_ENABLED` (off by default) hides the reminders opt-in, the WhatsApp line and the confirmation-message hint on the booking form, and the "Avisar a cliente" switch when the owner cancels; bookings are saved without the reminders opt-in.
+- [x] Fold every migration into a single `0000_init` (overlap triggers kept) and realign local databases.
 - [ ] Dockerfile (Node 24, multi-stage, arm64; check that `sharp` loads its linux-arm64 binary in the image). Ship `server/db/migrations` next to `.output` (same relative path), set `NUXT_APP_SECRET`, `NUXT_DB_URL` on the volume and `NUXT_SITE_URL`. `NUXT_PUBLIC_*` values are read at runtime, so the same image serves WhatsApp on or off.
 - [ ] `deploy/compose.yaml` (project `nails`, one service, one volume) and `deploy/server-deploy.sh`.
 - [ ] **(you)** On the box: `/srv/nails`, `.env`, dedicated deploy key restricted in `authorized_keys`, Caddy block, Cloudflare DNS record.

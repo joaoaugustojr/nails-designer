@@ -9,13 +9,13 @@ CREATE TABLE `bookings` (
 	`ends_at` integer NOT NULL,
 	`client_name` text NOT NULL,
 	`client_phone` text NOT NULL,
-	`client_email` text,
 	`reminders_opt_in` integer DEFAULT false NOT NULL,
 	`status` text DEFAULT 'confirmed' NOT NULL,
 	`token` text NOT NULL,
 	`idempotency_key` text,
 	`created_at` integer NOT NULL,
 	`cancelled_at` integer,
+	`reminder_day_before_sent_at` integer,
 	`reminder_day_sent_at` integer,
 	`reminder1h_sent_at` integer,
 	`reminder30m_sent_at` integer,
@@ -66,7 +66,7 @@ CREATE TABLE `settings` (
 	`id` integer PRIMARY KEY DEFAULT 1 NOT NULL,
 	`store_name` text DEFAULT '' NOT NULL,
 	`logo_path` text,
-	`cover_path` text,
+	`cover_paths` text DEFAULT '[]' NOT NULL,
 	`accent_color` text DEFAULT '#a8325a' NOT NULL,
 	`address` text,
 	`whatsapp` text,
@@ -115,4 +115,25 @@ CREATE TABLE `working_hours` (
 	CONSTRAINT "working_hours_range" CHECK("working_hours"."start_minute" >= 0 and "working_hours"."start_minute" < "working_hours"."end_minute" and "working_hours"."end_minute" <= 1440)
 );
 --> statement-breakpoint
-CREATE INDEX `working_hours_weekday_idx` ON `working_hours` (`weekday`);
+CREATE INDEX `working_hours_weekday_idx` ON `working_hours` (`weekday`);--> statement-breakpoint
+-- Last guard against double booking, whatever code path writes: two confirmed bookings never overlap.
+CREATE TRIGGER `bookings_no_overlap_insert`
+BEFORE INSERT ON `bookings`
+WHEN NEW.`status` = 'confirmed' AND EXISTS (
+  SELECT 1 FROM `bookings`
+  WHERE `status` = 'confirmed' AND `starts_at` < NEW.`ends_at` AND `ends_at` > NEW.`starts_at`
+)
+BEGIN
+  SELECT RAISE(ABORT, 'booking_overlap');
+END;
+--> statement-breakpoint
+CREATE TRIGGER `bookings_no_overlap_update`
+BEFORE UPDATE OF `status`, `starts_at`, `ends_at` ON `bookings`
+WHEN NEW.`status` = 'confirmed' AND EXISTS (
+  SELECT 1 FROM `bookings`
+  WHERE `id` <> NEW.`id` AND `status` = 'confirmed'
+    AND `starts_at` < NEW.`ends_at` AND `ends_at` > NEW.`starts_at`
+)
+BEGIN
+  SELECT RAISE(ABORT, 'booking_overlap');
+END;

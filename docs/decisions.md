@@ -199,7 +199,7 @@ A whole-project pass for duplication, hidden coupling and code outside the conve
 Supersedes the "Atomic" point of "No double booking" above: `BEGIN IMMEDIATE` does not work here. SQLite runs inside the Node process and blocks the thread while it waits for a lock, so a second open transaction froze the first one until both failed with "database is locked" after 5 s (a test with two simultaneous bookings caught it).
 
 - **One booking at a time:** `createBooking` runs in an in-process queue: check the idempotency key, re-check the slot with the same rule as the picker, then write client + booking in one `db.batch`, which begins and commits in a single call without yielding to other requests. A second client asking for the same time waits in the queue, sees the slot taken and gets 409 ("Esse horário acabou de ser reservado"). This holds for one app process, which is how the app is deployed.
-- **Database guards stay:** the overlap trigger (migration `0001_booking_overlap_guard`, hand-written SQL, so regenerating `0000_init` must keep it) and the unique idempotency key.
+- **Database guards stay:** the overlap trigger (hand-written SQL appended to the end of `0000_init`; regenerating `0000_init` must keep it) and the unique idempotency key.
 - **Idempotent:** the form creates its key on the first submit and reuses it on retries; a repeated submit returns the same booking.
 - **No open transactions anywhere:** saving a day's working hours now uses one `db.batch` too, for the same reason.
 - **Abuse:** `POST /api/bookings` allows 10 requests per IP per 10 minutes and `/api/auth/login` 10 per 15 minutes (in memory, per process; the IP comes from `X-Forwarded-For`, set by the proxy). A hidden "website" field must stay empty.
@@ -325,3 +325,8 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - Reverses "Notifications before deploy": the owner launches first and sets up Meta (business portfolio, number, template approval) calmly afterwards, since it takes days. Phase 5 is deploy, phase 6 is WhatsApp.
 - The reason for the earlier order still holds, so until WhatsApp is on the booking form must not promise messages: the reminders opt-in and the WhatsApp line are hidden (planned in phase 5). The log channel keeps running in production meanwhile.
 - The switch is `NUXT_PUBLIC_IS_WHATSAPP_ENABLED` (runtime config, off by default), not a code change: being white label, another store may never set up WhatsApp. While off, the booking form hides the reminders opt-in and "A confirmação e os lembretes chegam no seu WhatsApp.", the footer reads "Imprevisto? Depois de confirmar, você vê como desmarcar." (the thank-you page links to "my booking"), the owner's cancel dialog has no "Avisar a cliente" switch, and the server saves `reminders_opt_in` as false whatever the request says, so turning WhatsApp on never sends reminders nobody was promised. Bookings made while off get no reminders.
+
+### Migrations folded for the first deploy (2026-11-17)
+
+- `0001_booking_overlap_guard` to `0004_reminder_day_before` are folded into a regenerated `0000_init`; the overlap triggers are appended by hand at its end. Local databases were realigned, not recreated: their structure (columns, foreign keys, indexes, triggers, CHECK constraints) matches a fresh database built from `0000_init` except for column order, so `__drizzle_migrations` now holds only the new `0000_init` row.
+- This is the last regeneration: from the first deploy on, every schema change is a new migration.

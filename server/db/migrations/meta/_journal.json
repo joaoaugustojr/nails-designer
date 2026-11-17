@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1794868908384,
+      "when": 1794930367561,
       "tag": "0000_init",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1794868908907,
-      "tag": "0001_booking_overlap_guard",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1794918692289,
-      "tag": "0002_store_covers",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1794919741664,
-      "tag": "0003_drop_client_email",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1794922020465,
-      "tag": "0004_reminder_day_before",
       "breakpoints": true
     }
   ]
