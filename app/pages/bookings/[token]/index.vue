@@ -16,9 +16,8 @@ const booking = computed(() => data.value!.booking);
 const cancellation = computed(() => data.value!.cancellation);
 const isCancelled = computed(() => booking.value.status === "cancelled");
 
-const when = computed(
-  () =>
-    `${formatFullDay(booking.value.date)} · ${minutesToTime(booking.value.startMinute)} às ${minutesToTime(booking.value.endMinute)}`,
+const when = computed(() =>
+  formatBookingTime(booking.value.date, booking.value.startMinute, booking.value.endMinute),
 );
 
 const greeting = computed(() =>

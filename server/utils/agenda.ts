@@ -1,6 +1,7 @@
 import { and, eq, gt, lt } from "drizzle-orm";
 
 import { bookings, timeOff, workingHours } from "../db/schema";
+import { bookingMessage, notify } from "./notifications";
 
 const toDayMinutes = (instant: Date, day: string, timezone: string) => {
   const zoned = utcToZoned(instant.getTime(), timezone);
@@ -58,12 +59,21 @@ export async function getAgenda(requestedDate: string | undefined) {
   };
 }
 
-export async function cancelBooking(id: number) {
+export async function cancelBooking(id: number, { notifyClient }: { notifyClient: boolean }) {
   const db = await useDb();
   const [cancelled] = await db
     .update(bookings)
     .set({ status: "cancelled", cancelledAt: new Date() })
     .where(and(eq(bookings.id, id), eq(bookings.status, "confirmed")))
-    .returning({ id: bookings.id });
+    .returning({
+      clientName: bookings.clientName,
+      clientPhone: bookings.clientPhone,
+      serviceName: bookings.serviceName,
+      startsAt: bookings.startsAt,
+      endsAt: bookings.endsAt,
+      token: bookings.token,
+    });
   if (!cancelled) throw createError({ statusCode: 404, statusMessage: "Booking not found" });
+  if (notifyClient)
+    void notify(bookingMessage("booking_cancelled", cancelled, await readSettings()));
 }

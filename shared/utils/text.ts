@@ -10,3 +10,5 @@ export function initials(name: string) {
 export function plural(count: number, singular: string, pluralForm: string) {
   return `${count} ${count === 1 ? singular : pluralForm}`;
 }
+
+export const firstName = (name: string) => name.trim().split(/\s+/)[0]!;

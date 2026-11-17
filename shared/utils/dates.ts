@@ -1,4 +1,4 @@
-import { addDays } from "./time";
+import { addDays, minutesToTime } from "./time";
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
@@ -27,6 +27,10 @@ export function formatFullDay(date: string) {
   const { day, longWeekday, longMonth } = dateParts(date);
   return `${capitalize(longWeekday)}, ${day} de ${longMonth.toLowerCase()}`;
 }
+
+// "Quarta, 18 de novembro · 09:00 às 10:00".
+export const formatBookingTime = (date: string, startMinute: number, endMinute: number) =>
+  `${formatFullDay(date)} · ${minutesToTime(startMinute)} às ${minutesToTime(endMinute)}`;
 
 export const formatDayWithWeekday = (date: string) =>
   `${dateParts(date).weekday}, ${formatDay(date)}`;

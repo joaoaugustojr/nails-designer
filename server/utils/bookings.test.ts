@@ -7,13 +7,16 @@ import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vites
 
 import { createDatabase, migrateDatabase } from "../db/client";
 import { bookings, clients, services, workingHours } from "../db/schema";
+import { cancelBooking } from "./agenda";
 import { cancelBookingByClient, createBooking } from "./bookings";
 
 vi.stubGlobal("createError", (error: object) => Object.assign(new Error(), error));
 const dir = mkdtempSync(join(tmpdir(), "nails-bookings-"));
 const db = createDatabase(`file:${join(dir, "test.db")}`);
 vi.stubGlobal("useDb", async () => db);
+vi.stubGlobal("useRuntimeConfig", () => ({ siteUrl: "https://example.com" }));
 const settings = {
+  storeName: "Studio",
   timezone: "America/Sao_Paulo",
   slotStepMinutes: 30,
   gapMinutes: 0,
@@ -53,7 +56,10 @@ beforeEach(async () => {
   await db.insert(workingHours).values({ weekday: 3, startMinute: 9 * 60, endMinute: 12 * 60 });
 });
 
-afterEach(() => vi.useRealTimers());
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 describe("createBooking", () => {
@@ -88,6 +94,21 @@ describe("createBooking", () => {
     expect(second.token).toBe(first.token);
     expect(third.token).toBe(first.token);
     expect(await db.$count(bookings)).toBe(1);
+  });
+
+  it("sends the confirmation once, not again on a repeated submit", async () => {
+    const log = vi.spyOn(console, "info").mockImplementation(() => {});
+    const same = request({ name: "Ana Souza" });
+    const { token } = await createBooking(same);
+    await createBooking(same);
+    expect(log).toHaveBeenCalledOnce();
+    expect(log).toHaveBeenCalledWith("Notification booking_confirmation to 11912345678", {
+      clientFirstName: "Ana",
+      storeName: "Studio",
+      serviceName: "Gel",
+      when: "Quarta, 18 de novembro · 09:00 às 10:00",
+      link: `https://example.com/bookings/${token}`,
+    });
   });
 
   it("refuses a time that is not free or not offered", async () => {
@@ -156,5 +177,29 @@ describe("cancelBookingByClient", () => {
   it("answers 404 for unknown or malformed tokens", async () => {
     await expect(cancelBookingByClient("x".repeat(32))).rejects.toMatchObject({ statusCode: 404 });
     await expect(cancelBookingByClient("../etc")).rejects.toMatchObject({ statusCode: 404 });
+  });
+});
+
+describe("cancelBooking by the owner", () => {
+  const cancelOnly = async (notifyClient: boolean) => {
+    const { token } = await createBooking(request());
+    const booking = await db.query.bookings.findFirst({ where: eq(bookings.token, token) });
+    const log = vi.spyOn(console, "info").mockImplementation(() => {});
+    await cancelBooking(booking!.id, { notifyClient });
+    return { log, token };
+  };
+
+  it("tells the client when the owner asks for it", async () => {
+    const { log, token } = await cancelOnly(true);
+    expect(log).toHaveBeenCalledWith(
+      "Notification booking_cancelled to 11912345678",
+      expect.objectContaining({ link: `https://example.com/bookings/${token}` }),
+    );
+  });
+
+  it("stays silent when the owner turns the message off", async () => {
+    const { log } = await cancelOnly(false);
+    expect(log).not.toHaveBeenCalled();
+    expect(await db.query.bookings.findFirst()).toMatchObject({ status: "cancelled" });
   });
 });

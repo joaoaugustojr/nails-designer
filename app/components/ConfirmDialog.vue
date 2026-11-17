@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { LoaderCircleIcon } from "@lucide/vue";
 
-const { current, isPending, error, accept, cancel } = useConfirmDialog();
+const { current, isPending, isToggleOn, error, accept, cancel } = useConfirmDialog();
 
 const isOpen = computed(() => current.value !== null);
 
@@ -19,6 +19,10 @@ function onOpenChange(open: boolean) {
           {{ current.description }}
         </AlertDialogDescription>
       </AlertDialogHeader>
+      <Field v-if="current.toggle" orientation="horizontal" class="justify-between">
+        <FieldLabel for="confirm-toggle">{{ current.toggle.label }}</FieldLabel>
+        <Switch id="confirm-toggle" v-model="isToggleOn" :disabled="isPending" />
+      </Field>
       <p v-if="error" role="alert" class="text-sm text-destructive">{{ error }}</p>
       <AlertDialogFooter>
         <AlertDialogCancel size="md" :disabled="isPending">

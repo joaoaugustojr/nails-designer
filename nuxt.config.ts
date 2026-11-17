@@ -16,6 +16,7 @@ export default defineNuxtConfig({
     dbUrl: "file:.data/nails.db",
     storeName: "",
     uploadsDir: ".data/uploads",
+    siteUrl: "http://localhost:3000",
     admin: { name: "", email: "", password: "" },
     session: { maxAge: 60 * 60 * 24 * 7 },
   },

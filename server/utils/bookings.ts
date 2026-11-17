@@ -2,11 +2,13 @@ import { randomBytes } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 
 import type { BookingInput } from "../../shared/schemas/booking";
+import { firstName } from "../../shared/utils/text";
 import { utcToZoned, zonedToUtc } from "../../shared/utils/time";
 import type { Database } from "../db/client";
 import { bookings, clients } from "../db/schema";
 import { findActiveService, freeStartMinutes } from "./availability";
 import { upsertClient } from "./clients";
+import { bookingMessage, notify } from "./notifications";
 
 const MS_PER_MINUTE = 60_000;
 
@@ -52,6 +54,10 @@ export function createBooking(input: BookingInput) {
 
     const { timezone } = settings;
     const token = randomBytes(24).toString("base64url");
+    const startsAt = new Date(zonedToUtc(input.date, input.startMinute, timezone));
+    const endsAt = new Date(
+      zonedToUtc(input.date, input.startMinute + service.durationMinutes, timezone),
+    );
     try {
       await db.batch([
         upsertClient(db, { phone: input.phone, name: input.name }),
@@ -61,10 +67,8 @@ export function createBooking(input: BookingInput) {
           serviceName: service.name,
           serviceDurationMinutes: service.durationMinutes,
           servicePriceCents: service.priceCents,
-          startsAt: new Date(zonedToUtc(input.date, input.startMinute, timezone)),
-          endsAt: new Date(
-            zonedToUtc(input.date, input.startMinute + service.durationMinutes, timezone),
-          ),
+          startsAt,
+          endsAt,
           clientName: input.name,
           clientPhone: input.phone,
           remindersOptIn: input.remindersOptIn,
@@ -76,6 +80,20 @@ export function createBooking(input: BookingInput) {
       if (errorText(error).includes("booking_overlap")) throw slotTaken();
       throw error;
     }
+    void notify(
+      bookingMessage(
+        "booking_confirmation",
+        {
+          clientName: input.name,
+          clientPhone: input.phone,
+          serviceName: service.name,
+          startsAt,
+          endsAt,
+          token,
+        },
+        settings,
+      ),
+    );
     return { token };
   });
 }
@@ -127,7 +145,7 @@ export async function getBookingSummary(token: string) {
       token: booking.token,
       status: booking.status,
       hasStarted: now >= booking.startsAt.getTime(),
-      clientFirstName: booking.clientName.split(/\s+/)[0]!,
+      clientFirstName: firstName(booking.clientName),
       serviceName: booking.serviceName,
       date: start.date,
       startMinute: start.minutes,

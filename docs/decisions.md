@@ -297,3 +297,16 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - The accepted inputs are unchanged (JPEG, PNG, WebP by signature, up to 8 MB). A file with a valid signature that sharp cannot decode is rejected with 415. A request's images are all re-encoded before any is written.
 - Files uploaded before this change keep their original format and are still served; there were no real customer photos yet.
 - `sharp` 0.35 runs on the dev machine (glibc 2.31); its linux-arm64 binary is checked with the Dockerfile.
+
+### Notification module (2026-11-17)
+
+- Every client message goes through `notify()` in `server/utils/notifications.ts`. A message is shaped like a WhatsApp template message: recipient phone, template name and named variables. The text itself lives in the approved Meta template, not in the app.
+- For now the only channel is `log` (prints the message to the server log). Picking a channel and handling send errors come with the WhatsApp channel; callers already call `notify()` without awaiting it, so a failed message never undoes or delays a booking.
+- The booking confirmation (`booking_confirmation`) is sent for every new booking, whatever the reminders opt-in, and not again when the same form is resubmitted. Variables: client first name, store name, service, when ("Quarta, 18 de novembro · 09:00 às 10:00") and the "my booking" link.
+- Links in messages use `NUXT_SITE_URL` (default `http://localhost:3000`): reminders are sent by a scheduled task with no request to read the host from.
+
+### Owner cancellation message (2026-11-17)
+
+- When the owner cancels a booking (agenda or clients list), the confirm dialog has an "Avisar a cliente no WhatsApp" switch, on by default. If on, the client gets the `booking_cancelled` message (same variables as the confirmation; the link opens the "my booking" page, which shows the cancellation and offers a new booking). If off, nothing is sent. This settles "Notifying the client comes with phase 5" in the agenda notes.
+- `useConfirmDialog` takes an optional `toggle` (`label`, `isOn`) and passes its state to the action.
+- A client who cancels by herself gets no message: she did it.

@@ -8,8 +8,12 @@ export function useCancelBooking() {
       confirmLabel: "Cancelar atendimento",
       pendingLabel: "Cancelando…",
       isDestructive: true,
-      action: async () => {
-        await $fetch(`/api/admin/bookings/${id}/cancel`, { method: "POST" });
+      toggle: { label: "Avisar a cliente no WhatsApp", isOn: true },
+      action: async (notifyClient) => {
+        await $fetch(`/api/admin/bookings/${id}/cancel`, {
+          method: "POST",
+          body: { notifyClient },
+        });
       },
     });
   };
