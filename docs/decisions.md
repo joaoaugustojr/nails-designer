@@ -274,3 +274,7 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - Endpoints: `POST /api/admin/store/logo` (replace), `POST /api/admin/store/covers` (add), `DELETE /api/admin/store/covers/:index` (asks first in the panel).
 - Shipped as migration `0002_store_covers` (copies the old single cover into the list) instead of regenerating `0000_init`, because local databases apply it at boot without realignment. Fold it into `0000_init` before the first deploy.
 - Service photos on the site catalog card are square (96px).
+
+### Cancel from the client card (2026-11-17)
+
+- A client card with an upcoming booking has "Cancelar" next to "Próximo", which cancels that next booking with the same confirmation as the agenda (`useCancelBooking`). The clients list returns `nextBookingId` for it.

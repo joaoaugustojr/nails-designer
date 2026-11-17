@@ -7,7 +7,8 @@ export function useClients() {
   const debouncedSearch = refDebounced(search, SEARCH_DELAY_MS);
   const query = computed(() => ({ search: debouncedSearch.value.trim() || undefined }));
 
-  const { data: firstPage } = useFetch("/api/admin/clients", { query });
+  const { data: firstPage, refresh } = useFetch("/api/admin/clients", { query });
+  const confirmCancel = useCancelBooking();
   type Client = NonNullable<typeof firstPage.value>["items"][number];
 
   const morePages = ref<Client[]>([]);
@@ -36,5 +37,10 @@ export function useClients() {
     }
   }
 
-  return { search, clients, total, hasMore, isLoadingMore, loadMore };
+  async function cancelNextBooking(client: Client) {
+    if (!client.nextBookingId) return;
+    if (await confirmCancel(client.nextBookingId, client.name)) await refresh();
+  }
+
+  return { search, clients, total, hasMore, isLoadingMore, loadMore, cancelNextBooking };
 }

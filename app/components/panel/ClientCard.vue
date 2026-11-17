@@ -4,6 +4,7 @@ import { CalendarIcon } from "@lucide/vue";
 import type { ApiGet } from "~/types/api";
 
 const props = defineProps<{ client: ApiGet<"/api/admin/clients">["items"][number] }>();
+const emit = defineEmits<{ cancelNext: [] }>();
 
 const timezone = useStoreTimezone();
 
@@ -75,14 +76,23 @@ const cancellations = computed(() =>
       </div>
     </dl>
 
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <span
-        v-if="nextVisit"
-        class="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1.5 text-xs font-bold text-secondary-foreground"
-      >
-        <CalendarIcon :size="14" aria-hidden="true" />
-        Próximo: {{ nextVisit }}
-      </span>
+    <div class="flex flex-wrap items-center justify-between gap-x-2">
+      <div v-if="nextVisit" class="flex items-center gap-3">
+        <span
+          class="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1.5 text-xs font-bold text-secondary-foreground"
+        >
+          <CalendarIcon :size="14" aria-hidden="true" />
+          Próximo: {{ nextVisit }}
+        </span>
+        <Button
+          variant="quiet"
+          size="inline"
+          :aria-label="`Cancelar o próximo atendimento de ${client.name}`"
+          @click="emit('cancelNext')"
+        >
+          Cancelar
+        </Button>
+      </div>
       <span v-else class="text-xs text-muted-foreground">Sem agendamento futuro</span>
       <span v-if="cancellations" class="text-xs text-muted-foreground">{{ cancellations }}</span>
     </div>

@@ -4,7 +4,8 @@ import { SearchIcon } from "@lucide/vue";
 definePageMeta({ layout: "panel" });
 useHead({ title: "Clientes" });
 
-const { search, clients, total, hasMore, isLoadingMore, loadMore } = useClients();
+const { search, clients, total, hasMore, isLoadingMore, loadMore, cancelNextBooking } =
+  useClients();
 </script>
 
 <template>
@@ -32,7 +33,12 @@ const { search, clients, total, hasMore, isLoadingMore, loadMore } = useClients(
     </PanelHeader>
 
     <section class="flex flex-col gap-2.5 px-5 py-4">
-      <PanelClientCard v-for="client in clients" :key="client.id" :client="client" />
+      <PanelClientCard
+        v-for="client in clients"
+        :key="client.id"
+        :client="client"
+        @cancel-next="cancelNextBooking(client)"
+      />
       <p v-if="!clients.length" class="py-10 text-center text-sm text-muted-foreground">
         {{
           search

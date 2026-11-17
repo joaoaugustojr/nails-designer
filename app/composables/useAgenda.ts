@@ -7,7 +7,7 @@ export function useAgenda() {
   const { data: agenda, refresh } = useFetch("/api/admin/agenda", {
     query: computed(() => ({ date: requestedDate.value })),
   });
-  const { confirmAction } = useConfirmDialog();
+  const confirmCancel = useCancelBooking();
 
   const title = computed(() =>
     agenda.value ? formatAgendaDay(agenda.value.date, agenda.value.today) : "",
@@ -29,17 +29,7 @@ export function useAgenda() {
   }
 
   async function cancelBooking(id: number, clientName: string) {
-    const isCancelled = await confirmAction({
-      title: `Cancelar o atendimento de ${clientName}?`,
-      description: "O horário volta a ficar livre na agenda.",
-      confirmLabel: "Cancelar atendimento",
-      pendingLabel: "Cancelando…",
-      isDestructive: true,
-      action: async () => {
-        await $fetch(`/api/admin/bookings/${id}/cancel`, { method: "POST" });
-      },
-    });
-    if (isCancelled) await refresh();
+    if (await confirmCancel(id, clientName)) await refresh();
   }
 
   return { agenda, title, summary, goToDay, cancelBooking, refresh };

@@ -28,19 +28,23 @@ async function book(
     { id: number },
   ];
   const startsAt = new Date(NOW.getTime() + hoursFromNow * HOUR);
-  await db.insert(bookings).values({
-    clientId: id,
-    clientName: client.name,
-    clientPhone: client.phone,
-    serviceName: "Manicure",
-    serviceDurationMinutes: 60,
-    servicePriceCents: priceCents,
-    startsAt,
-    endsAt: new Date(startsAt.getTime() + HOUR),
-    status,
-    token: `t${tokens++}`,
-    createdAt: new Date(NOW.getTime() - createdHoursAgo * HOUR),
-  });
+  const [booking] = await db
+    .insert(bookings)
+    .values({
+      clientId: id,
+      clientName: client.name,
+      clientPhone: client.phone,
+      serviceName: "Manicure",
+      serviceDurationMinutes: 60,
+      servicePriceCents: priceCents,
+      startsAt,
+      endsAt: new Date(startsAt.getTime() + HOUR),
+      status,
+      token: `t${tokens++}`,
+      createdAt: new Date(NOW.getTime() - createdHoursAgo * HOUR),
+    })
+    .returning({ id: bookings.id });
+  return booking!;
 }
 
 beforeEach(async () => {
@@ -70,7 +74,7 @@ describe("queryClients", () => {
     await book(maria, -48, { priceCents: 6000 });
     await book(maria, -24, { priceCents: 4000 });
     await book(maria, -12, { status: "cancelled" });
-    await book(maria, 30);
+    const next = await book(maria, 30);
 
     const { items } = await listClients({ now: NOW });
     expect(items[0]).toMatchObject({
@@ -79,8 +83,30 @@ describe("queryClients", () => {
       spentCents: 10000,
       lastVisitAt: NOW.getTime() - 24 * HOUR,
       nextVisitAt: NOW.getTime() + 30 * HOUR,
+      nextBookingId: next.id,
       cancellations: 1,
     });
+  });
+
+  it("points to the soonest confirmed upcoming booking when there are several", async () => {
+    const maria = { phone: "11900000001", name: "Maria" };
+    await book(maria, 72);
+    const soonest = await book(maria, 30);
+    await book(maria, 10, { status: "cancelled" });
+    await book(maria, -5);
+
+    const { items } = await listClients({ now: NOW });
+    expect(items[0]).toMatchObject({
+      nextVisitAt: NOW.getTime() + 30 * HOUR,
+      nextBookingId: soonest.id,
+    });
+  });
+
+  it("has no next booking when every upcoming one is cancelled", async () => {
+    await book({ phone: "11900000001", name: "Maria" }, 30, { status: "cancelled" });
+
+    const { items } = await listClients({ now: NOW });
+    expect(items[0]).toMatchObject({ nextVisitAt: null, nextBookingId: null });
   });
 
   it("lists clients with upcoming bookings first, soonest first, then the most recently active", async () => {
