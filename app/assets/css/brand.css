@@ -30,6 +30,8 @@
   --input: #dccdd2;
   --ring: #a8325a;
   --success: #2f7a4f;
+  --warning: #fff4e5;
+  --warning-foreground: #6a4a12;
 }
 
 .dark {
@@ -53,6 +55,8 @@
   --input: #4a3e44;
   --ring: #e9b9c8;
   --success: #7cc49a;
+  --warning: #3a2e1c;
+  --warning-foreground: #f3d9a8;
 }
 
 body {

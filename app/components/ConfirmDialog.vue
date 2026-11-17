@@ -21,7 +21,9 @@ function onOpenChange(open: boolean) {
       </AlertDialogHeader>
       <p v-if="error" role="alert" class="text-sm text-destructive">{{ error }}</p>
       <AlertDialogFooter>
-        <AlertDialogCancel size="md" :disabled="isPending">Cancelar</AlertDialogCancel>
+        <AlertDialogCancel size="md" :disabled="isPending">
+          {{ current?.dismissLabel ?? "Cancelar" }}
+        </AlertDialogCancel>
         <Button
           size="md"
           :variant="current.isDestructive ? 'destructive' : 'default'"

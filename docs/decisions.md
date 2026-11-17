@@ -206,6 +206,15 @@ Supersedes the "Atomic" point of "No double booking" above: `BEGIN IMMEDIATE` do
 - **"Ver meu agendamento"** links to `/bookings/<token>` (the page sent in the WhatsApp confirmation), so the client can keep it before notifications exist. Not in the mockup; asked for by the owner.
 - **No "the confirmation was sent to your WhatsApp" line yet:** nothing is sent until phase 5, so the page only says the time is reserved. Add the line back with the notifications.
 
+### "My booking" page (2026-11-17)
+
+- **`/bookings/<token>`** is the link the client keeps (the WhatsApp confirmation will carry it; the thank-you page and the calendar event already do). It shows the service, the full date ("Quarta, 18 de novembro · 09:00 às 10:00") and the address.
+- **Cancellation follows the Horários rule, decided on the server:** `GET /api/bookings/:token` says whether the store offers it and whether this booking can still be cancelled (confirmed, and now ≤ start − deadline); `POST /api/bookings/:token/cancel` applies the same check (403 otherwise; cancelling twice is fine) and marks the booking `cancelled`, freeing the slot. Rate limited like booking.
+- **Four states:** can cancel (note "até 2h antes", WhatsApp and "Cancelar agendamento" with a confirm); owner only (setting off: "Precisa remarcar ou desmarcar? Fale com …"); deadline passed (setting on: "O prazo para cancelar por aqui já passou. Para remarcar ou desmarcar, entre em contato pelo WhatsApp."); cancelled ("Agendamento cancelado" and "Agendar outro horário"). A booking that already started greets with "Esperamos que tenha gostado" and offers a new booking.
+- **White label:** the WhatsApp button reads "Falar comigo no WhatsApp" (the owner speaking, as in the thank-you message; asked for by the owner instead of "Falar com <store name>"), and the header shows the store name only. The WhatsApp button opens a message with the service, day and time, and is hidden when the store has no WhatsApp.
+- `ConfirmDialog` takes an optional `dismissLabel`: here it is "Manter", so the client never sees "Cancelar" next to "Cancelar agendamento".
+- Warning colours (`--warning`, `--warning-foreground`, light and dark) for the cancellation note.
+
 ### Migrations before launch
 
 - **Until the first production deploy there is a single migration, `0000_init`, regenerated from the schema** (delete `server/db/migrations` and run `pnpm exec drizzle-kit generate --name init`). There is no real data to migrate, so correction migrations are noise. This supersedes the earlier `0001_user_roles`, `0002_clients` and `0003_session_version`; the notes above about hand-edited migrations describe that history.

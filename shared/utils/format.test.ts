@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { formatFullDay } from "./dates";
 import { formatDuration } from "./duration";
 import { centsToPriceInput, formatPrice, formatPriceShort, parsePrice } from "./money";
 import { formatPhone, whatsappUrl } from "./phone";
@@ -85,5 +86,12 @@ describe("text helpers", () => {
     expect(plural(1, "cliente", "clientes")).toBe("1 cliente");
     expect(plural(0, "cliente", "clientes")).toBe("0 clientes");
     expect(plural(2, "cliente", "clientes")).toBe("2 clientes");
+  });
+});
+
+describe("formatFullDay", () => {
+  it("writes the weekday and the month in full, without the '-feira'", () => {
+    expect(formatFullDay("2026-11-16")).toBe("Segunda, 16 de novembro");
+    expect(formatFullDay("2026-11-21")).toBe("Sábado, 21 de novembro");
   });
 });

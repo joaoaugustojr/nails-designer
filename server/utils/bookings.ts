@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import type { BookingInput } from "../../shared/schemas/booking";
 import { utcToZoned, zonedToUtc } from "../../shared/utils/time";
@@ -7,6 +7,8 @@ import type { Database } from "../db/client";
 import { bookings, clients } from "../db/schema";
 import { findActiveService, freeStartMinutes } from "./availability";
 import { upsertClient } from "./clients";
+
+const MS_PER_MINUTE = 60_000;
 
 const slotTaken = () => createError({ statusCode: 409, statusMessage: "Slot no longer available" });
 
@@ -101,20 +103,55 @@ export async function findBookingByToken(token: string) {
   return booking;
 }
 
+type CancelRules = { clientCanCancel: boolean; cancelDeadlineMinutes: number };
+
+function canClientCancel(
+  booking: { status: string; startsAt: Date },
+  rules: CancelRules,
+  now: number,
+) {
+  const deadline = booking.startsAt.getTime() - rules.cancelDeadlineMinutes * MS_PER_MINUTE;
+  return rules.clientCanCancel && booking.status === "confirmed" && now <= deadline;
+}
+
 export async function getBookingSummary(token: string) {
-  const [booking, store] = await Promise.all([findBookingByToken(token), getStoreProfile()]);
+  const [booking, store, settings] = await Promise.all([
+    findBookingByToken(token),
+    getStoreProfile(),
+    readSettings(),
+  ]);
+  const now = Date.now();
   const start = utcToZoned(booking.startsAt.getTime(), store.timezone);
   const end = utcToZoned(booking.endsAt.getTime(), store.timezone);
   return {
     booking: {
       token: booking.token,
       status: booking.status,
+      hasStarted: now >= booking.startsAt.getTime(),
       clientFirstName: booking.clientName.split(/\s+/)[0]!,
       serviceName: booking.serviceName,
       date: start.date,
       startMinute: start.minutes,
       endMinute: end.minutes,
     },
+    cancellation: {
+      isOffered: settings.clientCanCancel,
+      deadlineMinutes: settings.cancelDeadlineMinutes,
+      canCancelNow: canClientCancel(booking, settings, now),
+    },
     store,
   };
+}
+
+export async function cancelBookingByClient(token: string) {
+  const [booking, settings] = await Promise.all([findBookingByToken(token), readSettings()]);
+  if (booking.status === "cancelled") return;
+  if (!canClientCancel(booking, settings, Date.now())) {
+    throw createError({ statusCode: 403, statusMessage: "Cancellation not allowed" });
+  }
+  const db = await useDb();
+  await db
+    .update(bookings)
+    .set({ status: "cancelled", cancelledAt: new Date() })
+    .where(and(eq(bookings.token, token), eq(bookings.status, "confirmed")));
 }

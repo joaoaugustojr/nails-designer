@@ -2,6 +2,7 @@ type ConfirmOptions = {
   title: string;
   description?: string;
   confirmLabel: string;
+  dismissLabel?: string;
   pendingLabel: string;
   isDestructive?: boolean;
   action: () => Promise<unknown>;

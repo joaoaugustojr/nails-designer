@@ -23,6 +23,11 @@ export const formatDay = (date: string) => {
   return `${day} ${month}`;
 };
 
+export function formatFullDay(date: string) {
+  const { day, longWeekday, longMonth } = dateParts(date);
+  return `${capitalize(longWeekday)}, ${day} de ${longMonth.toLowerCase()}`;
+}
+
 export const formatDayWithWeekday = (date: string) =>
   `${dateParts(date).weekday}, ${formatDay(date)}`;
 

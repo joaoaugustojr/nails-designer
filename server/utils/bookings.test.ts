@@ -7,19 +7,22 @@ import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vites
 
 import { createDatabase, migrateDatabase } from "../db/client";
 import { bookings, clients, services, workingHours } from "../db/schema";
-import { createBooking } from "./bookings";
+import { cancelBookingByClient, createBooking } from "./bookings";
 
 vi.stubGlobal("createError", (error: object) => Object.assign(new Error(), error));
 const dir = mkdtempSync(join(tmpdir(), "nails-bookings-"));
 const db = createDatabase(`file:${join(dir, "test.db")}`);
 vi.stubGlobal("useDb", async () => db);
-vi.stubGlobal("readSettings", async () => ({
+const settings = {
   timezone: "America/Sao_Paulo",
   slotStepMinutes: 30,
   gapMinutes: 0,
   minNoticeMinutes: 0,
   maxDaysAhead: 30,
-}));
+  clientCanCancel: true,
+  cancelDeadlineMinutes: 120,
+};
+vi.stubGlobal("readSettings", async () => settings);
 
 const DAY = "2026-11-18";
 let serviceId: number;
@@ -38,6 +41,7 @@ const request = (changes: Partial<Parameters<typeof createBooking>[0]> = {}) => 
 });
 
 beforeEach(async () => {
+  Object.assign(settings, { clientCanCancel: true, cancelDeadlineMinutes: 120 });
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date("2026-11-17T08:00:00-03:00"));
   await migrateDatabase(db);
@@ -124,5 +128,34 @@ describe("booking overlap guard", () => {
     await expect(
       db.update(bookings).set({ status: "confirmed" }).where(eq(bookings.token, "other")),
     ).rejects.toThrow();
+  });
+});
+
+describe("cancelBookingByClient", () => {
+  const statusOf = async (token: string) =>
+    (await db.query.bookings.findFirst({ where: eq(bookings.token, token) }))?.status;
+
+  it("cancels before the deadline and frees the slot", async () => {
+    const { token } = await createBooking(request());
+    vi.setSystemTime(new Date(`${DAY}T07:00:00-03:00`));
+    await cancelBookingByClient(token);
+    expect(await statusOf(token)).toBe("cancelled");
+    await expect(cancelBookingByClient(token)).resolves.toBeUndefined();
+    await expect(createBooking(request({ name: "Bia" }))).resolves.toHaveProperty("token");
+  });
+
+  it("refuses after the deadline or when the store does not allow it", async () => {
+    const { token } = await createBooking(request());
+    vi.setSystemTime(new Date(`${DAY}T07:01:00-03:00`));
+    await expect(cancelBookingByClient(token)).rejects.toMatchObject({ statusCode: 403 });
+    vi.setSystemTime(new Date(`${DAY}T06:00:00-03:00`));
+    settings.clientCanCancel = false;
+    await expect(cancelBookingByClient(token)).rejects.toMatchObject({ statusCode: 403 });
+    expect(await statusOf(token)).toBe("confirmed");
+  });
+
+  it("answers 404 for unknown or malformed tokens", async () => {
+    await expect(cancelBookingByClient("x".repeat(32))).rejects.toMatchObject({ statusCode: 404 });
+    await expect(cancelBookingByClient("../etc")).rejects.toMatchObject({ statusCode: 404 });
   });
 });
