@@ -94,7 +94,7 @@ function cancelBooking() {
           class="mt-3.5 rounded-xl bg-(--warning) px-3.5 py-3 text-[13px] leading-[1.45] text-(--warning-foreground)"
         >
           Você pode cancelar por aqui até {{ formatLeadTime(cancellation.deadlineMinutes) }} antes.
-          Depois disso, fale direto com {{ store.name }}.
+          Depois disso, entre em contato pelo WhatsApp.
         </p>
         <div class="mt-auto flex flex-col gap-2.5 pt-6">
           <Button v-if="whatsappLink" as-child>
