@@ -1,11 +1,10 @@
 import { bookingSchema } from "#shared/schemas/booking";
 
-type FieldName = "name" | "phone" | "email";
+type FieldName = "name" | "phone";
 
 const FIELD_ERRORS: Record<FieldName, string> = {
   name: "Informe o seu nome.",
   phone: "Informe o celular com DDD, por exemplo (11) 91234-5678.",
-  email: "Confira o email ou deixe em branco.",
 };
 
 const REQUEST_ERRORS: Record<number, string> = {
@@ -22,7 +21,7 @@ function newIdempotencyKey() {
 }
 
 export function useBookingForm(choice: { serviceId: number; date: string; startMinute: number }) {
-  const form = reactive({ name: "", phone: "", email: "", remindersOptIn: true, website: "" });
+  const form = reactive({ name: "", phone: "", remindersOptIn: true, website: "" });
   const errors = ref<Partial<Record<FieldName, string>>>({});
   const error = ref("");
   const isSlotTaken = ref(false);

@@ -33,7 +33,6 @@ const request = (changes: Partial<Parameters<typeof createBooking>[0]> = {}) => 
   startMinute: 9 * 60,
   name: "Ana",
   phone: "11912345678",
-  email: "",
   remindersOptIn: true,
   idempotencyKey: randomUUID(),
   website: "",

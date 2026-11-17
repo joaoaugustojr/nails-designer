@@ -169,7 +169,6 @@ export const bookings = sqliteTable(
     endsAt: timestamp().notNull(),
     clientName: text().notNull(),
     clientPhone: text().notNull(),
-    clientEmail: text(),
     remindersOptIn: integer({ mode: "boolean" }).notNull().default(false),
     status: text({ enum: ["confirmed", "cancelled"] })
       .notNull()

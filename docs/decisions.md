@@ -278,3 +278,7 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 ### Cancel from the client card (2026-11-17)
 
 - A client card with an upcoming booking has "Cancelar" next to "Próximo", which cancels that next booking with the same confirmation as the agenda (`useCancelBooking`). The clients list returns `nextBookingId` for it.
+
+### No client email (2026-11-17)
+
+- The booking form asks only for name and mobile (WhatsApp); the optional email field and `bookings.client_email` are gone (migration `0003_drop_client_email`). Nothing used it, every message goes to WhatsApp, and collecting unused personal data is a risk with no benefit (LGPD data minimisation). This supersedes the email mentions in "Client flow", "Email is optional and secondary" and the booking form notes above, and drops the email notification channel from the plan.

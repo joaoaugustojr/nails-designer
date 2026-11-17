@@ -77,21 +77,6 @@ const when = computed(() => {
           <FieldDescription>A confirmação e os lembretes chegam no seu WhatsApp.</FieldDescription>
           <FieldError v-if="errors.phone">{{ errors.phone }}</FieldError>
         </Field>
-        <Field :data-invalid="!!errors.email || undefined">
-          <FieldLabel for="booking-email" class="gap-1">
-            Email
-            <span class="font-medium text-muted-foreground">(opcional)</span>
-          </FieldLabel>
-          <Input
-            id="booking-email"
-            v-model="form.email"
-            type="email"
-            autocomplete="email"
-            placeholder="voce@email.com"
-            :aria-invalid="!!errors.email || undefined"
-          />
-          <FieldError v-if="errors.email">{{ errors.email }}</FieldError>
-        </Field>
       </FieldGroup>
 
       <SurfaceCard as="label" class="flex cursor-pointer items-start gap-3 p-3.5">

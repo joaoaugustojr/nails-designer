@@ -67,7 +67,6 @@ export function createBooking(input: BookingInput) {
           ),
           clientName: input.name,
           clientPhone: input.phone,
-          clientEmail: input.email || null,
           remindersOptIn: input.remindersOptIn,
           token,
           idempotencyKey: input.idempotencyKey,

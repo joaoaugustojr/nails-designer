@@ -59,7 +59,7 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 ## Phase 5 — Notifications
 
 - [ ] Thank-you page: add back "A confirmação foi enviada para o seu WhatsApp." once confirmations are sent.
-- [ ] Notification module with one entry point and channels: `log` (default), `email` (optional), `whatsapp`.
+- [ ] Notification module with one entry point and channels: `log` (default), `whatsapp`.
 - [ ] Reminder task (Nitro scheduled task, every 5 min): day of, 1 h and 30 min before, each sent once.
 - [ ] **(you)** Meta Business account, app, number, utility templates approved.
 - [ ] WhatsApp Cloud API channel: confirmation + reminders.

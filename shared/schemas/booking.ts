@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { MINUTES_PER_DAY } from "../utils/time";
-import { emailField, nameField } from "./user";
+import { nameField } from "./user";
 
 export const AVAILABILITY_MAX_DAYS = 14;
 
@@ -23,7 +23,6 @@ export const bookingSchema = z.object({
     .string()
     .transform((value) => value.replace(/\D/g, ""))
     .refine((digits) => MOBILE_PATTERN.test(digits)),
-  email: z.union([z.literal(""), emailField]),
   remindersOptIn: z.boolean(),
   idempotencyKey: z.uuid(),
   website: z.string().max(0),
