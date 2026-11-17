@@ -337,3 +337,12 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - Native packages are traced for the platform that builds, so the production image is built natively on GitHub's arm64 runner, never cross-built from x86.
 - `/data` is the volume: `NUXT_DB_URL=file:/data/nails.db` and `NUXT_UPLOADS_DIR=/data/uploads` are set in the image. The rest (`NUXT_APP_SECRET`, `NUXT_SITE_URL`, store name, first admin) comes from the server's `.env`.
 - Checked locally (x86): boot runs the migrations and creates the first admin, pages and API answer, a logo upload is re-encoded to WebP by `sharp`, and the reminder task is scheduled in the build. The session cookie is `Secure` in production, so logging in over plain HTTP (e.g. `localhost` against the image) does not keep the session; behind Cloudflare it is HTTPS.
+
+### Compose and deploy script (2026-11-17)
+
+- `deploy/compose.yaml` and `deploy/server-deploy.sh` are copied by hand to `/srv/nails` on the server, next to `.env` (they change rarely; the image changes on every push).
+- **Versions are commits.** CI tags each image with the full commit SHA. `server-deploy.sh <sha>` pulls `ghcr.io/joaoaugustojr/nails-designer:<sha>`, tags it `nails:current` (the compose file runs that tag, with `pull_policy: never`, so `docker compose logs/ps/restart` work without arguments) and runs `docker compose up -d --wait`. It appends the time and SHA to `deploys.log`; **rollback** is the same call with an older SHA from that log.
+- The deploy key's forced command in `authorized_keys` runs only this script, which accepts nothing but a 40-character hex SHA (sent by CI as the SSH command).
+- **Healthcheck** (`node -e fetch(…/api/store)`; the image has no curl): `--wait` returns only when the new container is healthy, so a version that fails to boot (a bad migration, a missing env var) turns the deploy red in GitHub. Expect a few seconds of 502 while the single container is replaced.
+- No published port: the `nails` network is named, and Caddy joins it and proxies to `nails-web:3000` (a network alias, so it never clashes with other projects' `web` services).
+- Logs are capped at 3 × 10 MB. Images of this repository older than 7 days are pruned after each deploy (matched by the `org.opencontainers.image.source` label set in the Dockerfile, so other projects' images on the server are never touched).

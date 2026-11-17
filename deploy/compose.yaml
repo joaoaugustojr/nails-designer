@@ -1,0 +1,39 @@
+# Lives on the server at /srv/nails/compose.yaml, next to .env and server-deploy.sh.
+# No published port: only Caddy reaches the app, through the `nails` network, at nails-web:3000.
+name: nails
+
+services:
+  web:
+    # server-deploy.sh pulls the requested commit and tags it nails:current.
+    image: nails:current
+    pull_policy: never
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - data:/data
+    networks:
+      default:
+        aliases: [nails-web]
+    # The image has no curl; `docker compose up --wait` uses this to know the new version booted.
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/store').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  data:
+
+networks:
+  default:
+    name: nails

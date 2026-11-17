@@ -16,6 +16,8 @@ COPY . .
 RUN pnpm install --offline --frozen-lockfile && pnpm build
 
 FROM node:24-slim
+# Links the GHCR package to the repository; server-deploy.sh prunes old images by it.
+LABEL org.opencontainers.image.source=https://github.com/joaoaugustojr/nails-designer
 WORKDIR /app
 ENV NODE_ENV=production \
     PORT=3000 \
