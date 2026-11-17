@@ -61,6 +61,22 @@ async function logout() {
             <FieldError v-if="errors.address">{{ errors.address }}</FieldError>
           </Field>
 
+          <Field :data-invalid="!!errors.mapLocation || undefined">
+            <FieldLabel for="store-map-location">Localização no mapa</FieldLabel>
+            <FieldDescription>
+              Para o mapa abrir no ponto exato: no Google Maps, toque e segure no estúdio e copie os
+              números que aparecem.
+            </FieldDescription>
+            <Input
+              id="store-map-location"
+              v-model="form.mapLocation"
+              inputmode="decimal"
+              placeholder="-18.147734, -47.912953"
+              :aria-invalid="!!errors.mapLocation || undefined"
+            />
+            <FieldError v-if="errors.mapLocation">{{ errors.mapLocation }}</FieldError>
+          </Field>
+
           <div class="grid grid-cols-2 gap-3">
             <Field :data-invalid="!!errors.whatsapp || undefined">
               <FieldLabel for="store-whatsapp">WhatsApp</FieldLabel>

@@ -1,10 +1,12 @@
 import { DEFAULT_ACCENT, storeSchema } from "#shared/schemas/store";
 
-type FieldName = "storeName" | "address" | "whatsapp" | "instagram" | "about" | "thankYouMessage";
+type FieldName =
+  "storeName" | "address" | "mapLocation" | "whatsapp" | "instagram" | "about" | "thankYouMessage";
 
 const FIELD_ERRORS: Record<FieldName, string> = {
   storeName: "Informe o nome do estúdio (até 80 caracteres).",
   address: "O endereço pode ter até 200 caracteres.",
+  mapLocation: "Cole os números do Google Maps, por exemplo -18.147734, -47.912953.",
   whatsapp: "Informe o WhatsApp com DDD, por exemplo (11) 91234-5678.",
   instagram: "Informe só o usuário, por exemplo @alineprata.",
   about: "O texto pode ter até 500 caracteres.",
@@ -20,6 +22,7 @@ export function useStoreSettings() {
     storeName: "",
     accentColor: DEFAULT_ACCENT.light as string,
     address: "",
+    mapLocation: "",
     whatsapp: "",
     instagram: "",
     about: "",
@@ -38,6 +41,7 @@ export function useStoreSettings() {
         storeName: loaded.storeName,
         accentColor: loaded.accentColor,
         address: loaded.address ?? "",
+        mapLocation: loaded.mapLocation?.replace(",", ", ") ?? "",
         whatsapp: loaded.whatsapp ? formatPhone(loaded.whatsapp) : "",
         instagram: loaded.instagram ? `@${loaded.instagram}` : "",
         about: loaded.about ?? "",

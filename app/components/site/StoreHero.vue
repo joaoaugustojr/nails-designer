@@ -35,7 +35,7 @@ const links = computed(() => {
     address && {
       label: "Endereço",
       icon: MapPinIcon,
-      href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
+      href: mapUrl(props.store)!,
     },
     instagram && {
       label: "Instagram",

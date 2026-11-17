@@ -14,11 +14,7 @@ const booking = computed(() => data.value!.booking);
 const when = computed(
   () => `${formatDayWithWeekday(booking.value.date)} · ${minutesToTime(booking.value.startMinute)}`,
 );
-const directionsUrl = computed(() =>
-  store.value.address
-    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.value.address)}`
-    : null,
-);
+const directions = computed(() => directionsUrl(store.value));
 </script>
 
 <template>
@@ -75,13 +71,8 @@ const directionsUrl = computed(() =>
           Salvar na agenda
         </a>
       </Button>
-      <Button
-        v-if="directionsUrl"
-        as-child
-        variant="outline"
-        class="h-12 rounded-xl bg-card text-sm"
-      >
-        <a :href="directionsUrl" target="_blank" rel="noopener">
+      <Button v-if="directions" as-child variant="outline" class="h-12 rounded-xl bg-card text-sm">
+        <a :href="directions" target="_blank" rel="noopener">
           <NavigationIcon aria-hidden="true" />
           Como chegar
         </a>

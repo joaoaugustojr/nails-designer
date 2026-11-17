@@ -15,10 +15,22 @@ const accentValues = ACCENT_COLORS.map((color) => color.light) as [string, ...st
 
 const optionalText = (max: number) => z.string().trim().max(max);
 
+// As Google Maps shows them: "-18.147734, -47.912953". Stored without spaces.
+const COORDINATES_PATTERN = /^(-?\d{1,2}(?:\.\d+)?),(-?\d{1,3}(?:\.\d+)?)$/;
+
+function isCoordinates(value: string) {
+  const match = COORDINATES_PATTERN.exec(value);
+  return !!match && Math.abs(Number(match[1])) <= 90 && Math.abs(Number(match[2])) <= 180;
+}
+
 export const storeSchema = z.object({
   storeName: z.string().trim().min(1).max(80),
   accentColor: z.enum(accentValues),
   address: optionalText(200),
+  mapLocation: z
+    .string()
+    .transform((value) => value.replace(/\s/g, ""))
+    .refine((value) => value === "" || isCoordinates(value)),
   whatsapp: z
     .string()
     .transform((value) => value.replace(/\D/g, ""))

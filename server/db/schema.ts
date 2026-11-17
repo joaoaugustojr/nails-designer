@@ -47,6 +47,8 @@ export const settings = sqliteTable(
     coverPaths: text({ mode: "json" }).$type<string[]>().notNull().default([]),
     accentColor: text().notNull().default("#a8325a"),
     address: text(),
+    // "lat,lng": map links open this exact point instead of searching the address text.
+    mapLocation: text(),
     whatsapp: text(),
     instagram: text(),
     about: text(),

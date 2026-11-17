@@ -360,3 +360,8 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - Pushes to `main` queue instead of cancelling, so deploys never overlap.
 - Repository secrets: `DEPLOY_SSH_KEY` (private half of the dedicated key), `DEPLOY_HOST` (server IP) and `DEPLOY_KNOWN_HOSTS` (the server's host keys, so the runner refuses an impostor instead of trusting on first use).
 - The GHCR package must be **public** (the repository is public; the server pulls without logging in).
+
+### Exact map location (2026-11-17)
+
+- Searching Google Maps for the address text can land on the wrong place (the same street exists in other cities; new addresses are not always known). Loja has an optional **"Localização no mapa"** field: the owner pastes the coordinates Google Maps shows when she long-presses the studio (`-18.147734, -47.912953`). They are stored as `settings.map_location` (`"lat,lng"`, no spaces; migration `0001_store_map_location`, the first after launch).
+- When set, the address chip on the site and "Como chegar" on the thank-you page open that exact point (`mapUrl` / `directionsUrl` in `shared/utils/maps.ts`); otherwise they search the address text as before. The address text is still what clients read; the coordinates never appear on the page.
