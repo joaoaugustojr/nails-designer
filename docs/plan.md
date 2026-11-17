@@ -38,7 +38,7 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [x] Booking form; saved one booking at a time (in-process queue) with an atomic batch that re-checks the slot with `availableStartMinutes` and upserts the client by phone (latest name wins). Idempotency key per form (unique column): a repeated submit returns the same booking. A database trigger rejects overlapping confirmed bookings as the last guard. Rate limit and honeypot on the public endpoint; the same rate limit on `/api/auth/login` (login throttling).
 - [x] Thank-you page with .ics download and directions.
 - [x] "My booking" page by unguessable token; cancellation honoring the setting.
-- [ ] Brand applied from settings (accent color as CSS variable, logo, cover).
+- [x] Brand applied from settings (accent color as CSS variable, logo, cover).
 
 ## Later (not scheduled)
 

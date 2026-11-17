@@ -3,7 +3,7 @@ const { fetch: refreshSession } = useUserSession();
 const { data: store } = await useStoreInfo();
 
 const title = computed(() => (store.value?.name ? `${store.value.name} · Painel` : "Painel"));
-useHead({ title });
+useHead({ title: "Painel" });
 
 const email = ref("");
 const password = ref("");

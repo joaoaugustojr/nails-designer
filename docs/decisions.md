@@ -215,6 +215,13 @@ Supersedes the "Atomic" point of "No double booking" above: `BEGIN IMMEDIATE` do
 - `ConfirmDialog` takes an optional `dismissLabel`: here it is "Manter", so the client never sees "Cancelar" next to "Cancelar agendamento".
 - Warning colours (`--warning`, `--warning-foreground`, light and dark) for the cancellation note.
 
+### Brand on every page (2026-11-17)
+
+- **Tab title:** a title template adds the store name to every page ("Escolha o horário · Aline Prata", "Agenda · Aline Prata"); the catalog shows the name alone. The login tab reads "Painel · <name>".
+- **Tab icon:** the store's logo, falling back to `/favicon.ico`.
+- **Link preview** (WhatsApp, Instagram, etc.): every page answers with `og:title` / `og:site_name` = store name, `og:description` = "Sobre", `og:image` = the cover (or the logo) as an absolute URL built from the proxy's forwarded host and protocol. Link previews can only be checked for real after deploy. `/api/store` now also returns the cover and "Sobre" (both already public in the catalog).
+- **Mobile browser bar colour** (`theme-color`) follows the page background of the theme in use, read from the CSS after each switch.
+
 ### Migrations before launch
 
 - **Until the first production deploy there is a single migration, `0000_init`, regenerated from the schema** (delete `server/db/migrations` and run `pnpm exec drizzle-kit generate --name init`). There is no real data to migrate, so correction migrations are noise. This supersedes the earlier `0001_user_roles`, `0002_clients` and `0003_session_version`; the notes above about hand-edited migrations describe that history.

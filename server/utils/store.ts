@@ -10,6 +10,8 @@ export async function getPublicStore() {
   return {
     name: store.storeName,
     logoPath: store.logoPath,
+    coverPath: store.coverPath,
+    about: store.about,
     accentColor: store.accentColor,
     timezone: store.timezone,
   };

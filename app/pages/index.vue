@@ -4,7 +4,6 @@ import type { ApiGet } from "~/types/api";
 type CatalogService = ApiGet<"/api/catalog">["services"][number];
 
 const { data: catalog } = await useFetch("/api/catalog");
-useHead({ title: () => catalog.value?.store.name ?? "" });
 
 const services = computed(() => catalog.value?.services ?? []);
 const detailsService = ref<CatalogService | null>(null);
