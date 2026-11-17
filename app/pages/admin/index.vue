@@ -4,7 +4,8 @@ import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "@lucide/vue";
 definePageMeta({ layout: "panel" });
 useHead({ title: "Agenda" });
 
-const { agenda, title, summary, goToDay, cancelBooking, refresh } = useAgenda();
+const { agenda, title, summary, isLastOpenDate, goToDay, goToDate, cancelBooking, refresh } =
+  useAgenda();
 const isBlocking = ref(false);
 
 async function onBlocked() {
@@ -25,11 +26,22 @@ async function onBlocked() {
           <Button variant="outline" size="icon-lg" aria-label="Dia anterior" @click="goToDay(-1)">
             <ChevronLeftIcon aria-hidden="true" />
           </Button>
-          <div class="flex flex-1 flex-col text-center">
-            <span class="text-[15px] font-bold">{{ title }}</span>
-            <span class="text-xs text-muted-foreground">{{ summary }}</span>
-          </div>
-          <Button variant="outline" size="icon-lg" aria-label="Próximo dia" @click="goToDay(1)">
+          <PanelDayPicker
+            v-if="agenda"
+            :date="agenda.date"
+            :title="title"
+            :summary="summary"
+            :last-open-date="agenda.lastOpenDate"
+            :open-weekdays="agenda.openWeekdays"
+            @select="goToDate"
+          />
+          <Button
+            variant="outline"
+            size="icon-lg"
+            aria-label="Próximo dia"
+            :disabled="isLastOpenDate"
+            @click="goToDay(1)"
+          >
             <ChevronRightIcon aria-hidden="true" />
           </Button>
         </div>

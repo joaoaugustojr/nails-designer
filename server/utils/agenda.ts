@@ -11,14 +11,15 @@ const toDayMinutes = (instant: Date, day: string, timezone: string) => {
 };
 
 export async function getAgenda(requestedDate: string | undefined) {
-  const timezone = await storeTimezone();
-  const date = requestedDate ?? todayIn(timezone);
+  const { timezone, maxDaysAhead } = await readSettings();
+  const today = todayIn(timezone);
+  const date = requestedDate ?? today;
   const dayStart = new Date(zonedToUtc(date, 0, timezone));
   const dayEnd = new Date(zonedToUtc(addDays(date, 1), 0, timezone));
   const weekday = weekdayOf(date);
   const db = await useDb();
 
-  const [ranges, dayBookings, blocks] = await Promise.all([
+  const [ranges, dayBookings, blocks, openDays] = await Promise.all([
     db.query.workingHours.findMany({
       columns: { startMinute: true, endMinute: true },
       where: eq(workingHours.weekday, weekday),
@@ -42,6 +43,7 @@ export async function getAgenda(requestedDate: string | undefined) {
       columns: { id: true, startsAt: true, endsAt: true, reason: true },
       where: and(lt(timeOff.startsAt, dayEnd), gt(timeOff.endsAt, dayStart)),
     }),
+    db.selectDistinct({ weekday: workingHours.weekday }).from(workingHours),
   ]);
 
   const inDay = <T extends { startsAt: Date; endsAt: Date }>({ startsAt, endsAt, ...rest }: T) => ({
@@ -52,7 +54,10 @@ export async function getAgenda(requestedDate: string | undefined) {
 
   return {
     date,
-    today: todayIn(timezone),
+    today,
+    // The calendar offers only days clients can book: open weekdays up to the last bookable date.
+    lastOpenDate: addDays(today, maxDaysAhead),
+    openWeekdays: openDays.map((day) => day.weekday),
     workingRanges: ranges.sort((first, second) => first.startMinute - second.startMinute),
     bookingCount: dayBookings.length,
     items: buildDayTimeline(ranges, dayBookings.map(inDay), blocks.map(inDay)),

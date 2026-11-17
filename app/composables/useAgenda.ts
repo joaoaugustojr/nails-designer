@@ -23,14 +23,31 @@ export function useAgenda() {
     return `${count} · ${opens} às ${closes}`;
   });
 
+  const isLastOpenDate = computed(() =>
+    agenda.value ? agenda.value.date >= agenda.value.lastOpenDate : false,
+  );
+
   function goToDay(offset: number) {
     if (!agenda.value) return;
     return navigateTo({ query: { date: addDays(agenda.value.date, offset) } });
+  }
+
+  function goToDate(date: string) {
+    return navigateTo({ query: { date } });
   }
 
   async function cancelBooking(id: number, clientName: string) {
     if (await confirmCancel(id, clientName)) await refresh();
   }
 
-  return { agenda, title, summary, goToDay, cancelBooking, refresh };
+  return {
+    agenda,
+    title,
+    summary,
+    isLastOpenDate,
+    goToDay,
+    goToDate,
+    cancelBooking,
+    refresh,
+  };
 }
