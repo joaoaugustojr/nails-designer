@@ -285,4 +285,15 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 
 ### Reminder one day before (2026-11-17)
 
-- Reminders are 1 day before, day of, 1 h before and 30 min before, all under the single "Quero receber lembretes" opt-in (the client does not pick each one). This extends the list in "WhatsApp Cloud API" above; the sent-at column for the new reminder is added with the reminder task (phase 5).
+- Reminders are 1 day before, day of, 1 h before and 30 min before, all under the single "Quero receber lembretes" opt-in (the client does not pick each one). This extends the list in "WhatsApp Cloud API" above; the sent-at column for the new reminder is added with the reminder task (phase 4 since 2026-11-17).
+
+### Notifications before deploy (2026-11-17)
+
+- Phase order swapped by the owner: notifications (now phase 4) ship before deploy (now phase 5), so the site never goes live promising reminders and WhatsApp confirmations it does not send.
+
+### Image processing on upload (2026-11-17)
+
+- Settles the pending decision in "Services and uploads": every upload (service photos, logo, covers) is re-encoded with `sharp` before it is written (`prepareImage` in `server/utils/uploads.ts`, `encodeWebp` in `server/utils/image-encode.ts`). Re-encoding drops all metadata, including the phone's GPS position; the EXIF orientation is applied first so photos stay upright. Images are fitted within 1600 × 1600 px (never enlarged) and stored as WebP at quality 80, so a 4–8 MB phone photo becomes a few hundred KB. Transparency in PNG logos is kept.
+- The accepted inputs are unchanged (JPEG, PNG, WebP by signature, up to 8 MB). A file with a valid signature that sharp cannot decode is rejected with 415. A request's images are all re-encoded before any is written.
+- Files uploaded before this change keep their original format and are still served; there were no real customer photos yet.
+- `sharp` 0.35 runs on the dev machine (glibc 2.31); its linux-arm64 binary is checked with the Dockerfile.

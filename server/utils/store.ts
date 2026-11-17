@@ -58,10 +58,10 @@ export async function updateStoreSettings(input: StoreInput) {
 }
 
 export async function replaceStoreLogo(data: Uint8Array) {
-  const extension = assertImage(data);
+  const image = await prepareImage(data);
   const previous = (await readSettings()).logoPath;
 
-  const path = await saveImage(data, extension);
+  const path = await saveImage(image);
   await writeSettings({ logoPath: path });
 
   if (previous) await deleteUpload(previous);
@@ -69,13 +69,13 @@ export async function replaceStoreLogo(data: Uint8Array) {
 }
 
 export async function addStoreCover(data: Uint8Array) {
-  const extension = assertImage(data);
+  const image = await prepareImage(data);
   const { coverPaths } = await readSettings();
   if (coverPaths.length >= STORE_MAX_COVERS) {
     throw createError({ statusCode: 400, statusMessage: "Too many covers" });
   }
 
-  const path = await saveImage(data, extension);
+  const path = await saveImage(image);
   await writeSettings({ coverPaths: [...coverPaths, path] });
   return { path };
 }

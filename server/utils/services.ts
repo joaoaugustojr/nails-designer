@@ -87,9 +87,9 @@ export async function addServicePhotos(id: number, images: Uint8Array[]) {
     throw createError({ statusCode: 400, statusMessage: "Too many photos" });
   }
 
-  // Validate every image before writing any, so a bad file leaves nothing behind.
-  const extensions = images.map(assertImage);
-  const paths = await Promise.all(images.map((data, index) => saveImage(data, extensions[index]!)));
+  // Prepare every image before writing any, so a bad file leaves nothing behind.
+  const prepared = await Promise.all(images.map(prepareImage));
+  const paths = await Promise.all(prepared.map(saveImage));
 
   const db = await useDb();
   const [last] = await db

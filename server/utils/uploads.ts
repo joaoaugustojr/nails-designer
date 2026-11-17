@@ -3,6 +3,7 @@ import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import type { H3Event } from "h3";
 
+import { encodeWebp } from "./image-encode";
 import { detectImageType } from "./image-type";
 
 export const UPLOAD_NAME_PATTERN = new RegExp(
@@ -13,15 +14,20 @@ export function uploadsDir() {
   return useRuntimeConfig().uploadsDir;
 }
 
-export function assertImage(data: Uint8Array): ImageExtension {
+// Validates and re-encodes without writing, so callers can prepare every image of a
+// request before saving any.
+export async function prepareImage(data: Uint8Array) {
   if (data.byteLength > MAX_IMAGE_BYTES) {
     throw createError({ statusCode: 413, statusMessage: "Image too large" });
   }
-  const extension = detectImageType(data);
-  if (!extension) {
+  if (!detectImageType(data)) {
     throw createError({ statusCode: 415, statusMessage: "Unsupported image type" });
   }
-  return extension;
+  try {
+    return await encodeWebp(data);
+  } catch {
+    throw createError({ statusCode: 415, statusMessage: "Unreadable image" });
+  }
 }
 
 export async function readImagePart(event: H3Event) {
@@ -31,10 +37,10 @@ export async function readImagePart(event: H3Event) {
   return image.data;
 }
 
-export async function saveImage(data: Uint8Array, extension: ImageExtension) {
-  const name = `${randomUUID()}.${extension}`;
+export async function saveImage(webp: Uint8Array) {
+  const name = `${randomUUID()}.webp`;
   await mkdir(uploadsDir(), { recursive: true });
-  await writeFile(join(uploadsDir(), name), data);
+  await writeFile(join(uploadsDir(), name), webp);
   return `/uploads/${name}`;
 }
 

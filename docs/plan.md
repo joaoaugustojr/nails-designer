@@ -44,22 +44,18 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 
 - Client notes by the owner; ratings (owner rates the client, client rates the service); client detail page with full history.
 
-## Pending decisions
-
-- [ ] Image processing on upload (strip EXIF/GPS, resize, WebP) — see decisions.md, "Services and uploads". Decide before going live.
-
-## Phase 4 — Deploy
-
-- [ ] Dockerfile (Node 24, multi-stage, arm64). Ship `server/db/migrations` next to `.output` (same relative path), set `NUXT_APP_SECRET`, `NUXT_DB_URL` on the volume.
-- [ ] `deploy/compose.yaml` (project `nails`, one service, one volume) and `deploy/server-deploy.sh`.
-- [ ] **(you)** On the box: `/srv/nails`, `.env`, dedicated deploy key restricted in `authorized_keys`, Caddy block, Cloudflare DNS record.
-- [ ] GitHub Actions: test → build arm64 → push GHCR → deploy on push to `main`. **(you)** add the repository secrets.
-- [ ] Nightly backup to R2 + healthchecks ping. **(you)** install the cron entry.
-
-## Phase 5 — Notifications
+## Phase 4 — Notifications
 
 - [ ] Thank-you page: add back "A confirmação foi enviada para o seu WhatsApp." once confirmations are sent.
 - [ ] Notification module with one entry point and channels: `log` (default), `whatsapp`.
 - [ ] Reminder task (Nitro scheduled task, every 5 min): 1 day before, day of, 1 h and 30 min before, each sent once (add `reminder_day_before_sent_at` next to the other sent-at columns).
 - [ ] **(you)** Meta Business account, app, number, utility templates approved.
 - [ ] WhatsApp Cloud API channel: confirmation + reminders.
+
+## Phase 5 — Deploy
+
+- [ ] Dockerfile (Node 24, multi-stage, arm64; check that `sharp` loads its linux-arm64 binary in the image). Ship `server/db/migrations` next to `.output` (same relative path), set `NUXT_APP_SECRET`, `NUXT_DB_URL` on the volume.
+- [ ] `deploy/compose.yaml` (project `nails`, one service, one volume) and `deploy/server-deploy.sh`.
+- [ ] **(you)** On the box: `/srv/nails`, `.env`, dedicated deploy key restricted in `authorized_keys`, Caddy block, Cloudflare DNS record.
+- [ ] GitHub Actions: test → build arm64 → push GHCR → deploy on push to `main`. **(you)** add the repository secrets.
+- [ ] Nightly backup to R2 + healthchecks ping. **(you)** install the cron entry.
