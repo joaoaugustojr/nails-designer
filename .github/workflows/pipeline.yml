@@ -1,4 +1,4 @@
-# push to main / pull request → checks. The build and deploy jobs land in phase 4.
+# Pull request → checks. Push to main → checks, then an arm64 image on GHCR, then deploy.
 name: Pipeline
 
 on:
@@ -8,7 +8,14 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
+  # Pushes to main queue up instead of cancelling, so two deploys never overlap.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/joaoaugustojr/nails-designer
 
 jobs:
   test:
@@ -28,3 +35,34 @@ jobs:
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm test
+
+  build:
+    needs: test
+    if: github.event_name == 'push'
+    # Native arm64: sharp and libsql ship a binary per platform, picked when the image is built.
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - run: docker build -t "$IMAGE:$GITHUB_SHA" .
+      - run: docker push "$IMAGE:$GITHUB_SHA"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # The key may only run /srv/nails/server-deploy.sh (forced command in authorized_keys);
+      # the SSH command is the commit to deploy.
+      - run: |
+          install -d -m 700 ~/.ssh
+          echo "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes "deploy@$DEPLOY_HOST" "$GITHUB_SHA"
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}

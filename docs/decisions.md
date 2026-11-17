@@ -36,7 +36,7 @@ Running record of decisions that are not derivable from the code. Newest entry w
 ### Infrastructure
 
 - **An existing ARM64 server** that already runs Docker Compose and Caddy. One compose project (`nails`) with a single `web` service and one volume (SQLite + uploads). Caddy (its own project) joins the `nails` network.
-- **Domain:** a temporary subdomain of a domain we already own, until the customer has her own. Cloudflare proxied; it must be a first-level subdomain so the universal certificate covers it. The actual hostname lives in the server config, not in this repo.
+- **Domain:** a temporary subdomain of a domain we already own, until the customer has her own. Cloudflare proxied; it must be a first-level subdomain so the universal certificate covers it. The actual hostname lives in the server config, not in this repo. _Superseded on 2026-11-17: see "Own domain" below._
 - **No staging.** Personal use; production only.
 - **Auto-deploy on push to `main`:** GitHub Actions → tests → arm64 image built on `ubuntu-24.04-arm` → GHCR → SSH deploy.
 - **Public GitHub repository.** Consequences: no secret ever committed (`.env` lives only on the server, CI secrets in GitHub Secrets); deploy runs only on push to `main`; the deploy SSH key is dedicated to this project and restricted in `authorized_keys` to the deploy script.
@@ -343,6 +343,19 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - `deploy/compose.yaml` and `deploy/server-deploy.sh` are copied by hand to `/srv/nails` on the server, next to `.env` (they change rarely; the image changes on every push).
 - **Versions are commits.** CI tags each image with the full commit SHA. `server-deploy.sh <sha>` pulls `ghcr.io/joaoaugustojr/nails-designer:<sha>`, tags it `nails:current` (the compose file runs that tag, with `pull_policy: never`, so `docker compose logs/ps/restart` work without arguments) and runs `docker compose up -d --wait`. It appends the time and SHA to `deploys.log`; **rollback** is the same call with an older SHA from that log.
 - The deploy key's forced command in `authorized_keys` runs only this script, which accepts nothing but a 40-character hex SHA (sent by CI as the SSH command).
-- **Healthcheck** (`node -e fetch(…/api/store)`; the image has no curl): `--wait` returns only when the new container is healthy, so a version that fails to boot (a bad migration, a missing env var) turns the deploy red in GitHub. Expect a few seconds of 502 while the single container is replaced.
+- **Healthcheck** (`node -e fetch(…/api/store)`; the image has no curl): `--wait` returns only when the new container is healthy, so a version that fails to boot (a bad migration, a missing env var) turns the deploy red in GitHub. While the single container is replaced, Caddy holds requests for up to 10 s (`lb_try_duration`) instead of answering 502.
 - No published port: the `nails` network is named, and Caddy joins it and proxies to `nails-web:3000` (a network alias, so it never clashes with other projects' `web` services).
 - Logs are capped at 3 × 10 MB. Images of this repository older than 7 days are pruned after each deploy (matched by the `org.opencontainers.image.source` label set in the Dockerfile, so other projects' images on the server are never touched).
+
+### Own domain (2026-11-17)
+
+- The site lives at **alinepratanails.site**, the store's own domain, instead of a temporary subdomain (owner's change of mind). The domain is added to Cloudflare as its own zone (free plan, nameservers changed at the registrar), both records proxied: `alinepratanails.site` points to the server and `www` redirects to it. The universal certificate covers both.
+- `NUXT_SITE_URL=https://alinepratanails.site` on the server.
+
+### CI build and deploy (2026-11-17)
+
+- `.github/workflows/pipeline.yml`: pull requests run the checks only. A push to `main` runs the checks, then **build** on `ubuntu-24.04-arm` (`docker build` + `docker push` of `ghcr.io/joaoaugustojr/nails-designer:<sha>`, logged in with the workflow's `GITHUB_TOKEN`, `packages: write` on that job only), then **deploy** (`ssh deploy@$DEPLOY_HOST <sha>`, which the forced command turns into `server-deploy.sh <sha>`).
+- Plain `docker build`, no buildx layer cache: GitHub runners are free for a public repository and a full build takes a few minutes.
+- Pushes to `main` queue instead of cancelling, so deploys never overlap.
+- Repository secrets: `DEPLOY_SSH_KEY` (private half of the dedicated key), `DEPLOY_HOST` (server IP) and `DEPLOY_KNOWN_HOSTS` (the server's host keys, so the runner refuses an impostor instead of trusting on first use).
+- The GHCR package must be **public** (the repository is public; the server pulls without logging in).
