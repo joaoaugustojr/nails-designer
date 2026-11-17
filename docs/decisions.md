@@ -282,3 +282,7 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 ### No client email (2026-11-17)
 
 - The booking form asks only for name and mobile (WhatsApp); the optional email field and `bookings.client_email` are gone (migration `0003_drop_client_email`). Nothing used it, every message goes to WhatsApp, and collecting unused personal data is a risk with no benefit (LGPD data minimisation). This supersedes the email mentions in "Client flow", "Email is optional and secondary" and the booking form notes above, and drops the email notification channel from the plan.
+
+### Reminder one day before (2026-11-17)
+
+- Reminders are 1 day before, day of, 1 h before and 30 min before, all under the single "Quero receber lembretes" opt-in (the client does not pick each one). This extends the list in "WhatsApp Cloud API" above; the sent-at column for the new reminder is added with the reminder task (phase 5).

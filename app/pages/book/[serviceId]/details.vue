@@ -88,7 +88,7 @@ const when = computed(() => {
         <span class="flex flex-col gap-1">
           <span class="text-[15px] font-bold">Quero receber lembretes</span>
           <span class="text-[13px] leading-[1.4] text-muted-foreground">
-            No dia do atendimento, 1 hora antes e 30 minutos antes.
+            1 dia antes, no dia do atendimento, 1 hora antes e 30 minutos antes.
           </span>
         </span>
       </SurfaceCard>
