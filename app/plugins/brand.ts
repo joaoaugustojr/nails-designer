@@ -26,7 +26,9 @@ export default defineNuxtPlugin(async () => {
   const { data: store } = await useStoreInfo();
   const { origin } = useRequestURL({ xForwardedHost: true, xForwardedProto: true });
   const name = computed(() => store.value?.name ?? "");
-  const absolute = (path: string | null | undefined) => (path ? `${origin}${path}` : undefined);
+  // "/uploads/<name>" → "/preview/<name>.jpg", the JPEG copy link previews can show.
+  const previewImage = (path: string | null | undefined) =>
+    path ? `${origin}${path.replace(/^\/uploads\//, "/preview/")}.jpg` : undefined;
   const themeColor = useThemeColor();
 
   useHead({
@@ -51,7 +53,7 @@ export default defineNuxtPlugin(async () => {
     ogTitle: name,
     description: () => store.value?.about ?? undefined,
     ogDescription: () => store.value?.about ?? undefined,
-    ogImage: () => absolute(store.value?.coverPaths[0] ?? store.value?.logoPath),
+    ogImage: () => previewImage(store.value?.coverPaths[0] ?? store.value?.logoPath),
     twitterCard: () => (store.value?.coverPaths.length ? "summary_large_image" : "summary"),
   });
 });

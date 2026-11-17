@@ -12,3 +12,14 @@ export function encodeWebp(data: Uint8Array) {
     .webp({ quality: WEBP_QUALITY })
     .toBuffer();
 }
+
+const PREVIEW_MAX_SIDE = 1200;
+const JPEG_QUALITY = 80;
+
+// Link previews (WhatsApp, Instagram) skip WebP images, so og:image gets a JPEG copy.
+export function encodePreviewJpeg(input: string | Uint8Array) {
+  return sharp(input)
+    .resize(PREVIEW_MAX_SIDE, PREVIEW_MAX_SIDE, { fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality: JPEG_QUALITY })
+    .toBuffer();
+}

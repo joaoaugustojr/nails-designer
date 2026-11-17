@@ -365,3 +365,13 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 
 - Searching Google Maps for the address text can land on the wrong place (the same street exists in other cities; new addresses are not always known). Loja has an optional **"Localização no mapa"** field: the owner pastes the coordinates Google Maps shows when she long-presses the studio (`-18.147734, -47.912953`). They are stored as `settings.map_location` (`"lat,lng"`, no spaces; migration `0001_store_map_location`, the first after launch).
 - When set, the address chip on the site and "Como chegar" on the thank-you page open that exact point (`mapUrl` / `directionsUrl` in `shared/utils/maps.ts`); otherwise they search the address text as before. The address text is still what clients read; the coordinates never appear on the page.
+
+### DNS only, no Cloudflare proxy (2026-11-17)
+
+- Measured from Brazil: the app answers in ~10 ms inside the server, ~0.21 s per request going straight to the server (stable; it is the Brazil–Germany round trip), but 0.3–2.8 s through Cloudflare's free proxy, with jumps of ~1 s and ~3 s that match lost packets on new connections between Cloudflare and the server. The other site on the same server shows the same pattern.
+- So both `alinepratanails.site` records are **DNS only** (grey cloud). Caddy serves its own Let's Encrypt certificate and renews it; the rate limit still sees the client's IP (Caddy only trusts `CF-Connecting-IP` from Cloudflare's ranges). Lost: Cloudflare's edge cache (assets are `immutable`, so only a first visit pays) and its DDoS shield; the server IP was already public through another DNS-only host.
+- **HTTP/3 is off in Caddy** (`protocols h1 h2`, in the Caddyfile kept with the server's other projects): Caddy advertised `h3` while only TCP 443 is published, so browsers going direct failed with `ERR_QUIC_PROTOCOL_ERROR`. Proxied hosts are unaffected (Cloudflare talks HTTP/3 to browsers).
+
+### JPEG link-preview image (2026-11-17)
+
+- WhatsApp showed the link preview without a picture: `og:image` pointed at the WebP cover, and link-preview crawlers skip WebP. `og:image` now points at `/preview/<upload name>.jpg`, which converts that upload to a JPEG of at most 1200 px with `sharp` on each request (crawlers ask rarely; `immutable` cache, since upload names are never reused). The upload name is checked with the same pattern as `/uploads`, so the route cannot read any other file.

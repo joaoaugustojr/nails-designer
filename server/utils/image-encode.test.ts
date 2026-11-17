@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 
-import { encodeWebp } from "./image-encode";
+import { encodePreviewJpeg, encodeWebp } from "./image-encode";
 
 const phonePhoto = (width: number, height: number) =>
   sharp({ create: { width, height, channels: 3, background: "#d9a" } })
@@ -23,5 +23,15 @@ describe("encodeWebp", () => {
     const output = await sharp(await encodeWebp(await phonePhoto(400, 300))).metadata();
 
     expect([output.width, output.height]).toEqual([300, 400]);
+  });
+});
+
+describe("encodePreviewJpeg", () => {
+  it("turns an upload into a JPEG of at most 1200 px for link previews", async () => {
+    const webp = await encodeWebp(await phonePhoto(4000, 3000));
+    const output = await sharp(await encodePreviewJpeg(webp)).metadata();
+
+    expect(output.format).toBe("jpeg");
+    expect([output.width, output.height]).toEqual([900, 1200]);
   });
 });
