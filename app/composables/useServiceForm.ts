@@ -84,7 +84,10 @@ export function useServiceForm(serviceId: string) {
   async function uploadPendingPhotos(id: number) {
     if (!pendingPhotos.value.length) return;
     const body = new FormData();
-    pendingPhotos.value.forEach((file) => body.append("photos", file));
+    const photos = await Promise.all(pendingPhotos.value.map(shrinkImage));
+    photos.forEach((photo, index) =>
+      body.append("photos", photo, pendingPhotos.value[index]!.name),
+    );
     await $fetch(`/api/admin/services/${id}/photos`, { method: "POST", body });
   }
 

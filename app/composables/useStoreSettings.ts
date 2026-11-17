@@ -31,6 +31,7 @@ export function useStoreSettings() {
   const errors = ref<Partial<Record<FieldName, string>>>({});
   const error = ref("");
   const isSaving = ref(false);
+  const uploading = ref<"logo" | "cover" | null>(null);
   const { confirmAction } = useConfirmDialog();
 
   watch(
@@ -76,20 +77,24 @@ export function useStoreSettings() {
     }
   }
 
-  async function uploadImage(url: "/api/admin/store/logo" | "/api/admin/store/covers", file: File) {
-    const body = new FormData();
-    body.append("image", file);
+  async function uploadImage(target: "logo" | "cover", file: File) {
+    const url = target === "logo" ? "/api/admin/store/logo" : "/api/admin/store/covers";
     error.value = "";
+    uploading.value = target;
     try {
+      const body = new FormData();
+      body.append("image", await shrinkImage(file), file.name);
       await $fetch(url, { method: "POST", body });
       await reload();
     } catch {
       error.value = `Use uma imagem JPG, PNG ou WebP de até ${MAX_IMAGE_MEGABYTES} MB.`;
+    } finally {
+      uploading.value = null;
     }
   }
 
-  const uploadLogo = (file: File) => uploadImage("/api/admin/store/logo", file);
-  const addCover = (file: File) => uploadImage("/api/admin/store/covers", file);
+  const uploadLogo = (file: File) => uploadImage("logo", file);
+  const addCover = (file: File) => uploadImage("cover", file);
 
   async function removeCover(index: number) {
     const isRemoved = await confirmAction({
@@ -105,5 +110,17 @@ export function useStoreSettings() {
     if (isRemoved) await reload();
   }
 
-  return { canEdit, store, form, errors, error, isSaving, save, uploadLogo, addCover, removeCover };
+  return {
+    canEdit,
+    store,
+    form,
+    errors,
+    error,
+    isSaving,
+    uploading,
+    save,
+    uploadLogo,
+    addCover,
+    removeCover,
+  };
 }

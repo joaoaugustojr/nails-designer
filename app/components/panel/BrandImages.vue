@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PlusIcon, XIcon } from "@lucide/vue";
+import { LoaderCircleIcon, PlusIcon, XIcon } from "@lucide/vue";
 
 import { STORE_MAX_COVERS } from "#shared/schemas/store";
 
@@ -8,6 +8,7 @@ const props = defineProps<{
   logoPath: string | null;
   coverPaths: string[];
   canEdit: boolean;
+  uploading: "logo" | "cover" | null;
 }>();
 const emit = defineEmits<{
   uploadLogo: [file: File];
@@ -16,6 +17,7 @@ const emit = defineEmits<{
 }>();
 
 const canAddCover = computed(() => props.canEdit && props.coverPaths.length < STORE_MAX_COVERS);
+const isUploading = computed(() => props.uploading !== null);
 
 function takeFile(event: Event) {
   const input = event.target as HTMLInputElement;
@@ -39,18 +41,31 @@ function pickCover(event: Event) {
   <div class="flex flex-col gap-4">
     <label
       class="flex items-center gap-3 self-start"
-      :class="canEdit ? 'cursor-pointer' : 'pointer-events-none'"
+      :class="canEdit && !isUploading ? 'cursor-pointer' : 'pointer-events-none'"
     >
       <span
-        class="flex size-[84px] items-center justify-center rounded-full border-[1.5px] border-dashed border-input"
+        class="relative flex size-[84px] items-center justify-center rounded-full border-[1.5px] border-dashed border-input"
       >
         <StoreMark :name="name" :logo-path="logoPath" size="md" />
+        <span
+          v-if="uploading === 'logo'"
+          class="absolute inset-0 flex items-center justify-center rounded-full bg-card/80"
+        >
+          <LoaderCircleIcon class="size-6 animate-spin text-primary" aria-hidden="true" />
+        </span>
       </span>
-      <span v-if="canEdit" class="text-xs font-bold text-primary">Trocar logo</span>
+      <span
+        v-if="canEdit"
+        class="text-xs font-bold text-primary"
+        :role="uploading === 'logo' ? 'status' : undefined"
+      >
+        {{ uploading === "logo" ? "Enviando…" : "Trocar logo" }}
+      </span>
       <input
         v-if="canEdit"
         type="file"
         :accept="ACCEPTED_IMAGE_TYPES"
+        :disabled="isUploading"
         class="sr-only"
         @change="pickLogo"
       />
@@ -81,11 +96,24 @@ function pickCover(event: Event) {
         </div>
         <label
           v-if="canAddCover"
-          class="flex aspect-[2/1] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-[1.5px] border-dashed border-input text-xs font-semibold text-muted-foreground"
+          class="flex aspect-[2/1] flex-col items-center justify-center gap-1 rounded-xl border-[1.5px] border-dashed border-input text-xs font-semibold text-muted-foreground"
+          :class="isUploading ? 'pointer-events-none' : 'cursor-pointer'"
         >
-          <PlusIcon :size="20" aria-hidden="true" />
-          Adicionar capa
-          <input type="file" :accept="ACCEPTED_IMAGE_TYPES" class="sr-only" @change="pickCover" />
+          <template v-if="uploading === 'cover'">
+            <LoaderCircleIcon class="size-5 animate-spin text-primary" aria-hidden="true" />
+            <span role="status">Enviando…</span>
+          </template>
+          <template v-else>
+            <PlusIcon :size="20" aria-hidden="true" />
+            Adicionar capa
+          </template>
+          <input
+            type="file"
+            :accept="ACCEPTED_IMAGE_TYPES"
+            :disabled="isUploading"
+            class="sr-only"
+            @change="pickCover"
+          />
         </label>
       </div>
       <p class="text-xs text-muted-foreground">

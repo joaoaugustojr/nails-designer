@@ -44,6 +44,6 @@ export const storeSchema = z.object({
   thankYouMessage: optionalText(300),
 });
 
-export const STORE_MAX_COVERS = 4;
+export const STORE_MAX_COVERS = 10;
 
 export type StoreInput = z.infer<typeof storeSchema>;

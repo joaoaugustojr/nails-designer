@@ -375,3 +375,9 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 ### JPEG link-preview image (2026-11-17)
 
 - WhatsApp showed the link preview without a picture: `og:image` pointed at the WebP cover, and link-preview crawlers skip WebP. `og:image` now points at `/preview/<upload name>.jpg`, which converts that upload to a JPEG of at most 1200 px with `sharp` on each request (crawlers ask rarely; `immutable` cache, since upload names are never reused). The upload name is checked with the same pattern as `/uploads`, so the route cannot read any other file.
+
+### Faster uploads, upload indicator, 10 covers (2026-11-17)
+
+- **Photos are shrunk in the browser before upload** (`shrinkImage` in `app/utils/upload.ts`): fitted within 1600 px (the server's own limit) and sent as JPEG at 0.85, or PNG for PNGs so a logo keeps its transparency. A 4–8 MB phone photo goes up as a few hundred KB, which matters with the server in Germany. Files already within 1600 px and under 1 MB go as they are; on any failure the original goes. The server still validates and re-encodes everything (metadata stripping does not rely on the browser).
+- **Logo and cover uploads show progress:** a spinner over the logo or on the "Adicionar capa" tile with "Enviando…" (`role="status"`), and both pickers are disabled until the upload ends. Service photos already showed "Salvando…" on the save button.
+- **Up to 10 cover photos** instead of 4 (owner's request; `STORE_MAX_COVERS`).

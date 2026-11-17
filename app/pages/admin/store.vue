@@ -3,8 +3,19 @@ definePageMeta({ layout: "panel" });
 useHead({ title: "Loja" });
 
 const { clear } = useUserSession();
-const { canEdit, store, form, errors, error, isSaving, save, uploadLogo, addCover, removeCover } =
-  useStoreSettings();
+const {
+  canEdit,
+  store,
+  form,
+  errors,
+  error,
+  isSaving,
+  uploading,
+  save,
+  uploadLogo,
+  addCover,
+  removeCover,
+} = useStoreSettings();
 
 async function logout() {
   await clear();
@@ -29,6 +40,7 @@ async function logout() {
         :logo-path="store?.logoPath ?? null"
         :cover-paths="store?.coverPaths ?? []"
         :can-edit="canEdit"
+        :uploading="uploading"
         @upload-logo="uploadLogo"
         @add-cover="addCover"
         @remove-cover="removeCover"
