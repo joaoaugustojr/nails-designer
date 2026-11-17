@@ -1,11 +1,33 @@
 <script setup lang="ts">
 import { MapPinIcon, MessageCircleIcon } from "@lucide/vue";
+import { useIntervalFn } from "@vueuse/core";
 
 import { SiteInstagramIcon } from "#components";
 
 import type { ApiGet } from "~/types/api";
 
 const props = defineProps<{ store: ApiGet<"/api/catalog">["store"] }>();
+
+const COVER_INTERVAL_MS = 4000;
+
+const coverIndex = ref(0);
+const { pause, resume } = useIntervalFn(showNextCover, COVER_INTERVAL_MS, { immediate: false });
+
+onMounted(() => {
+  watch(
+    () => props.store.coverPaths.length,
+    (count) => {
+      coverIndex.value = 0;
+      if (count > 1) resume();
+      else pause();
+    },
+    { immediate: true },
+  );
+});
+
+function showNextCover() {
+  coverIndex.value = (coverIndex.value + 1) % props.store.coverPaths.length;
+}
 
 const links = computed(() => {
   const { address, instagram, whatsapp } = props.store;
@@ -27,8 +49,15 @@ const links = computed(() => {
 
 <template>
   <header>
-    <div class="relative h-[140px] bg-secondary sm:h-[200px]">
-      <img v-if="store.coverPath" :src="store.coverPath" alt="" class="size-full object-cover" />
+    <div class="relative h-[220px] overflow-hidden bg-secondary sm:h-[320px]">
+      <img
+        v-for="(path, index) in store.coverPaths"
+        :key="path"
+        :src="path"
+        alt=""
+        class="absolute inset-0 size-full object-cover object-center transition-opacity duration-1000 motion-reduce:transition-none"
+        :class="index === coverIndex ? 'opacity-100' : 'opacity-0'"
+      />
       <div class="absolute top-3 right-3 rounded-full bg-background/80 backdrop-blur-sm">
         <ThemeSwitch />
       </div>

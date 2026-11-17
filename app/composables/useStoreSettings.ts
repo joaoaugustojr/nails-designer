@@ -1,4 +1,4 @@
-import { DEFAULT_ACCENT, type StoreImageKind, storeSchema } from "#shared/schemas/store";
+import { DEFAULT_ACCENT, storeSchema } from "#shared/schemas/store";
 
 type FieldName = "storeName" | "address" | "whatsapp" | "instagram" | "about" | "thankYouMessage";
 
@@ -28,6 +28,7 @@ export function useStoreSettings() {
   const errors = ref<Partial<Record<FieldName, string>>>({});
   const error = ref("");
   const isSaving = ref(false);
+  const { confirmAction } = useConfirmDialog();
 
   watch(
     store,
@@ -71,17 +72,34 @@ export function useStoreSettings() {
     }
   }
 
-  async function uploadImage(kind: StoreImageKind, file: File) {
+  async function uploadImage(url: "/api/admin/store/logo" | "/api/admin/store/covers", file: File) {
     const body = new FormData();
     body.append("image", file);
     error.value = "";
     try {
-      await $fetch(`/api/admin/store/${kind}`, { method: "POST", body });
+      await $fetch(url, { method: "POST", body });
       await reload();
     } catch {
       error.value = `Use uma imagem JPG, PNG ou WebP de até ${MAX_IMAGE_MEGABYTES} MB.`;
     }
   }
 
-  return { canEdit, store, form, errors, error, isSaving, save, uploadImage };
+  const uploadLogo = (file: File) => uploadImage("/api/admin/store/logo", file);
+  const addCover = (file: File) => uploadImage("/api/admin/store/covers", file);
+
+  async function removeCover(index: number) {
+    const isRemoved = await confirmAction({
+      title: "Remover esta capa?",
+      description: "Ela deixa de aparecer no topo do site.",
+      confirmLabel: "Remover",
+      pendingLabel: "Removendo…",
+      isDestructive: true,
+      action: async () => {
+        await $fetch(`/api/admin/store/covers/${index}`, { method: "DELETE" });
+      },
+    });
+    if (isRemoved) await reload();
+  }
+
+  return { canEdit, store, form, errors, error, isSaving, save, uploadLogo, addCover, removeCover };
 }

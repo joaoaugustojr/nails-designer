@@ -15,6 +15,13 @@
       "when": 1794868908907,
       "tag": "0001_booking_overlap_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794918692289,
+      "tag": "0002_store_covers",
+      "breakpoints": true
     }
   ]
 }

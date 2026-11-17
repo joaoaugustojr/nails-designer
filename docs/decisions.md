@@ -267,3 +267,10 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 
 - **Logo: option C, script "Aline Prata" + "NAILS DESIGNER"** in tracked caps. Pink variants exist because the accent color is configurable.
 - Mockups of every screen and the logo: https://claude.ai/artifact/88FBqL1KLNjo9ijxbYFggv
+
+### Store covers (2026-11-17)
+
+- The store has up to 4 cover photos (`settings.cover_paths`, a JSON list; `STORE_MAX_COVERS`). With more than one, the site hero cross-fades between them every 4 s (1 s fade; an instant swap under reduced motion); with one there is no animation. The hero is taller (220px on phones, 320px from `sm`), image centred. The first cover is the link preview image.
+- Endpoints: `POST /api/admin/store/logo` (replace), `POST /api/admin/store/covers` (add), `DELETE /api/admin/store/covers/:index` (asks first in the panel).
+- Shipped as migration `0002_store_covers` (copies the old single cover into the list) instead of regenerating `0000_init`, because local databases apply it at boot without realignment. Fold it into `0000_init` before the first deploy.
+- Service photos on the site catalog card are square (96px).

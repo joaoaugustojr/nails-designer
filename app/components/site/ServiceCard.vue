@@ -13,9 +13,9 @@ const coverPath = computed(() => props.service.photos[0]?.path);
       v-if="coverPath"
       :src="coverPath"
       alt=""
-      class="h-24 w-[84px] shrink-0 rounded-[10px] object-cover"
+      class="size-24 shrink-0 rounded-[10px] object-cover"
     />
-    <div v-else class="h-24 w-[84px] shrink-0 rounded-[10px] bg-secondary" />
+    <div v-else class="size-24 shrink-0 rounded-[10px] bg-secondary" />
     <div class="flex min-w-0 flex-1 flex-col gap-0.5">
       <h3 class="text-[15px] font-bold">{{ service.name }}</h3>
       <SiteServiceSummary :service="service" class="text-[13px]" />

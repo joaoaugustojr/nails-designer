@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
+import type { H3Event } from "h3";
 
 import { detectImageType } from "./image-type";
 
@@ -21,6 +22,13 @@ export function assertImage(data: Uint8Array): ImageExtension {
     throw createError({ statusCode: 415, statusMessage: "Unsupported image type" });
   }
   return extension;
+}
+
+export async function readImagePart(event: H3Event) {
+  const parts = (await readMultipartFormData(event)) ?? [];
+  const image = parts.find((part) => part.name === "image");
+  if (!image) throw createError({ statusCode: 400, statusMessage: "No image" });
+  return image.data;
 }
 
 export async function saveImage(data: Uint8Array, extension: ImageExtension) {

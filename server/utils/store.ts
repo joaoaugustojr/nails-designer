@@ -1,6 +1,4 @@
-import type { StoreImageKind, StoreInput } from "#shared/schemas/store";
-
-const IMAGE_COLUMNS = { logo: "logoPath", cover: "coverPath" } as const;
+import { STORE_MAX_COVERS, type StoreInput } from "#shared/schemas/store";
 
 const emptyToNull = (value: string) => value || null;
 
@@ -10,7 +8,7 @@ export async function getPublicStore() {
   return {
     name: store.storeName,
     logoPath: store.logoPath,
-    coverPath: store.coverPath,
+    coverPaths: store.coverPaths,
     about: store.about,
     accentColor: store.accentColor,
     timezone: store.timezone,
@@ -22,7 +20,7 @@ export async function getStoreProfile() {
   return {
     name: store.storeName,
     logoPath: store.logoPath,
-    coverPath: store.coverPath,
+    coverPaths: store.coverPaths,
     about: store.about,
     address: store.address,
     whatsapp: store.whatsapp,
@@ -38,7 +36,7 @@ export async function getStoreSettings() {
     storeName: store.storeName,
     accentColor: store.accentColor,
     logoPath: store.logoPath,
-    coverPath: store.coverPath,
+    coverPaths: store.coverPaths,
     address: store.address,
     whatsapp: store.whatsapp,
     instagram: store.instagram,
@@ -59,14 +57,34 @@ export async function updateStoreSettings(input: StoreInput) {
   });
 }
 
-export async function replaceStoreImage(kind: StoreImageKind, data: Uint8Array) {
+export async function replaceStoreLogo(data: Uint8Array) {
   const extension = assertImage(data);
-  const column = IMAGE_COLUMNS[kind];
-  const previous = (await readSettings())[column];
+  const previous = (await readSettings()).logoPath;
 
   const path = await saveImage(data, extension);
-  await writeSettings({ [column]: path });
+  await writeSettings({ logoPath: path });
 
   if (previous) await deleteUpload(previous);
   return { path };
+}
+
+export async function addStoreCover(data: Uint8Array) {
+  const extension = assertImage(data);
+  const { coverPaths } = await readSettings();
+  if (coverPaths.length >= STORE_MAX_COVERS) {
+    throw createError({ statusCode: 400, statusMessage: "Too many covers" });
+  }
+
+  const path = await saveImage(data, extension);
+  await writeSettings({ coverPaths: [...coverPaths, path] });
+  return { path };
+}
+
+export async function deleteStoreCover(index: number) {
+  const { coverPaths } = await readSettings();
+  const path = coverPaths[index];
+  if (!path) throw createError({ statusCode: 404, statusMessage: "Cover not found" });
+
+  await writeSettings({ coverPaths: coverPaths.filter((_, position) => position !== index) });
+  await deleteUpload(path);
 }

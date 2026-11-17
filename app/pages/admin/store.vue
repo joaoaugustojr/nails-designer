@@ -3,7 +3,8 @@ definePageMeta({ layout: "panel" });
 useHead({ title: "Loja" });
 
 const { clear } = useUserSession();
-const { canEdit, store, form, errors, error, isSaving, save, uploadImage } = useStoreSettings();
+const { canEdit, store, form, errors, error, isSaving, save, uploadLogo, addCover, removeCover } =
+  useStoreSettings();
 
 async function logout() {
   await clear();
@@ -26,9 +27,11 @@ async function logout() {
       <PanelBrandImages
         :name="form.storeName"
         :logo-path="store?.logoPath ?? null"
-        :cover-path="store?.coverPath ?? null"
+        :cover-paths="store?.coverPaths ?? []"
         :can-edit="canEdit"
-        @upload="uploadImage"
+        @upload-logo="uploadLogo"
+        @add-cover="addCover"
+        @remove-cover="removeCover"
       />
 
       <fieldset :disabled="!canEdit" class="flex flex-col gap-4 disabled:opacity-70">

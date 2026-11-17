@@ -43,7 +43,8 @@ export const settings = sqliteTable(
     id: integer().primaryKey().default(1),
     storeName: text().notNull().default(""),
     logoPath: text(),
-    coverPath: text(),
+    // Ordered list of upload paths; the site cycles through them.
+    coverPaths: text({ mode: "json" }).$type<string[]>().notNull().default([]),
     accentColor: text().notNull().default("#a8325a"),
     address: text(),
     whatsapp: text(),

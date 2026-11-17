@@ -32,7 +32,6 @@ export const storeSchema = z.object({
   thankYouMessage: optionalText(300),
 });
 
-export const STORE_IMAGE_KINDS = ["logo", "cover"] as const;
+export const STORE_MAX_COVERS = 4;
 
 export type StoreInput = z.infer<typeof storeSchema>;
-export type StoreImageKind = (typeof STORE_IMAGE_KINDS)[number];
