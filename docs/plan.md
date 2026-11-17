@@ -44,18 +44,24 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 
 - Client notes by the owner; ratings (owner rates the client, client rates the service); client detail page with full history.
 
-## Phase 4 — Notifications
+## Phase 4 — Notifications (log channel)
 
-- [ ] Thank-you page: add back "A confirmação foi enviada para o seu WhatsApp." once confirmations are sent.
-- [x] Notification module with one entry point (`notify`) and the `log` channel; the booking confirmation goes through it. The `whatsapp` channel comes with the Cloud API item.
+- [x] Notification module with one entry point (`notify`) and the `log` channel; the booking confirmation goes through it. The `whatsapp` channel comes in phase 6.
+- [x] Owner cancellation: "Avisar a cliente no WhatsApp" switch in the confirm dialog.
 - [x] Reminder task (Nitro scheduled task, every minute): 1 day before, day of, 1 h and 30 min before, each sent once (add `reminder_day_before_sent_at` next to the other sent-at columns).
-- [ ] **(you)** Meta Business account, app, number, utility templates approved.
-- [ ] WhatsApp Cloud API channel: confirmation + reminders.
 
 ## Phase 5 — Deploy
 
-- [ ] Dockerfile (Node 24, multi-stage, arm64; check that `sharp` loads its linux-arm64 binary in the image). Ship `server/db/migrations` next to `.output` (same relative path), set `NUXT_APP_SECRET`, `NUXT_DB_URL` on the volume.
+- [x] Until phase 6, the site promises nothing it does not send: `NUXT_PUBLIC_IS_WHATSAPP_ENABLED` (off by default) hides the reminders opt-in, the WhatsApp line and the confirmation-message hint on the booking form, and the "Avisar a cliente" switch when the owner cancels; bookings are saved without the reminders opt-in.
+- [ ] Dockerfile (Node 24, multi-stage, arm64; check that `sharp` loads its linux-arm64 binary in the image). Ship `server/db/migrations` next to `.output` (same relative path), set `NUXT_APP_SECRET`, `NUXT_DB_URL` on the volume and `NUXT_SITE_URL`. `NUXT_PUBLIC_*` values are read at runtime, so the same image serves WhatsApp on or off.
 - [ ] `deploy/compose.yaml` (project `nails`, one service, one volume) and `deploy/server-deploy.sh`.
 - [ ] **(you)** On the box: `/srv/nails`, `.env`, dedicated deploy key restricted in `authorized_keys`, Caddy block, Cloudflare DNS record.
 - [ ] GitHub Actions: test → build arm64 → push GHCR → deploy on push to `main`. **(you)** add the repository secrets.
 - [ ] Nightly backup to R2 + healthchecks ping. **(you)** install the cron entry.
+
+## Phase 6 — WhatsApp
+
+- [ ] **(you)** Meta Business portfolio (on João's Facebook, in the store's name; the owner's Facebook is not needed), app, number (the owner's WhatsApp Business number through coexistence, or a new one), utility templates approved: `booking_confirmation`, `booking_cancelled`, `booking_reminder`.
+- [ ] WhatsApp Cloud API channel: confirmation, cancellation and reminders.
+- [ ] Thank-you page: add back "A confirmação foi enviada para o seu WhatsApp." behind `isWhatsappEnabled`.
+- [ ] **(you)** Set `NUXT_PUBLIC_IS_WHATSAPP_ENABLED=true` on the box.

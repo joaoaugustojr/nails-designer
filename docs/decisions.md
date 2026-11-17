@@ -319,3 +319,9 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - The sent-at column is written before the message goes out: if the process dies in between, a reminder is lost rather than sent twice.
 - **One WhatsApp template for all four** (`booking_reminder`, same variables as the confirmation, the date and time spelled out), so Meta approves one template instead of four.
 - New column `reminder_day_before_sent_at` (migration `0004_reminder_day_before`).
+
+### Deploy before WhatsApp (2026-11-17)
+
+- Reverses "Notifications before deploy": the owner launches first and sets up Meta (business portfolio, number, template approval) calmly afterwards, since it takes days. Phase 5 is deploy, phase 6 is WhatsApp.
+- The reason for the earlier order still holds, so until WhatsApp is on the booking form must not promise messages: the reminders opt-in and the WhatsApp line are hidden (planned in phase 5). The log channel keeps running in production meanwhile.
+- The switch is `NUXT_PUBLIC_IS_WHATSAPP_ENABLED` (runtime config, off by default), not a code change: being white label, another store may never set up WhatsApp. While off, the booking form hides the reminders opt-in and "A confirmação e os lembretes chegam no seu WhatsApp.", the footer reads "Imprevisto? Depois de confirmar, você vê como desmarcar." (the thank-you page links to "my booking"), the owner's cancel dialog has no "Avisar a cliente" switch, and the server saves `reminders_opt_in` as false whatever the request says, so turning WhatsApp on never sends reminders nobody was promised. Bookings made while off get no reminders.

@@ -11,7 +11,8 @@ const dir = mkdtempSync(join(tmpdir(), "nails-reminders-"));
 const db = createDatabase(`file:${join(dir, "test.db")}`);
 vi.stubGlobal("useDb", async () => db);
 vi.stubGlobal("readSettings", async () => ({ storeName: "Studio", timezone: "America/Sao_Paulo" }));
-vi.stubGlobal("useRuntimeConfig", () => ({ siteUrl: "https://example.com" }));
+const runtimeConfig = { siteUrl: "https://example.com", public: { isWhatsappEnabled: true } };
+vi.stubGlobal("useRuntimeConfig", () => runtimeConfig);
 
 const at = (time: string) => new Date(`2026-11-18T${time}:00-03:00`).getTime();
 const log = vi.spyOn(console, "info").mockImplementation(() => {});

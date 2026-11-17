@@ -71,7 +71,9 @@ export function createBooking(input: BookingInput) {
           endsAt,
           clientName: input.name,
           clientPhone: input.phone,
-          remindersOptIn: input.remindersOptIn,
+          // The form hides the opt-in while WhatsApp is off; saving it would send reminders
+          // nobody was promised once it is turned on.
+          remindersOptIn: input.remindersOptIn && useRuntimeConfig().public.isWhatsappEnabled,
           token,
           idempotencyKey: input.idempotencyKey,
         }),

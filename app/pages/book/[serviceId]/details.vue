@@ -21,6 +21,11 @@ const { form, errors, error, isSlotTaken, isSaving, formatPhoneField, confirm } 
   startMinute,
 });
 
+const { isWhatsappEnabled } = useRuntimeConfig().public;
+const cancelHint = isWhatsappEnabled
+  ? "Imprevisto? A mensagem de confirmação explica como desmarcar."
+  : "Imprevisto? Depois de confirmar, você vê como desmarcar.";
+
 const when = computed(() => {
   if (!data.value) return "";
   const end = startMinute + data.value.service.durationMinutes;
@@ -74,12 +79,18 @@ const when = computed(() => {
             :aria-invalid="!!errors.phone || undefined"
             @blur="formatPhoneField"
           />
-          <FieldDescription>A confirmação e os lembretes chegam no seu WhatsApp.</FieldDescription>
+          <FieldDescription v-if="isWhatsappEnabled">
+            A confirmação e os lembretes chegam no seu WhatsApp.
+          </FieldDescription>
           <FieldError v-if="errors.phone">{{ errors.phone }}</FieldError>
         </Field>
       </FieldGroup>
 
-      <SurfaceCard as="label" class="flex cursor-pointer items-start gap-3 p-3.5">
+      <SurfaceCard
+        v-if="isWhatsappEnabled"
+        as="label"
+        class="flex cursor-pointer items-start gap-3 p-3.5"
+      >
         <input
           v-model="form.remindersOptIn"
           type="checkbox"
@@ -113,7 +124,7 @@ const when = computed(() => {
           pending-label="Confirmando…"
         />
         <span class="text-center text-xs text-muted-foreground">
-          Imprevisto? A mensagem de confirmação explica como desmarcar.
+          {{ cancelHint }}
         </span>
       </div>
     </footer>

@@ -14,7 +14,8 @@ vi.stubGlobal("createError", (error: object) => Object.assign(new Error(), error
 const dir = mkdtempSync(join(tmpdir(), "nails-bookings-"));
 const db = createDatabase(`file:${join(dir, "test.db")}`);
 vi.stubGlobal("useDb", async () => db);
-vi.stubGlobal("useRuntimeConfig", () => ({ siteUrl: "https://example.com" }));
+const runtimeConfig = { siteUrl: "https://example.com", public: { isWhatsappEnabled: true } };
+vi.stubGlobal("useRuntimeConfig", () => runtimeConfig);
 const settings = {
   storeName: "Studio",
   timezone: "America/Sao_Paulo",
@@ -74,6 +75,13 @@ describe("createBooking", () => {
       endsAt: new Date(`${DAY}T10:00:00-03:00`),
       status: "confirmed",
     });
+  });
+
+  it("saves no reminders opt-in while WhatsApp is off", async () => {
+    runtimeConfig.public.isWhatsappEnabled = false;
+    await createBooking(request({ remindersOptIn: true }));
+    runtimeConfig.public.isWhatsappEnabled = true;
+    expect(await db.query.bookings.findFirst()).toMatchObject({ remindersOptIn: false });
   });
 
   it("lets only one of two simultaneous requests take the same slot", async () => {

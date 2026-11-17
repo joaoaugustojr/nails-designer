@@ -1,5 +1,6 @@
 export function useCancelBooking() {
   const { confirmAction } = useConfirmDialog();
+  const { isWhatsappEnabled } = useRuntimeConfig().public;
 
   return function cancelBooking(id: number, clientName: string) {
     return confirmAction({
@@ -8,11 +9,11 @@ export function useCancelBooking() {
       confirmLabel: "Cancelar atendimento",
       pendingLabel: "Cancelando…",
       isDestructive: true,
-      toggle: { label: "Avisar a cliente no WhatsApp", isOn: true },
-      action: async (notifyClient) => {
+      toggle: isWhatsappEnabled ? { label: "Avisar a cliente no WhatsApp", isOn: true } : undefined,
+      action: async (isToggleOn) => {
         await $fetch(`/api/admin/bookings/${id}/cancel`, {
           method: "POST",
-          body: { notifyClient },
+          body: { notifyClient: isWhatsappEnabled && isToggleOn },
         });
       },
     });
