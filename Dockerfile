@@ -25,6 +25,9 @@ ENV NODE_ENV=production \
     NUXT_UPLOADS_DIR=/data/uploads
 
 COPY --from=build /app/.output ./.output
+# libsql picks its native package at runtime (require(`@libsql/${target}`)), which Nitro's
+# trace cannot follow: on arm64 it was left out. Copy the one pnpm installed for this platform.
+COPY --from=build /app/node_modules/.pnpm/@libsql+linux-*/node_modules/@libsql/ ./.output/server/node_modules/@libsql/
 # Read at boot from server/db/migrations, relative to /app.
 COPY --from=build /app/server/db/migrations ./server/db/migrations
 
