@@ -395,3 +395,4 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 ### Calendar and directions on "my booking" (2026-11-17)
 
 - "Salvar na agenda" and "Como chegar" also appear on `/bookings/<token>` under the booking card, while the booking has not started (hidden once cancelled or under way). Both pages use the same `SiteBookingLinks` component.
+- A full-width **"Copiar link do agendamento"** button under them copies the absolute `/bookings/<token>` link (VueUse `useClipboard`, with the legacy fallback), and reads "Link copiado" for 2 s. Until WhatsApp sends the link, this is how a client keeps it.
