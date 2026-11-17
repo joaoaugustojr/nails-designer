@@ -29,7 +29,7 @@ async function login() {
 </script>
 
 <template>
-  <main class="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-6">
+  <main class="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-5">
     <div class="fixed top-4 right-4">
       <ThemeSwitch />
     </div>

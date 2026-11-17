@@ -181,6 +181,11 @@ A whole-project pass for duplication, hidden coupling and code outside the conve
 - Buttons no longer shift 1px down when pressed (shadcn's `active:translate-y-px`, removed from the base button): with `transition-all` it read as a sliding animation on the theme switch. (2026-11-17)
 - Panel "Sair" is a header action (`size="md"`, primary pill), like "+ Novo". The client cancellation deadline goes up to 7 days (2 to 7 days added). (2026-11-17)
 
+### Typography (2026-11-17)
+
+- Nunito for all text (rounded, friendly; fits the beauty trade), replacing Manrope. A Fraunces + Figtree pairing was tried and rejected. Parisienne was loaded but unused and is gone.
+- Small selects (`size="sm"`, 34px) keep their look but get an invisible extension to a 44px touch area, like the chips.
+
 ### Day and time picker (2026-11-17)
 
 - **`GET /api/services/:id/availability?from=&days=`** (public; 404 for an inactive or unknown service) returns the service summary, the open agenda (`firstDate` = today, `lastDate` = today + `max_days_ahead`) and, for each day, its free start minutes. One request per page of days: changing day does not hit the server.

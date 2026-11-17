@@ -6,7 +6,7 @@
  * A store's accent color overrides --primary at runtime (app/plugins/brand.ts); the tints
  * below derive from it with color-mix, so every accent gets matching tones.
  */
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Parisienne&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400..900&display=swap");
 
 :root {
   color-scheme: light;
@@ -60,5 +60,5 @@
 }
 
 body {
-  font-family: "Manrope", sans-serif;
+  font-family: "Nunito", sans-serif;
 }
