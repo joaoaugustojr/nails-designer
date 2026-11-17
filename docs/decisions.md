@@ -381,3 +381,7 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - **Photos are shrunk in the browser before upload** (`shrinkImage` in `app/utils/upload.ts`): fitted within 1600 px (the server's own limit) and sent as JPEG at 0.85, or PNG for PNGs so a logo keeps its transparency. A 4–8 MB phone photo goes up as a few hundred KB, which matters with the server in Germany. Files already within 1600 px and under 1 MB go as they are; on any failure the original goes. The server still validates and re-encodes everything (metadata stripping does not rely on the browser).
 - **Logo and cover uploads show progress:** a spinner over the logo or on the "Adicionar capa" tile with "Enviando…" (`role="status"`), and both pickers are disabled until the upload ends. Service photos already showed "Salvando…" on the save button.
 - **Up to 10 cover photos** instead of 4 (owner's request; `STORE_MAX_COVERS`).
+
+### Thank-you message without a signature (2026-11-17)
+
+- The owner's message on the thank-you page stands alone: the small logo and the store name under it were removed at the owner's request.

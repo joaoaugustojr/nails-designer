@@ -34,20 +34,12 @@ const directions = computed(() => directionsUrl(store.value));
       <p class="text-[15px] leading-normal text-muted-foreground">Seu horário está reservado.</p>
     </div>
 
-    <figure
+    <blockquote
       v-if="store.thankYouMessage"
-      class="flex flex-col gap-3 rounded-2xl bg-secondary p-[18px]"
+      class="rounded-2xl bg-secondary p-[18px] font-[Georgia,serif] text-xl leading-[1.35] text-secondary-foreground italic"
     >
-      <blockquote
-        class="font-[Georgia,serif] text-xl leading-[1.35] text-secondary-foreground italic"
-      >
-        “{{ store.thankYouMessage }}”
-      </blockquote>
-      <figcaption class="flex items-center gap-2.5">
-        <StoreMark :name="store.name" :logo-path="store.logoPath" size="xs" class="bg-card" />
-        <span class="text-sm font-bold">{{ store.name }}</span>
-      </figcaption>
-    </figure>
+      “{{ store.thankYouMessage }}”
+    </blockquote>
 
     <SurfaceCard as="dl" class="flex flex-col divide-y divide-border rounded-2xl">
       <div class="flex justify-between gap-3 px-4 py-3.5 text-sm">
