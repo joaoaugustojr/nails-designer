@@ -15,7 +15,7 @@ const {
   updateRules,
   removeTimeOff,
   refreshTimeOff,
-} = useSchedule();
+} = await useSchedule();
 
 const isAddingTimeOff = ref(false);
 

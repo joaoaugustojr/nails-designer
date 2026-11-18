@@ -1,12 +1,13 @@
-export function useAgenda() {
+export async function useAgenda() {
   const route = useRoute();
   const requestedDate = computed(() =>
     typeof route.query.date === "string" ? route.query.date : undefined,
   );
 
-  const { data: agenda, refresh } = useFetch("/api/admin/agenda", {
+  const agendaRequest = useFetch("/api/admin/agenda", {
     query: computed(() => ({ date: requestedDate.value })),
   });
+  const { data: agenda, refresh } = agendaRequest;
   const confirmCancel = useCancelBooking();
 
   const title = computed(() =>
@@ -43,6 +44,8 @@ export function useAgenda() {
   async function cancelBooking(id: number, clientName: string) {
     if (await confirmCancel(id, clientName)) await refresh();
   }
+
+  await agendaRequest;
 
   return {
     agenda,

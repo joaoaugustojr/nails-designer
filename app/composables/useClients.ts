@@ -2,12 +2,13 @@ import { refDebounced } from "@vueuse/core";
 
 const SEARCH_DELAY_MS = 300;
 
-export function useClients() {
+export async function useClients() {
   const search = ref("");
   const debouncedSearch = refDebounced(search, SEARCH_DELAY_MS);
   const query = computed(() => ({ search: debouncedSearch.value.trim() || undefined }));
 
-  const { data: firstPage, refresh } = useFetch("/api/admin/clients", { query });
+  const firstPageRequest = useFetch("/api/admin/clients", { query });
+  const { data: firstPage, refresh } = firstPageRequest;
   const confirmCancel = useCancelBooking();
   const { confirmAction } = useConfirmDialog();
   type Client = NonNullable<typeof firstPage.value>["items"][number];
@@ -57,6 +58,8 @@ export function useClients() {
     });
     if (isRemoved) await refresh();
   }
+
+  await firstPageRequest;
 
   return {
     search,

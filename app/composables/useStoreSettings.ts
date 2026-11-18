@@ -13,10 +13,11 @@ const FIELD_ERRORS: Record<FieldName, string> = {
   thankYouMessage: "A mensagem pode ter até 300 caracteres.",
 };
 
-export function useStoreSettings() {
+export async function useStoreSettings() {
   const { isOwner: canEdit } = usePanelUser();
 
-  const { data: store, refresh } = useFetch("/api/admin/store");
+  const storeRequest = useFetch("/api/admin/store");
+  const { data: store, refresh } = storeRequest;
 
   const form = reactive({
     storeName: "",
@@ -119,6 +120,8 @@ export function useStoreSettings() {
     }
     await reload();
   }
+
+  await storeRequest;
 
   return {
     canEdit,

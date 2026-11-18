@@ -5,7 +5,7 @@ definePageMeta({ layout: "panel" });
 useHead({ title: "Agenda" });
 
 const { agenda, title, summary, lastDate, isLastDate, goToDay, goToDate, cancelBooking, refresh } =
-  useAgenda();
+  await useAgenda();
 const isBlocking = ref(false);
 const route = useRoute();
 const bookingPath = computed(() =>

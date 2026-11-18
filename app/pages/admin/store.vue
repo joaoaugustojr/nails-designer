@@ -16,7 +16,7 @@ const {
   addCover,
   removeCover,
   reorderCovers,
-} = useStoreSettings();
+} = await useStoreSettings();
 
 async function logout() {
   await clear();

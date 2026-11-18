@@ -18,7 +18,7 @@ const {
   startReset,
   cancelReset,
   saveReset,
-} = usePanelUsers();
+} = await usePanelUsers();
 </script>
 
 <template>

@@ -4,17 +4,10 @@ import { SearchIcon } from "@lucide/vue";
 definePageMeta({ layout: "panel" });
 useHead({ title: "Clientes" });
 
-const {
-  search,
-  clients,
-  total,
-  hasMore,
-  isLoadingMore,
-  loadMore,
-  cancelNextBooking,
-  removeClient,
-} = useClients();
-const { requests: waitlist, resolve } = useWaitlist();
+const [
+  { search, clients, total, hasMore, isLoadingMore, loadMore, cancelNextBooking, removeClient },
+  { requests: waitlist, resolve },
+] = await Promise.all([useClients(), useWaitlist()]);
 </script>
 
 <template>

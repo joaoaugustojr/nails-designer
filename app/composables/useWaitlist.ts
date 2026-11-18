@@ -1,5 +1,6 @@
-export function useWaitlist() {
-  const { data: requests, refresh } = useFetch("/api/admin/waitlist", { default: () => [] });
+export async function useWaitlist() {
+  const waitlistRequest = useFetch("/api/admin/waitlist", { default: () => [] });
+  const { data: requests, refresh } = waitlistRequest;
   const { confirmAction } = useConfirmDialog();
 
   async function resolve(request: { id: number; clientName: string }) {
@@ -14,6 +15,8 @@ export function useWaitlist() {
     });
     if (isRemoved) await refresh();
   }
+
+  await waitlistRequest;
 
   return { requests, resolve };
 }

@@ -8,10 +8,11 @@ const FIELD_ERRORS: Record<FieldName, string> = {
   password: `A senha precisa ter pelo menos ${PASSWORD_MIN_LENGTH} caracteres.`,
 };
 
-export function usePanelUsers() {
+export async function usePanelUsers() {
   const { isOwner: canManage } = usePanelUser();
 
-  const { data: users, refresh } = useFetch("/api/admin/users", { default: () => [] });
+  const usersRequest = useFetch("/api/admin/users", { default: () => [] });
+  const { data: users, refresh } = usersRequest;
   const { confirmAction } = useConfirmDialog();
 
   const form = reactive({ name: "", email: "", password: "" });
@@ -94,6 +95,8 @@ export function usePanelUsers() {
     });
     if (isChanged) resettingId.value = null;
   }
+
+  await usersRequest;
 
   return {
     canManage,

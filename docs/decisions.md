@@ -450,3 +450,7 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - **Refused while she has an upcoming confirmed booking** (409; the button is hidden then): cancel it first.
 - **She can book again:** her phone is free, so a new booking creates a new client with no past history.
 - **Migration note:** drizzle-kit rebuilds `bookings` to change the foreign key (SQLite cannot alter one) and drops its overlap triggers with the old table; `0003_client_removal` recreates them by hand. Any later rebuild of `bookings` must do the same.
+
+### Panel tabs wait for their data (2026-11-18)
+
+- Switching tabs showed each page before its data arrived (switches off, empty lists), then filled it in; a reload did not, because the server renders with the data. The panel composables (`useAgenda`, `useClients`, `useWaitlist`, `useSchedule`, `useStoreSettings`, `usePanelUsers`) now start their fetches, call every other composable, and `await` the fetches last; pages `await` them. New data-loading composables follow the same shape.

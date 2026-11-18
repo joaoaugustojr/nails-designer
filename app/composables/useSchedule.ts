@@ -41,11 +41,11 @@ const CANCEL_DEADLINE_RULE = {
   format: (minutes: number) => `${formatLeadTime(minutes)} antes`,
 };
 
-export function useSchedule() {
-  const { data: schedule, refresh: refreshSchedule } = useFetch("/api/admin/schedule");
-  const { data: timeOffList, refresh: refreshTimeOff } = useFetch("/api/admin/time-off", {
-    default: () => [],
-  });
+export async function useSchedule() {
+  const scheduleRequest = useFetch("/api/admin/schedule");
+  const timeOffRequest = useFetch("/api/admin/time-off", { default: () => [] });
+  const { data: schedule, refresh: refreshSchedule } = scheduleRequest;
+  const { data: timeOffList, refresh: refreshTimeOff } = timeOffRequest;
   const error = ref("");
   const { confirmAction } = useConfirmDialog();
 
@@ -105,6 +105,8 @@ export function useSchedule() {
     });
     if (isRemoved) await refreshTimeOff();
   }
+
+  await Promise.all([scheduleRequest, timeOffRequest]);
 
   return {
     rules: computed(() => schedule.value?.rules),
