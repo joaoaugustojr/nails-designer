@@ -83,21 +83,21 @@ describe("maskPhone", () => {
 
 describe("whatsappShareUrl", () => {
   it("lets the sender pick the contact", () => {
-    expect(whatsappShareUrl("Agende: https://x.com")).toBe(
-      "https://wa.me/?text=Agende%3A%20https%3A%2F%2Fx.com",
+    expect(whatsappShareUrl("Agende em Nails 💅")).toBe(
+      "https://api.whatsapp.com/send?text=Agende+em+Nails+%F0%9F%92%85",
     );
   });
 });
 
 describe("whatsappUrl", () => {
   it("adds Brazil's code to local numbers", () => {
-    expect(whatsappUrl("11912345678")).toBe("https://wa.me/5511912345678");
-    expect(whatsappUrl("5511912345678")).toBe("https://wa.me/5511912345678");
+    expect(whatsappUrl("11912345678")).toBe("https://api.whatsapp.com/send?phone=5511912345678");
+    expect(whatsappUrl("5511912345678")).toBe("https://api.whatsapp.com/send?phone=5511912345678");
   });
 
   it("encodes a prefilled message", () => {
     expect(whatsappUrl("11912345678", "Olá, Maria!")).toBe(
-      "https://wa.me/5511912345678?text=Ol%C3%A1%2C%20Maria!",
+      "https://api.whatsapp.com/send?phone=5511912345678&text=Ol%C3%A1%2C+Maria%21",
     );
   });
 });

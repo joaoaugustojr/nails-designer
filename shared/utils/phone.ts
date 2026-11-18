@@ -22,12 +22,14 @@ export function maskPhone(typed: string) {
   return `(${area}) ${number.slice(0, prefixLength)}-${number.slice(prefixLength)}`;
 }
 
+// Not wa.me: its redirect turns emoji (e.g. in the store name) into "�" in the prefilled text.
+const WHATSAPP_SEND_URL = "https://api.whatsapp.com/send";
+
 export function whatsappUrl(digits: string, message?: string) {
-  const international = digits.length <= 11 ? BRAZIL_CODE + digits : digits;
-  const text = message ? `?text=${encodeURIComponent(message)}` : "";
-  return `https://wa.me/${international}${text}`;
+  const phone = digits.length <= 11 ? BRAZIL_CODE + digits : digits;
+  return `${WHATSAPP_SEND_URL}?${new URLSearchParams(message ? { phone, text: message } : { phone })}`;
 }
 
 export function whatsappShareUrl(message: string) {
-  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+  return `${WHATSAPP_SEND_URL}?${new URLSearchParams({ text: message })}`;
 }
