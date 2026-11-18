@@ -29,6 +29,9 @@ export default defineNuxtPlugin(async () => {
   // "/uploads/<name>" → "/preview/<name>.jpg", the JPEG copy link previews can show.
   const previewImage = (path: string | null | undefined) =>
     path ? `${origin}${path.replace(/^\/uploads\//, "/preview/")}.jpg` : undefined;
+  const iconUrl = computed(() =>
+    store.value?.logoPath ? `/favicon.ico?v=${store.value.logoPath.split("/").pop()}` : undefined,
+  );
   const themeColor = useThemeColor();
 
   useHead({
@@ -38,11 +41,8 @@ export default defineNuxtPlugin(async () => {
       { key: "brand-accent", textContent: computed(() => accentCss(store.value?.accentColor)) },
     ],
     link: [
-      {
-        key: "icon",
-        rel: "icon",
-        href: computed(() => store.value?.logoPath ?? "/favicon.ico"),
-      },
+      { key: "icon", rel: "icon", type: "image/png", href: iconUrl },
+      { key: "apple-touch-icon", rel: "apple-touch-icon", href: iconUrl },
     ],
     meta: [{ key: "theme-color", name: "theme-color", content: themeColor }],
   });

@@ -461,3 +461,8 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - **Layout in the R2 bucket:** `nails/db/nails-YYYY-MM-DD.db`, one per day, old ones deleted by an R2 lifecycle rule on `nails/db/` (30 days); `nails/uploads/` gets `rclone copy`, which never deletes, so a photo removed by mistake can still be restored.
 - **Settings in `/srv/nails/backup.env`** (template: `deploy/backup.env.example`), apart from the app's `.env` so the app never holds the R2 keys. The R2 token is limited to the bucket.
 - **healthchecks.io** gets `/start` and then the script's exit code, so a failed or missed night sends an email.
+
+### Site icon from the logo (2026-11-18)
+
+- WhatsApp showed the Nuxt logo next to the link: it skips a WebP icon and falls back to `/favicon.ico`, which was still the framework's default file. That file is gone; **`/favicon.ico` is now a route that serves the store's logo as a 180 px square PNG** (404 without a logo, never a framework default). This supersedes "Tab icon: the store's logo, falling back to `/favicon.ico`".
+- Pages link it as `icon` and `apple-touch-icon` with `?v=<logo file name>`, so a new logo is a new URL and no browser keeps the old one.

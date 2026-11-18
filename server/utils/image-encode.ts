@@ -23,3 +23,14 @@ export function encodePreviewJpeg(input: string | Uint8Array) {
     .jpeg({ quality: JPEG_QUALITY })
     .toBuffer();
 }
+
+const ICON_SIDE = 180;
+
+// Square PNG for /favicon.ico and apple-touch-icon: browsers take a PNG under that name, and
+// link previews (WhatsApp) skip a WebP icon and fall back to /favicon.ico.
+export function encodeIconPng(input: string | Uint8Array) {
+  return sharp(input)
+    .resize(ICON_SIDE, ICON_SIDE, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
+}
