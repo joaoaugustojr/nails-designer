@@ -412,3 +412,11 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - A booking keeps the service name, duration and price it was made with (`serviceName`, `serviceDurationMinutes`, `servicePriceCents`); later changes to the service never alter it.
 - The "Saiba mais" sheet on the thank-you and "my booking" pages shows those booked values; only the description, photos and "O que inclui" come from the current service.
 - The admin agenda shows the booked price next to the service name; the client's total spent already sums the booked prices.
+
+### Owner books for a client (2026-11-18)
+
+- "+ Agendar" on the agenda opens `/admin/bookings/new` (starts on the agenda's day). The owner picks a client (typing the name suggests saved clients; choosing one fills the phone) or types a new one, the service, any day and time, and the price (starts at the service price, editable for discounts). Reminders are off unless she turns them on.
+- **Any day and time:** closed days, outside working hours, over her own time off, without minimum notice or the open-agenda limit.
+- **Another booking always blocks:** `POST /api/admin/bookings` refuses an overlap with 409 and the conflicting booking (client, time); the page says to cancel it first to fit someone in. The overlap trigger stays as it is for every path.
+- The client gets the same confirmation as a site booking. The site path and the panel path share `saveBooking` (snapshot, client upsert, notification).
+- The agenda's calendar also enables days that have bookings (`bookedDates`), so bookings on closed days or past the open agenda stay reachable; "Bloquear horário" became "Bloquear" so both header buttons fit at 390px.

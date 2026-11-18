@@ -8,7 +8,7 @@ import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vites
 import { createDatabase, migrateDatabase } from "../db/client";
 import { bookings, clients, services, workingHours } from "../db/schema";
 import { cancelBooking } from "./agenda";
-import { cancelBookingByClient, createBooking } from "./bookings";
+import { cancelBookingByClient, createBooking, createPanelBooking } from "./bookings";
 
 vi.stubGlobal("createError", (error: object) => Object.assign(new Error(), error));
 const dir = mkdtempSync(join(tmpdir(), "nails-bookings-"));
@@ -209,5 +209,38 @@ describe("cancelBooking by the owner", () => {
     const { log } = await cancelOnly(false);
     expect(log).not.toHaveBeenCalled();
     expect(await db.query.bookings.findFirst()).toMatchObject({ status: "cancelled" });
+  });
+});
+
+describe("createPanelBooking", () => {
+  const SUNDAY = "2026-11-22";
+  const panelRequest = (changes: Partial<Parameters<typeof createPanelBooking>[0]> = {}) => ({
+    serviceId,
+    date: SUNDAY,
+    startMinute: 10 * 60,
+    priceCents: 5000,
+    name: "Ana",
+    phone: "11912345678",
+    remindersOptIn: false,
+    ...changes,
+  });
+
+  it("books a closed day with the price the owner set", async () => {
+    await createPanelBooking(panelRequest());
+    expect(await db.query.bookings.findFirst()).toMatchObject({
+      servicePriceCents: 5000,
+      startsAt: new Date(`${SUNDAY}T10:00:00-03:00`),
+      endsAt: new Date(`${SUNDAY}T11:00:00-03:00`),
+    });
+  });
+
+  it("refuses a time that overlaps another booking and names it", async () => {
+    await createPanelBooking(panelRequest());
+    await expect(
+      createPanelBooking(panelRequest({ startMinute: 10 * 60 + 30, phone: "11987654321" })),
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      data: { clientName: "Ana", date: SUNDAY, startMinute: 600, endMinute: 660 },
+    });
   });
 });

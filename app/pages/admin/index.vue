@@ -4,9 +4,12 @@ import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "@lucide/vue";
 definePageMeta({ layout: "panel" });
 useHead({ title: "Agenda" });
 
-const { agenda, title, summary, isLastOpenDate, goToDay, goToDate, cancelBooking, refresh } =
+const { agenda, title, summary, lastDate, isLastDate, goToDay, goToDate, cancelBooking, refresh } =
   useAgenda();
 const isBlocking = ref(false);
+const newBookingPath = computed(() =>
+  agenda.value ? `/admin/bookings/new?date=${agenda.value.date}` : "/admin/bookings/new",
+);
 
 async function onBlocked() {
   isBlocking.value = false;
@@ -17,10 +20,15 @@ async function onBlocked() {
 <template>
   <div>
     <PanelHeader title="Agenda">
-      <Button size="md" @click="isBlocking = !isBlocking">
-        <PlusIcon aria-hidden="true" />
-        Bloquear horário
-      </Button>
+      <div class="flex gap-2">
+        <Button size="md" variant="outline" @click="isBlocking = !isBlocking">Bloquear</Button>
+        <Button as-child size="md">
+          <NuxtLink :to="newBookingPath">
+            <PlusIcon aria-hidden="true" />
+            Agendar
+          </NuxtLink>
+        </Button>
+      </div>
       <template #bottom>
         <div class="flex items-center gap-2">
           <Button variant="outline" size="icon-lg" aria-label="Dia anterior" @click="goToDay(-1)">
@@ -31,15 +39,16 @@ async function onBlocked() {
             :date="agenda.date"
             :title="title"
             :summary="summary"
-            :last-open-date="agenda.lastOpenDate"
+            :last-open-date="lastDate"
             :open-weekdays="agenda.openWeekdays"
+            :booked-dates="agenda.bookedDates"
             @select="goToDate"
           />
           <Button
             variant="outline"
             size="icon-lg"
             aria-label="Próximo dia"
-            :disabled="isLastOpenDate"
+            :disabled="isLastDate"
             @click="goToDay(1)"
           >
             <ChevronRightIcon aria-hidden="true" />

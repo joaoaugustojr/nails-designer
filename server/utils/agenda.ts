@@ -1,4 +1,4 @@
-import { and, eq, gt, lt } from "drizzle-orm";
+import { and, eq, gt, gte, lt } from "drizzle-orm";
 
 import { bookings, timeOff, workingHours } from "../db/schema";
 import { bookingMessage, notify } from "./notifications";
@@ -19,7 +19,8 @@ export async function getAgenda(requestedDate: string | undefined) {
   const weekday = weekdayOf(date);
   const db = await useDb();
 
-  const [ranges, dayBookings, blocks, openDays] = await Promise.all([
+  const todayStart = new Date(zonedToUtc(today, 0, timezone));
+  const [ranges, dayBookings, blocks, openDays, upcoming] = await Promise.all([
     db.query.workingHours.findMany({
       columns: { startMinute: true, endMinute: true },
       where: eq(workingHours.weekday, weekday),
@@ -45,7 +46,14 @@ export async function getAgenda(requestedDate: string | undefined) {
       where: and(lt(timeOff.startsAt, dayEnd), gt(timeOff.endsAt, dayStart)),
     }),
     db.selectDistinct({ weekday: workingHours.weekday }).from(workingHours),
+    db.query.bookings.findMany({
+      columns: { startsAt: true },
+      where: and(eq(bookings.status, "confirmed"), gte(bookings.startsAt, todayStart)),
+    }),
   ]);
+  const bookedDates = [
+    ...new Set(upcoming.map(({ startsAt }) => utcToZoned(startsAt.getTime(), timezone).date)),
+  ].sort();
 
   const inDay = <T extends { startsAt: Date; endsAt: Date }>({ startsAt, endsAt, ...rest }: T) => ({
     ...rest,
@@ -59,6 +67,8 @@ export async function getAgenda(requestedDate: string | undefined) {
     // The calendar offers only days clients can book: open weekdays up to the last bookable date.
     lastOpenDate: addDays(today, maxDaysAhead),
     openWeekdays: openDays.map((day) => day.weekday),
+    // Bookings the owner made on closed days or past the open agenda must stay reachable.
+    bookedDates,
     workingRanges: ranges.sort((first, second) => first.startMinute - second.startMinute),
     bookingCount: dayBookings.length,
     items: buildDayTimeline(ranges, dayBookings.map(inDay), blocks.map(inDay)),

@@ -1,11 +1,11 @@
 import { randomBytes } from "node:crypto";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, gt, lt, sql } from "drizzle-orm";
 
-import type { BookingInput } from "../../shared/schemas/booking";
+import type { BookingInput, PanelBookingInput } from "../../shared/schemas/booking";
 import { firstName } from "../../shared/utils/text";
 import { utcToZoned, zonedToUtc } from "../../shared/utils/time";
 import type { Database } from "../db/client";
-import { bookings, clients } from "../db/schema";
+import { bookings, clients, services } from "../db/schema";
 import { findActiveService, freeStartMinutes } from "./availability";
 import { upsertClient } from "./clients";
 import { bookingMessage, notify } from "./notifications";
@@ -34,6 +34,75 @@ async function findByIdempotencyKey(db: Database, key: string) {
   });
 }
 
+type Settings = Awaited<ReturnType<typeof readSettings>>;
+
+type NewBooking = {
+  service: { id: number; name: string; durationMinutes: number };
+  priceCents: number;
+  date: string;
+  startMinute: number;
+  name: string;
+  phone: string;
+  remindersOptIn: boolean;
+  idempotencyKey?: string;
+};
+
+function bookingTimes(
+  booking: Pick<NewBooking, "service" | "date" | "startMinute">,
+  timezone: string,
+) {
+  const { date, startMinute, service } = booking;
+  return {
+    startsAt: new Date(zonedToUtc(date, startMinute, timezone)),
+    endsAt: new Date(zonedToUtc(date, startMinute + service.durationMinutes, timezone)),
+  };
+}
+
+async function saveBooking(db: Database, booking: NewBooking, settings: Settings) {
+  const { service } = booking;
+  const { startsAt, endsAt } = bookingTimes(booking, settings.timezone);
+  const token = randomBytes(24).toString("base64url");
+  try {
+    await db.batch([
+      upsertClient(db, { phone: booking.phone, name: booking.name }),
+      db.insert(bookings).values({
+        serviceId: service.id,
+        clientId: sql`(select ${clients.id} from ${clients} where ${clients.phone} = ${booking.phone})`,
+        serviceName: service.name,
+        serviceDurationMinutes: service.durationMinutes,
+        servicePriceCents: booking.priceCents,
+        startsAt,
+        endsAt,
+        clientName: booking.name,
+        clientPhone: booking.phone,
+        // The forms hide the opt-in while WhatsApp is off; saving it would send reminders
+        // nobody was promised once it is turned on.
+        remindersOptIn: booking.remindersOptIn && useRuntimeConfig().public.isWhatsappEnabled,
+        token,
+        idempotencyKey: booking.idempotencyKey,
+      }),
+    ]);
+  } catch (error) {
+    if (errorText(error).includes("booking_overlap")) throw slotTaken();
+    throw error;
+  }
+  void notify(
+    bookingMessage(
+      "booking_confirmation",
+      {
+        clientName: booking.name,
+        clientPhone: booking.phone,
+        serviceName: service.name,
+        startsAt,
+        endsAt,
+        token,
+      },
+      settings,
+    ),
+  );
+  return { token };
+}
+
 export function createBooking(input: BookingInput) {
   return oneAtATime(async () => {
     const db = await useDb();
@@ -52,51 +121,48 @@ export function createBooking(input: BookingInput) {
     });
     if (!day!.startMinutes.includes(input.startMinute)) throw slotTaken();
 
-    const { timezone } = settings;
-    const token = randomBytes(24).toString("base64url");
-    const startsAt = new Date(zonedToUtc(input.date, input.startMinute, timezone));
-    const endsAt = new Date(
-      zonedToUtc(input.date, input.startMinute + service.durationMinutes, timezone),
-    );
-    try {
-      await db.batch([
-        upsertClient(db, { phone: input.phone, name: input.name }),
-        db.insert(bookings).values({
-          serviceId: service.id,
-          clientId: sql`(select ${clients.id} from ${clients} where ${clients.phone} = ${input.phone})`,
-          serviceName: service.name,
-          serviceDurationMinutes: service.durationMinutes,
-          servicePriceCents: service.priceCents,
-          startsAt,
-          endsAt,
-          clientName: input.name,
-          clientPhone: input.phone,
-          // The form hides the opt-in while WhatsApp is off; saving it would send reminders
-          // nobody was promised once it is turned on.
-          remindersOptIn: input.remindersOptIn && useRuntimeConfig().public.isWhatsappEnabled,
-          token,
-          idempotencyKey: input.idempotencyKey,
-        }),
-      ]);
-    } catch (error) {
-      if (errorText(error).includes("booking_overlap")) throw slotTaken();
-      throw error;
-    }
-    void notify(
-      bookingMessage(
-        "booking_confirmation",
-        {
-          clientName: input.name,
-          clientPhone: input.phone,
-          serviceName: service.name,
-          startsAt,
-          endsAt,
-          token,
-        },
-        settings,
+    return saveBooking(db, { ...input, service, priceCents: service.priceCents }, settings);
+  });
+}
+
+// The owner may book outside working hours and over her own time off; another
+// confirmed booking is the only conflict, and she cancels it first if she wants the slot.
+export function createPanelBooking(input: PanelBookingInput) {
+  return oneAtATime(async () => {
+    const db = await useDb();
+    const [service, settings] = await Promise.all([
+      db.query.services.findFirst({
+        where: eq(services.id, input.serviceId),
+        columns: { id: true, name: true, durationMinutes: true },
+      }),
+      readSettings(),
+    ]);
+    if (!service) throw createError({ statusCode: 404, statusMessage: "Service not found" });
+
+    const { startsAt, endsAt } = bookingTimes({ ...input, service }, settings.timezone);
+    const conflict = await db.query.bookings.findFirst({
+      where: and(
+        eq(bookings.status, "confirmed"),
+        lt(bookings.startsAt, endsAt),
+        gt(bookings.endsAt, startsAt),
       ),
-    );
-    return { token };
+      columns: { clientName: true, startsAt: true, endsAt: true },
+    });
+    if (conflict) {
+      const zoned = (instant: Date) => utcToZoned(instant.getTime(), settings.timezone);
+      throw createError({
+        statusCode: 409,
+        statusMessage: "Overlaps another booking",
+        data: {
+          clientName: conflict.clientName,
+          date: zoned(conflict.startsAt).date,
+          startMinute: zoned(conflict.startsAt).minutes,
+          endMinute: zoned(conflict.endsAt).minutes,
+        },
+      });
+    }
+
+    return saveBooking(db, { ...input, service }, settings);
   });
 }
 

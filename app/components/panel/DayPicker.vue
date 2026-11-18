@@ -7,6 +7,7 @@ const props = defineProps<{
   summary: string;
   lastOpenDate: string;
   openWeekdays: number[];
+  bookedDates: string[];
 }>();
 const emit = defineEmits<{ select: [date: string] }>();
 
@@ -14,7 +15,10 @@ const isOpen = ref(false);
 const selected = computed(() => parseDate(props.date));
 const lastOpen = computed(() => parseDate(props.lastOpenDate));
 
-const isClosed = (day: DateValue) => !props.openWeekdays.includes(weekdayOf(day.toString()));
+const isClosed = (day: DateValue) => {
+  const date = day.toString();
+  return !props.openWeekdays.includes(weekdayOf(date)) && !props.bookedDates.includes(date);
+};
 
 function pick(value: DateValue | undefined) {
   if (!value) return;

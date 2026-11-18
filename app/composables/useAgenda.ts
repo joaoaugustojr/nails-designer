@@ -23,9 +23,13 @@ export function useAgenda() {
     return `${count} · ${opens} às ${closes}`;
   });
 
-  const isLastOpenDate = computed(() =>
-    agenda.value ? agenda.value.date >= agenda.value.lastOpenDate : false,
-  );
+  const lastDate = computed(() => {
+    if (!agenda.value) return "";
+    const { lastOpenDate, bookedDates } = agenda.value;
+    const lastBooked = bookedDates.at(-1) ?? "";
+    return lastBooked > lastOpenDate ? lastBooked : lastOpenDate;
+  });
+  const isLastDate = computed(() => !!agenda.value && agenda.value.date >= lastDate.value);
 
   function goToDay(offset: number) {
     if (!agenda.value) return;
@@ -44,7 +48,8 @@ export function useAgenda() {
     agenda,
     title,
     summary,
-    isLastOpenDate,
+    lastDate,
+    isLastDate,
     goToDay,
     goToDate,
     cancelBooking,
