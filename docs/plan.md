@@ -60,6 +60,8 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [x] **(you)** On the box: `/srv/nails`, `.env`, dedicated deploy key restricted in `authorized_keys`, Caddy block, Cloudflare DNS record.
 - [x] GitHub Actions: test → build arm64 → push GHCR → deploy on push to `main`. Upload a photo after the first deploy to prove `sharp` loaded its arm64 binary. **(you)** add the repository secrets.
 - [x] Nightly backup to R2 + healthchecks ping. **(you)** install the cron entry.
+- [x] Panel installable as a phone app (web app manifest, icons from the logo).
+- [ ] Panel push notifications: new booking, client cancellation, waitlist, 30 min before each client. **(you)** VAPID keys in the box's `.env`, then turn it on in each phone.
 
 ## Phase 6 — WhatsApp
 

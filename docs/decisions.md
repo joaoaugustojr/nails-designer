@@ -478,3 +478,12 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - **Linked from `/admin/**` pages only:** the owner installs the panel; the client site stays a plain site, with no install prompt for clients.
 - **Icons are the logo:** `/icon/192.png` and `/icon/512.png` (the sizes Android asks for) and `/favicon.ico` (180 px, also `apple-touch-icon`) come from one helper, `sendStoreIcon`; the home-screen name on iOS is the store name (`apple-mobile-web-app-title`).
 - No service worker: installing no longer needs one, and the panel is useless offline anyway.
+
+### Panel notifications on the phone (2026-11-18)
+
+- **Web Push to the installed panel**, free and independent of Meta, so it ships before WhatsApp. Each panel user turns it on per device in Loja → Minha conta ("Notificações neste celular"); every enabled device gets every notification. Both phones in use are Android; on iPhone it would need iOS 16.4+ and the app installed on the home screen.
+- **What is sent:** a booking made by a client (not the panel's own), a cancellation by the client, a new waitlist request, and **"Cliente chega em 30 minutos"** for every confirmed booking, panel ones included, whatever the client's reminders opt-in. Tapping opens the agenda (the waitlist one opens Clientes).
+- The 30-minute reminder runs in the existing minute task (`reminders:send`), marked in `bookings.owner_reminder_sent_at` before sending (a crash loses one instead of sending it twice), and is skipped for bookings made less than 30 minutes ahead.
+- `push_subscriptions` (endpoint unique, cascades with its user). A subscription the push service reports gone (404/410) is deleted. Sending never blocks or fails the booking (callers do not await it).
+- **Keys:** `NUXT_PUBLIC_VAPID_PUBLIC_KEY` and `NUXT_VAPID_PRIVATE_KEY` (`pnpm exec web-push generate-vapid-keys`); the VAPID subject is `NUXT_SITE_URL`, which must be https. Without the keys the switch is hidden and nothing is sent (white label: another store may skip it).
+- `web-push` pinned to 3.6.7: 4.0.0 was 12 days old, ESM-only, and has no matching types yet.

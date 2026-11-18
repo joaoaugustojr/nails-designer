@@ -44,6 +44,8 @@ const {
       />
     </SurfaceCard>
 
+    <PanelPushSwitch />
+
     <Button
       v-if="!isChangingPassword"
       variant="outline"

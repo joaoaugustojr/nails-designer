@@ -19,7 +19,8 @@ export default defineNuxtConfig({
     siteUrl: "http://localhost:3000",
     admin: { name: "", email: "", password: "" },
     session: { maxAge: 60 * 60 * 24 * 7 },
-    public: { isWhatsappEnabled: false },
+    vapidPrivateKey: "",
+    public: { isWhatsappEnabled: false, vapidPublicKey: "" },
   },
 
   // `dark` / `light` class on <html>, matching shadcn's `.dark` variant.

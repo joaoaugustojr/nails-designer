@@ -1,12 +1,14 @@
-import { and, eq, gt, lte } from "drizzle-orm";
+import { and, eq, gt, isNull, lte } from "drizzle-orm";
 
 import { utcToZoned, zonedToUtc } from "../../shared/utils/time";
 import { bookings } from "../db/schema";
 import { bookingMessage, notify } from "./notifications";
+import { bookingPush, pushToPanel } from "./push";
 
 const MS_PER_MINUTE = 60_000;
 const MS_PER_DAY = 24 * 60 * MS_PER_MINUTE;
 const DAY_OF_REMINDER_MINUTE = 8 * 60;
+const OWNER_REMINDER_MINUTES = 30;
 
 type SentColumn =
   "reminderDayBeforeSentAt" | "reminderDaySentAt" | "reminder1hSentAt" | "reminder30mSentAt";
@@ -54,6 +56,35 @@ export async function sendDueReminders(now = Date.now()) {
       .set(Object.fromEntries(due.map(({ column }) => [column, sentAt])))
       .where(eq(bookings.id, booking.id));
     void notify(bookingMessage("booking_reminder", booking, settings));
+    sentCount++;
+  }
+  return sentCount;
+}
+
+// The panel's "your client arrives in 30 minutes" push, for every confirmed booking (panel ones
+// included, whatever the client's opt-in). Skipped when the booking was made inside the window.
+export async function sendDueOwnerReminders(now = Date.now()) {
+  const db = await useDb();
+  const { timezone } = await readSettings();
+  const windowMs = OWNER_REMINDER_MINUTES * MS_PER_MINUTE;
+  const due = await db.query.bookings.findMany({
+    where: and(
+      eq(bookings.status, "confirmed"),
+      isNull(bookings.ownerReminderSentAt),
+      gt(bookings.startsAt, new Date(now)),
+      lte(bookings.startsAt, new Date(now + windowMs)),
+    ),
+  });
+
+  let sentCount = 0;
+  for (const booking of due) {
+    if (booking.createdAt.getTime() > booking.startsAt.getTime() - windowMs) continue;
+    // Marking first means a crash loses a reminder instead of sending it twice.
+    await db
+      .update(bookings)
+      .set({ ownerReminderSentAt: new Date(now) })
+      .where(eq(bookings.id, booking.id));
+    void pushToPanel(bookingPush("arriving", booking, timezone));
     sentCount++;
   }
   return sentCount;

@@ -5,7 +5,7 @@ import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createDatabase, migrateDatabase } from "../db/client";
 import { bookings, clients } from "../db/schema";
-import { sendDueReminders } from "./reminders";
+import { sendDueOwnerReminders, sendDueReminders } from "./reminders";
 
 const dir = mkdtempSync(join(tmpdir(), "nails-reminders-"));
 const db = createDatabase(`file:${join(dir, "test.db")}`);
@@ -92,5 +92,24 @@ describe("sendDueReminders", () => {
     await db.delete(bookings);
     await book({ status: "cancelled" });
     expect(await sentCountAt("2026-11-18T13:30:00-03:00")).toBe(0);
+  });
+});
+
+describe("sendDueOwnerReminders", () => {
+  const ownerCountAt = (now: string) => sendDueOwnerReminders(new Date(now).getTime());
+
+  it("reminds the owner 30 min before, once, whatever the client's opt-in", async () => {
+    await book({ remindersOptIn: false });
+    expect(await ownerCountAt("2026-11-18T13:29:00-03:00")).toBe(0);
+    expect(await ownerCountAt("2026-11-18T13:30:00-03:00")).toBe(1);
+    expect(await ownerCountAt("2026-11-18T13:31:00-03:00")).toBe(0);
+  });
+
+  it("skips bookings made inside the window or cancelled", async () => {
+    await book({ createdAt: new Date("2026-11-18T13:45:00-03:00") });
+    expect(await ownerCountAt("2026-11-18T13:46:00-03:00")).toBe(0);
+    await db.delete(bookings);
+    await book({ status: "cancelled" });
+    expect(await ownerCountAt("2026-11-18T13:30:00-03:00")).toBe(0);
   });
 });

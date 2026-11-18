@@ -1,6 +1,8 @@
 export default defineTask({
-  meta: { name: "reminders:send", description: "Send the WhatsApp reminders that are due" },
+  meta: { name: "reminders:send", description: "Send the reminders that are due" },
   async run() {
-    return { result: await sendDueReminders() };
+    const clients = await sendDueReminders();
+    const owner = await sendDueOwnerReminders();
+    return { result: { clients, owner } };
   },
 });

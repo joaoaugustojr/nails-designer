@@ -5,6 +5,7 @@ import { isOpenWeekday, todayIn } from "../../shared/utils/time";
 import { bookings, waitlistRequests } from "../db/schema";
 import { findActiveService, isBookableDate } from "./availability";
 import { notify, waitlistMessage } from "./notifications";
+import { pushToPanel, waitlistPush } from "./push";
 import { listOpenWeekdays } from "./schedule";
 
 export async function createWaitlistRequest(input: WaitlistInput) {
@@ -38,6 +39,7 @@ export async function createWaitlistRequest(input: WaitlistInput) {
   };
   await db.insert(waitlistRequests).values(request);
   if (settings.whatsapp) void notify(waitlistMessage(settings.whatsapp, request));
+  void pushToPanel(waitlistPush(request));
 }
 
 export async function listWaitlist() {

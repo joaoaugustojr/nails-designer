@@ -9,6 +9,7 @@ import { bookings, clients, services } from "../db/schema";
 import { findActiveService, freeStartMinutes } from "./availability";
 import { upsertClient } from "./clients";
 import { bookingMessage, notify } from "./notifications";
+import { bookingPush, pushToPanel } from "./push";
 
 const MS_PER_MINUTE = 60_000;
 
@@ -121,7 +122,23 @@ export function createBooking(input: BookingInput) {
     });
     if (!day!.startMinutes.includes(input.startMinute)) throw slotTaken();
 
-    return saveBooking(db, { ...input, service, priceCents: service.priceCents }, settings);
+    const saved = await saveBooking(
+      db,
+      { ...input, service, priceCents: service.priceCents },
+      settings,
+    );
+    void pushToPanel(
+      bookingPush(
+        "created",
+        {
+          clientName: input.name,
+          serviceName: service.name,
+          ...bookingTimes({ ...input, service }, settings.timezone),
+        },
+        settings.timezone,
+      ),
+    );
+    return saved;
   });
 }
 
@@ -245,4 +262,5 @@ export async function cancelBookingByClient(token: string) {
     .update(bookings)
     .set({ status: "cancelled", cancelledAt: new Date() })
     .where(and(eq(bookings.token, token), eq(bookings.status, "confirmed")));
+  void pushToPanel(bookingPush("cancelled", booking, settings.timezone));
 }

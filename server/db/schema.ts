@@ -185,6 +185,8 @@ export const bookings = sqliteTable(
     reminderDaySentAt: timestamp(),
     reminder1hSentAt: timestamp(),
     reminder30mSentAt: timestamp(),
+    // The panel's push "your client arrives in 30 minutes", for every booking.
+    ownerReminderSentAt: timestamp(),
   },
   (t) => [
     check("bookings_range", sql`${t.startsAt} < ${t.endsAt}`),
@@ -220,3 +222,16 @@ export const waitlistRequests = sqliteTable(
   },
   (t) => [index("waitlist_requests_last_date_idx").on(t.lastDate)],
 );
+
+// Phones and browsers where a panel user turned on notifications (Web Push). The endpoint is
+// the browser's push address; p256dh and auth are the keys messages are encrypted with.
+export const pushSubscriptions = sqliteTable("push_subscriptions", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  userId: integer()
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  endpoint: text().notNull().unique(),
+  p256dh: text().notNull(),
+  auth: text().notNull(),
+  createdAt: createdAt(),
+});
