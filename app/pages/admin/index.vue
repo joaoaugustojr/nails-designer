@@ -7,8 +7,9 @@ useHead({ title: "Agenda" });
 const { agenda, title, summary, lastDate, isLastDate, goToDay, goToDate, cancelBooking, refresh } =
   useAgenda();
 const isBlocking = ref(false);
-const newBookingPath = computed(() =>
-  agenda.value ? `/admin/bookings/new?date=${agenda.value.date}` : "/admin/bookings/new",
+const route = useRoute();
+const bookingPath = computed(() =>
+  newBookingPath({ date: agenda.value?.date, from: route.fullPath }),
 );
 
 async function onBlocked() {
@@ -23,7 +24,7 @@ async function onBlocked() {
       <div class="flex gap-2">
         <Button size="md" variant="outline" @click="isBlocking = !isBlocking">Bloquear</Button>
         <Button as-child size="md">
-          <NuxtLink :to="newBookingPath">
+          <NuxtLink :to="bookingPath">
             <PlusIcon aria-hidden="true" />
             Agendar
           </NuxtLink>

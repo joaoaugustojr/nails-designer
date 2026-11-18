@@ -5,6 +5,7 @@ import type { DaySpan } from "../../shared/utils/day-timeline";
 import { addDays, todayIn, weekdayOf, zonedToUtc } from "../../shared/utils/time";
 import type { Database } from "../db/client";
 import { bookings, servicePhotos, services, timeOff } from "../db/schema";
+import { listOpenWeekdays } from "./schedule";
 
 const MS_PER_MINUTE = 60_000;
 
@@ -29,9 +30,14 @@ export type AvailabilityInput = {
 const overlaps = (first: Interval, second: Interval) =>
   first.startsAt < second.endsAt && second.startsAt < first.endsAt;
 
+export function bookableRange(maxDaysAhead: number, timezone: string, now: number) {
+  const firstDate = todayIn(timezone, now);
+  return { firstDate, lastDate: addDays(firstDate, maxDaysAhead) };
+}
+
 export function isBookableDate(date: string, maxDaysAhead: number, timezone: string, now: number) {
-  const today = todayIn(timezone, now);
-  return date >= today && date <= addDays(today, maxDaysAhead);
+  const { firstDate, lastDate } = bookableRange(maxDaysAhead, timezone, now);
+  return date >= firstDate && date <= lastDate;
 }
 
 // Start minutes (in the store's timezone) where the whole service fits. The gap keeps
@@ -151,20 +157,22 @@ export async function findServiceAvailability(serviceId: number, query: Availabi
   const db = await useDb();
   const [service, settings] = await Promise.all([findActiveService(db, serviceId), readSettings()]);
   const now = Date.now();
-  const firstDate = todayIn(settings.timezone, now);
-  const lastDate = addDays(firstDate, settings.maxDaysAhead);
+  const { firstDate, lastDate } = bookableRange(settings.maxDaysAhead, settings.timezone, now);
   const from = query.from && query.from > firstDate ? query.from : firstDate;
   const to = addDays(from, query.days - 1);
   const bookableDates = Array.from({ length: settings.maxDaysAhead + 1 }, (_, index) =>
     addDays(firstDate, index),
   );
   // The whole bookable range is computed so the calendar can disable full and closed days.
-  const allDays = await freeStartMinutes(db, {
-    dates: bookableDates,
-    durationMinutes: service.durationMinutes,
-    settings,
-    now,
-  });
+  const [allDays, openWeekdays] = await Promise.all([
+    freeStartMinutes(db, {
+      dates: bookableDates,
+      durationMinutes: service.durationMinutes,
+      settings,
+      now,
+    }),
+    listOpenWeekdays(),
+  ]);
 
   return {
     service: {
@@ -176,6 +184,7 @@ export async function findServiceAvailability(serviceId: number, query: Availabi
     },
     firstDate,
     lastDate,
+    openWeekdays,
     openDates: allDays.filter((day) => day.startMinutes.length).map((day) => day.date),
     days: allDays.filter((day) => day.date >= from && day.date <= to),
   };

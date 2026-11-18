@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { NAME_MAX_LENGTH } from "#shared/schemas/fields";
+
 const {
   user,
   name,
@@ -25,7 +27,7 @@ const {
         <Input
           id="account-name"
           v-model="name"
-          maxlength="80"
+          :maxlength="NAME_MAX_LENGTH"
           autocomplete="name"
           :aria-invalid="!!nameError || undefined"
         />

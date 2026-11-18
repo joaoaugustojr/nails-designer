@@ -4,6 +4,7 @@
 import { relations, sql } from "drizzle-orm";
 import { check, index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
+import type { WaitlistPeriod } from "../../shared/schemas/waitlist";
 import { DEFAULT_TIMEZONE } from "../../shared/utils/time";
 
 const timestamp = () => integer({ mode: "timestamp_ms" });
@@ -60,6 +61,7 @@ export const settings = sqliteTable(
     maxDaysAhead: integer().notNull().default(30),
     clientCanCancel: integer({ mode: "boolean" }).notNull().default(false),
     cancelDeadlineMinutes: integer().notNull().default(120),
+    isWaitlistEnabled: integer({ mode: "boolean" }).notNull().default(true),
   },
   (t) => [check("settings_single_row", sql`${t.id} = 1`)],
 );
@@ -201,3 +203,22 @@ export const clientsRelations = relations(clients, ({ many }) => ({
 export const bookingsRelations = relations(bookings, ({ one }) => ({
   client: one(clients, { fields: [bookings.clientId], references: [clients.id] }),
 }));
+
+// Clients asking to be called when a slot opens. Personal data is kept only while it can
+// still be useful (LGPD): a request is deleted once resolved, booked, or past its last day.
+export const waitlistRequests = sqliteTable(
+  "waitlist_requests",
+  {
+    id: integer().primaryKey({ autoIncrement: true }),
+    serviceId: integer().references(() => services.id, { onDelete: "set null" }),
+    serviceName: text().notNull(),
+    clientName: text().notNull(),
+    clientPhone: text().notNull(),
+    dates: text({ mode: "json" }).$type<string[]>().notNull(),
+    periods: text({ mode: "json" }).$type<WaitlistPeriod[]>().notNull(),
+    note: text().notNull().default(""),
+    lastDate: text().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("waitlist_requests_last_date_idx").on(t.lastDate)],
+);

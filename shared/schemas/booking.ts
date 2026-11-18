@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 import { MINUTES_PER_DAY } from "../utils/time";
+import { honeypotField, nameField, phoneField } from "./fields";
 import { SERVICE_MAX_PRICE_CENTS } from "./service";
-import { nameField } from "./user";
 
 export const AVAILABILITY_MAX_DAYS = 14;
 
@@ -13,13 +13,6 @@ export const availabilityQuerySchema = z.object({
 
 export type AvailabilityQuery = z.infer<typeof availabilityQuerySchema>;
 
-const MOBILE_PATTERN = /^\d{2}9\d{8}$/;
-
-const phoneField = z
-  .string()
-  .transform((value) => value.replace(/\D/g, ""))
-  .refine((digits) => MOBILE_PATTERN.test(digits));
-
 export const bookingSchema = z.object({
   serviceId: z.number().int().positive(),
   date: z.iso.date(),
@@ -28,7 +21,7 @@ export const bookingSchema = z.object({
   phone: phoneField,
   remindersOptIn: z.boolean(),
   idempotencyKey: z.uuid(),
-  website: z.string().max(0),
+  website: honeypotField,
 });
 
 export type BookingInput = z.infer<typeof bookingSchema>;

@@ -3,12 +3,13 @@ import { refDebounced } from "@vueuse/core";
 import { panelBookingSchema } from "#shared/schemas/booking";
 
 import type { ApiGet } from "~/types/api";
+import type { NewBookingPrefill } from "~/utils/new-booking";
 
 type FieldName = "name" | "phone" | "date" | "startMinute" | "priceCents";
 
 const FIELD_ERRORS: Record<FieldName, string> = {
   name: "Informe o nome da cliente.",
-  phone: "Informe o celular com DDD, por exemplo (11) 91234-5678.",
+  phone: PHONE_ERROR,
   date: "Escolha o dia.",
   startMinute: "Escolha o horário.",
   priceCents: "Informe um preço válido, por exemplo 45,00.",
@@ -21,16 +22,16 @@ const MAX_SUGGESTIONS = 3;
 type ClientMatch = ApiGet<"/api/admin/clients">["items"][number];
 type Conflict = { clientName: string; date: string; startMinute: number; endMinute: number };
 
-export function usePanelBookingForm(initialDate: string) {
+export function usePanelBookingForm(prefill: NewBookingPrefill) {
   const { data: services } = useFetch("/api/admin/services");
 
   const form = reactive({
-    serviceId: 0,
-    date: initialDate,
+    serviceId: prefill.serviceId ?? 0,
+    date: prefill.date ?? "",
     time: "",
     price: "",
-    name: "",
-    phone: "",
+    name: prefill.name ?? "",
+    phone: formatPhone(prefill.phone ?? ""),
     remindersOptIn: false,
   });
   const errors = ref<Partial<Record<FieldName, string>>>({});
@@ -88,7 +89,7 @@ export function usePanelBookingForm(initialDate: string) {
   }
 
   function formatPhoneField() {
-    form.phone = formatPhone(form.phone.replace(/\D/g, ""));
+    form.phone = formatPhone(form.phone);
   }
 
   async function save() {

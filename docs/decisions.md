@@ -420,3 +420,14 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - **Another booking always blocks:** `POST /api/admin/bookings` refuses an overlap with 409 and the conflicting booking (client, time); the page says to cancel it first to fit someone in. The overlap trigger stays as it is for every path.
 - The client gets the same confirmation as a site booking. The site path and the panel path share `saveBooking` (snapshot, client upsert, notification).
 - The agenda's calendar also enables days that have bookings (`bookedDates`), so bookings on closed days or past the open agenda stay reachable; "Bloquear horário" became "Bloquear" so both header buttons fit at 390px.
+
+### Waitlist (2026-11-18)
+
+- **Client side:** under the free times, "Nenhum horário bom? Deixe seu WhatsApp e te chamamos quando abrir uma vaga" opens a sheet: up to 5 days on the calendar (open weekdays within the open agenda; full days are allowed, that is the point), periods Manhã / Tarde / Noite (at least one), an optional note, name and WhatsApp. A line under the button says the data is used only to call about the slot (LGPD: purpose stated where the data is given). `POST /api/waitlist`: 5 requests per IP per 10 minutes, same honeypot as booking.
+- **No automatic match:** the owner calls the client herself; the copy says "te chamamos", not "te avisamos".
+- **Owner:** a `waitlist_request` WhatsApp notification to the store's number on each request, and a "Lista de espera" section at the top of Clientes (hidden while searching) with WhatsApp (prefilled message), Agendar and Resolvido.
+- **Agendar** opens the panel booking form filled from the request (client, service, first asked day). The form's URL is built and read only by `app/utils/new-booking.ts`; its `from` is the back link. Resolvido deletes the request after a confirm.
+- **A request ends by itself** once every asked day has passed or once the same phone has a confirmed booking for that service made after the request, whoever booked it (the owner from the list, or the client on the site). Both are cleaned when the list is read, so booking code knows nothing about the waitlist. Personal data is kept only while useful (LGPD). Service name is a snapshot, like bookings.
+- **Days a client may ask for:** open weekdays within the open agenda, checked on both sides with the same helpers (`bookableRange`, `isOpenWeekday`).
+- **On/off:** `settings.isWaitlistEnabled` (on by default), a rule in Horários > Regras that saves on change; the site reads it from `/api/store`. Off hides the link and the server refuses new requests (403).
+- Calendar day cells are `type="button"`: inside a form, a plain `<button>` submitted it on every tap.

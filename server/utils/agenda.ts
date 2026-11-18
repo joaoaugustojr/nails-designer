@@ -20,7 +20,7 @@ export async function getAgenda(requestedDate: string | undefined) {
   const db = await useDb();
 
   const todayStart = new Date(zonedToUtc(today, 0, timezone));
-  const [ranges, dayBookings, blocks, openDays, upcoming] = await Promise.all([
+  const [ranges, dayBookings, blocks, openWeekdays, upcoming] = await Promise.all([
     db.query.workingHours.findMany({
       columns: { startMinute: true, endMinute: true },
       where: eq(workingHours.weekday, weekday),
@@ -45,7 +45,7 @@ export async function getAgenda(requestedDate: string | undefined) {
       columns: { id: true, startsAt: true, endsAt: true, reason: true },
       where: and(lt(timeOff.startsAt, dayEnd), gt(timeOff.endsAt, dayStart)),
     }),
-    db.selectDistinct({ weekday: workingHours.weekday }).from(workingHours),
+    listOpenWeekdays(),
     db.query.bookings.findMany({
       columns: { startsAt: true },
       where: and(eq(bookings.status, "confirmed"), gte(bookings.startsAt, todayStart)),
@@ -65,8 +65,8 @@ export async function getAgenda(requestedDate: string | undefined) {
     date,
     today,
     // The calendar offers only days clients can book: open weekdays up to the last bookable date.
-    lastOpenDate: addDays(today, maxDaysAhead),
-    openWeekdays: openDays.map((day) => day.weekday),
+    lastOpenDate: bookableRange(maxDaysAhead, timezone, Date.now()).lastDate,
+    openWeekdays,
     // Bookings the owner made on closed days or past the open agenda must stay reachable.
     bookedDates,
     workingRanges: ranges.sort((first, second) => first.startMinute - second.startMinute),

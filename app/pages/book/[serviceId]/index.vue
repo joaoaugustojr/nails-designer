@@ -15,6 +15,9 @@ if (!data.value) throw createError({ statusCode: 404, statusMessage: "Serviço n
 
 useHead({ title: "Escolha o horário" });
 
+const { data: store } = useStoreInfo();
+const isWaitlistOpen = ref(false);
+
 const days = computed(() => data.value?.days ?? []);
 const selectedDay = computed(() => days.value.find((day) => day.date === selectedDate.value));
 const pageStart = computed(() => days.value[0]?.date ?? "");
@@ -99,7 +102,25 @@ function pickDate(date: string) {
         <p class="text-xs leading-[1.45] text-muted-foreground">
           Mostramos só os horários em que o serviço inteiro cabe na agenda.
         </p>
+        <Button
+          v-if="store?.isWaitlistEnabled"
+          variant="link"
+          size="inline"
+          class="h-auto min-h-11 self-start text-left whitespace-normal"
+          @click="isWaitlistOpen = true"
+        >
+          Nenhum horário bom? Deixe seu WhatsApp e te chamamos quando abrir uma vaga
+        </Button>
       </section>
+
+      <SiteWaitlistSheet
+        v-if="store?.isWaitlistEnabled"
+        v-model:open="isWaitlistOpen"
+        :service="data.service"
+        :first-date="data.firstDate"
+        :last-date="data.lastDate"
+        :open-weekdays="data.openWeekdays"
+      />
     </div>
 
     <footer

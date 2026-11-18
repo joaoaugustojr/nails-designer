@@ -6,6 +6,7 @@ useHead({ title: "Clientes" });
 
 const { search, clients, total, hasMore, isLoadingMore, loadMore, cancelNextBooking } =
   useClients();
+const { requests: waitlist, resolve } = useWaitlist();
 </script>
 
 <template>
@@ -31,6 +32,17 @@ const { search, clients, total, hasMore, isLoadingMore, loadMore, cancelNextBook
         </div>
       </template>
     </PanelHeader>
+
+    <section v-if="waitlist.length && !search" class="flex flex-col gap-2.5 px-5 pt-4">
+      <PanelSectionTitle>Lista de espera · {{ waitlist.length }}</PanelSectionTitle>
+      <PanelWaitlistCard
+        v-for="request in waitlist"
+        :key="request.id"
+        :request="request"
+        @resolve="resolve(request)"
+      />
+      <PanelSectionTitle class="mt-2">Clientes</PanelSectionTitle>
+    </section>
 
     <section class="flex flex-col gap-2.5 px-5 py-4">
       <PanelClientCard

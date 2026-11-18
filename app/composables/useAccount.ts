@@ -1,3 +1,4 @@
+import { NAME_MAX_LENGTH } from "#shared/schemas/fields";
 import { PASSWORD_MIN_LENGTH, passwordChangeSchema, profileSchema } from "#shared/schemas/user";
 
 export function useAccount() {
@@ -17,7 +18,7 @@ export function useAccount() {
   async function saveName() {
     const parsed = profileSchema.safeParse({ name: name.value });
     if (!parsed.success) {
-      nameError.value = "Informe o seu nome (até 80 caracteres).";
+      nameError.value = `Informe o seu nome (até ${NAME_MAX_LENGTH} caracteres).`;
       return;
     }
     nameError.value = "";

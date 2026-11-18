@@ -61,6 +61,20 @@ async function onTimeOffSaved() {
               @update:model-value="updateRules({ [rule.key]: $event })"
             />
           </div>
+          <div class="flex min-h-[46px] items-center justify-between gap-3 px-3.5 py-2 text-sm">
+            <label for="waitlist-enabled" class="flex flex-col">
+              Clientes podem entrar na lista de espera
+              <span class="text-xs text-muted-foreground">
+                Mostra “Nenhum horário bom?” na escolha do horário
+              </span>
+            </label>
+            <Switch
+              id="waitlist-enabled"
+              size="sm"
+              :model-value="rules.isWaitlistEnabled"
+              @update:model-value="updateRules({ isWaitlistEnabled: $event })"
+            />
+          </div>
         </SurfaceCard>
 
         <PanelSectionTitle class="mt-1.5">Cancelamento</PanelSectionTitle>

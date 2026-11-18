@@ -15,3 +15,8 @@ export function fieldMessages<Field extends string>(
 export function errorStatus(error: unknown) {
   return (error as { statusCode?: number } | null)?.statusCode;
 }
+
+export const CLIENT_NAME_ERROR = "Informe o seu nome.";
+export const PHONE_ERROR = "Informe o celular com DDD, por exemplo (11) 91234-5678.";
+export const TOO_MANY_ATTEMPTS_ERROR =
+  "Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.";

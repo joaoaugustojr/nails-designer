@@ -1,8 +1,9 @@
 import { z } from "zod";
 
+import { nameField } from "./fields";
+
 export const PASSWORD_MIN_LENGTH = 8;
 
-export const nameField = z.string().trim().min(1).max(80);
 export const emailField = z.string().trim().toLowerCase().pipe(z.email());
 const newPasswordField = z.string().min(PASSWORD_MIN_LENGTH).max(200);
 

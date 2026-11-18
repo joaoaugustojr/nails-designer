@@ -71,6 +71,9 @@ export const todayIn = (timeZone: string, now = Date.now()) => utcToZoned(now, t
 
 export const weekdayOf = (date: string) => new Date(`${date}T00:00:00Z`).getUTCDay();
 
+export const isOpenWeekday = (date: string, openWeekdays: number[]) =>
+  openWeekdays.includes(weekdayOf(date));
+
 export function addDays(date: string, days: number) {
   const [year, month, day] = date.split("-").map(Number) as [number, number, number];
   return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);

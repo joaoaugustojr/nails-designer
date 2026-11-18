@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { NAME_MAX_LENGTH } from "#shared/schemas/fields";
+
 const route = useRoute("book-serviceId-details");
 const date = String(route.query.date ?? "");
 const startMinute = Number(route.query.start);
@@ -59,7 +61,7 @@ const when = computed(() => {
           <Input
             id="booking-name"
             v-model="form.name"
-            maxlength="80"
+            :maxlength="NAME_MAX_LENGTH"
             autocomplete="name"
             placeholder="Como você gostaria de ser chamada"
             :aria-invalid="!!errors.name || undefined"
@@ -103,10 +105,7 @@ const when = computed(() => {
         </span>
       </SurfaceCard>
 
-      <div aria-hidden="true" class="absolute -left-[9999px]">
-        <label for="booking-website">Site</label>
-        <input id="booking-website" v-model="form.website" tabindex="-1" autocomplete="off" />
-      </div>
+      <SiteHoneypotField id="booking-website" v-model="form.website" />
 
       <p v-if="error && !isSlotTaken" role="alert" class="text-sm text-destructive">
         {{ error }}

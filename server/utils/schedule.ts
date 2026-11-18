@@ -1,8 +1,15 @@
 import { asc, eq, gt } from "drizzle-orm";
 
-import type { RulesChanges, TimeOffInput, TimeRange } from "#shared/schemas/schedule";
-
+import {
+  type RulesChanges,
+  rulesSchema,
+  type TimeOffInput,
+  type TimeRange,
+} from "../../shared/schemas/schedule";
 import { timeOff, workingHours } from "../db/schema";
+
+const RULE_KEYS = Object.keys(rulesSchema.shape) as (keyof RulesChanges)[];
+type Rules = Required<RulesChanges>;
 
 export async function getSchedule() {
   const db = await useDb();
@@ -13,12 +20,8 @@ export async function getSchedule() {
     }),
     readSettings(),
   ]);
-  const { gapMinutes, minNoticeMinutes, maxDaysAhead, clientCanCancel, cancelDeadlineMinutes } =
-    settings;
-  return {
-    workingHours: hours,
-    rules: { gapMinutes, minNoticeMinutes, maxDaysAhead, clientCanCancel, cancelDeadlineMinutes },
-  };
+  const rules = Object.fromEntries(RULE_KEYS.map((key) => [key, settings[key]])) as Rules;
+  return { workingHours: hours, rules };
 }
 
 export async function replaceDayRanges(weekday: number, ranges: TimeRange[]) {
@@ -32,6 +35,12 @@ export async function replaceDayRanges(weekday: number, ranges: TimeRange[]) {
     clearDay,
     db.insert(workingHours).values(ranges.map((range) => ({ weekday, ...range }))),
   ]);
+}
+
+export async function listOpenWeekdays() {
+  const db = await useDb();
+  const rows = await db.selectDistinct({ weekday: workingHours.weekday }).from(workingHours);
+  return rows.map((row) => row.weekday);
 }
 
 export async function updateRules(changes: RulesChanges) {

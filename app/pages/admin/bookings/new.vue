@@ -1,7 +1,7 @@
 <script setup lang="ts">
-const route = useRoute();
-const initialDate = typeof route.query.date === "string" ? route.query.date : "";
-const agendaPath = initialDate ? `/admin?date=${initialDate}` : "/admin";
+import { NAME_MAX_LENGTH } from "#shared/schemas/fields";
+
+const { backTo, prefill } = readNewBookingQuery(useRoute().query);
 
 const {
   form,
@@ -16,7 +16,7 @@ const {
   chooseClient,
   formatPhoneField,
   save,
-} = usePanelBookingForm(initialDate);
+} = usePanelBookingForm(prefill);
 const { isWhatsappEnabled } = useRuntimeConfig().public;
 
 useHead({ title: "Novo agendamento" });
@@ -30,7 +30,7 @@ const conflictText = computed(() => {
 
 <template>
   <form class="flex min-h-dvh flex-col" novalidate @submit.prevent="save">
-    <PanelDetailHeader title="Novo agendamento" :back-to="agendaPath" />
+    <PanelDetailHeader title="Novo agendamento" :back-to="backTo" />
 
     <FieldGroup class="flex-1 px-5 py-4">
       <Field :data-invalid="!!errors.name || undefined">
@@ -38,7 +38,7 @@ const conflictText = computed(() => {
         <Input
           id="client-name"
           v-model="form.name"
-          maxlength="80"
+          :maxlength="NAME_MAX_LENGTH"
           autocomplete="off"
           placeholder="Nome da cliente"
           :aria-invalid="!!errors.name || undefined"

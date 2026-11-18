@@ -3,13 +3,13 @@ import { bookingSchema } from "#shared/schemas/booking";
 type FieldName = "name" | "phone";
 
 const FIELD_ERRORS: Record<FieldName, string> = {
-  name: "Informe o seu nome.",
-  phone: "Informe o celular com DDD, por exemplo (11) 91234-5678.",
+  name: CLIENT_NAME_ERROR,
+  phone: PHONE_ERROR,
 };
 
 const REQUEST_ERRORS: Record<number, string> = {
   409: "Esse horário acabou de ser reservado. Escolha outro.",
-  429: "Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.",
+  429: TOO_MANY_ATTEMPTS_ERROR,
 };
 
 function newIdempotencyKey() {
@@ -29,7 +29,7 @@ export function useBookingForm(choice: { serviceId: number; date: string; startM
   let idempotencyKey: string | null = null;
 
   function formatPhoneField() {
-    form.phone = formatPhone(form.phone.replace(/\D/g, ""));
+    form.phone = formatPhone(form.phone);
   }
 
   async function confirm() {

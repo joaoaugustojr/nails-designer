@@ -12,6 +12,7 @@ export async function getPublicStore() {
     about: store.about,
     accentColor: store.accentColor,
     timezone: store.timezone,
+    isWaitlistEnabled: store.isWaitlistEnabled,
   };
 }
 

@@ -17,7 +17,7 @@ const lastOpen = computed(() => parseDate(props.lastOpenDate));
 
 const isClosed = (day: DateValue) => {
   const date = day.toString();
-  return !props.openWeekdays.includes(weekdayOf(date)) && !props.bookedDates.includes(date);
+  return !isOpenWeekday(date, props.openWeekdays) && !props.bookedDates.includes(date);
 };
 
 function pick(value: DateValue | undefined) {

@@ -51,6 +51,7 @@ export const rulesSchema = z
     maxDaysAhead: z.number().int().min(1).max(365),
     clientCanCancel: z.boolean(),
     cancelDeadlineMinutes: z.number().int().min(0).max(MAX_RULE_MINUTES),
+    isWaitlistEnabled: z.boolean(),
   })
   .partial()
   .refine((rules) => Object.keys(rules).length > 0, "No changes");

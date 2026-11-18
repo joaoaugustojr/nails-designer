@@ -56,9 +56,10 @@ describe("formatPhone", () => {
     ["11912345678", "(11) 91234-5678"],
     ["1133334444", "(11) 3333-4444"],
     ["5511912345678", "+55 (11) 91234-5678"],
+    ["11 91234 5678", "(11) 91234-5678"],
     ["123", "123"],
-  ])("formats %s as %s", (digits, label) => {
-    expect(formatPhone(digits)).toBe(label);
+  ])("formats %s as %s", (phone, label) => {
+    expect(formatPhone(phone)).toBe(label);
   });
 });
 
