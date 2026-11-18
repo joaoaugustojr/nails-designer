@@ -13,9 +13,10 @@ const bookingPath = computed(() =>
 );
 
 const { data: store } = useStoreInfo();
-const siteUrl = useRequestURL().origin;
 const shareLink = computed(() =>
-  whatsappShareUrl(`Agende seu horário em ${store.value?.name ?? ""}: ${siteUrl}`),
+  whatsappShareUrl(
+    `Agende seu horário em ${store.value?.name ?? ""}: ${store.value?.siteUrl ?? ""}`,
+  ),
 );
 
 async function onBlocked() {

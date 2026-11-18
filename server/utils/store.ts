@@ -13,6 +13,7 @@ export async function getPublicStore() {
     accentColor: store.accentColor,
     timezone: store.timezone,
     isWaitlistEnabled: store.isWaitlistEnabled,
+    siteUrl: useRuntimeConfig().siteUrl,
   };
 }
 
