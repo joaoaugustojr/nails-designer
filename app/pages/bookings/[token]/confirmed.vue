@@ -11,6 +11,11 @@ useHead({ title: "Agendamento confirmado" });
 
 const store = computed(() => data.value!.store);
 const booking = computed(() => data.value!.booking);
+const bookedService = computed(() => ({
+  name: booking.value.serviceName,
+  durationMinutes: booking.value.serviceDurationMinutes,
+  priceCents: booking.value.servicePriceCents,
+}));
 const when = computed(
   () => `${formatDayWithWeekday(booking.value.date)} · ${minutesToTime(booking.value.startMinute)}`,
 );
@@ -43,7 +48,10 @@ const when = computed(
     <SurfaceCard as="dl" class="flex flex-col divide-y divide-border rounded-2xl">
       <div class="flex justify-between gap-3 px-4 py-3.5 text-sm">
         <dt class="text-muted-foreground">Serviço</dt>
-        <dd class="text-right font-bold">{{ booking.serviceName }}</dd>
+        <dd class="flex flex-col items-end gap-0.5 text-right font-bold">
+          {{ booking.serviceName }}
+          <SiteServiceDetailsLink :service-id="booking.serviceId" :booked="bookedService" />
+        </dd>
       </div>
       <div class="flex justify-between gap-3 px-4 py-3.5 text-sm">
         <dt class="text-muted-foreground">Quando</dt>

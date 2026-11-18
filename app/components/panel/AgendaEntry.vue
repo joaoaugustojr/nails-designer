@@ -30,7 +30,9 @@ const placeholder = computed(() => {
       class="flex flex-1 flex-col gap-1 px-3.5 pt-3 pb-1"
     >
       <span class="text-[15px] font-bold">{{ entry.clientName }}</span>
-      <span class="text-[13px] text-muted-foreground">{{ entry.serviceName }}</span>
+      <span class="text-[13px] text-muted-foreground">
+        {{ entry.serviceName }} · {{ formatPriceShort(entry.servicePriceCents) }}
+      </span>
       <div class="flex gap-4">
         <Button as-child variant="link" size="inline">
           <a :href="whatsappUrl(entry.clientPhone)" target="_blank" rel="noopener">WhatsApp</a>

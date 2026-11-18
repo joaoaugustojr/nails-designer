@@ -1,6 +1,12 @@
 <script setup lang="ts">
 defineProps<{
-  service: { name: string; durationMinutes: number; priceCents: number; photoPath: string | null };
+  service: {
+    id: number;
+    name: string;
+    durationMinutes: number;
+    priceCents: number;
+    photoPath: string | null;
+  };
 }>();
 </script>
 
@@ -13,9 +19,12 @@ defineProps<{
       class="size-11 shrink-0 rounded-[10px] object-cover"
     />
     <div v-else class="size-11 shrink-0 rounded-[10px] bg-secondary" />
-    <div class="flex min-w-0 flex-1 flex-col gap-0.5 py-2">
-      <span class="truncate text-[15px] font-bold">{{ service.name }}</span>
-      <SiteServiceSummary :service="service" class="text-[13px]" />
+    <div class="flex min-w-0 flex-1 flex-col items-start gap-0.5 py-2">
+      <span class="max-w-full truncate text-[15px] font-bold">{{ service.name }}</span>
+      <slot>
+        <SiteServiceSummary :service="service" class="text-[13px]" />
+      </slot>
+      <SiteServiceDetailsLink :service-id="service.id" />
     </div>
     <Button as-child variant="link" size="inline">
       <NuxtLink to="/">Trocar</NuxtLink>

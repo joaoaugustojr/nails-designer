@@ -32,6 +32,7 @@ export async function getAgenda(requestedDate: string | undefined) {
         clientName: true,
         clientPhone: true,
         serviceName: true,
+        servicePriceCents: true,
       },
       where: and(
         eq(bookings.status, "confirmed"),

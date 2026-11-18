@@ -38,10 +38,9 @@ const when = computed(() => {
     <SiteStepHeader title="Seus dados" step="Passo 2 de 2" :back-to="backTo" />
 
     <div class="mx-auto flex w-full max-w-2xl flex-col gap-5 px-5 pt-4 pb-6">
-      <div class="flex flex-col gap-1 rounded-[14px] bg-secondary p-3.5">
-        <span class="text-[15px] font-bold">{{ data.service.name }}</span>
-        <span class="text-sm text-foreground/80">{{ when }}</span>
-      </div>
+      <SiteChosenService :service="data.service">
+        <span class="text-[13px] text-muted-foreground">{{ when }}</span>
+      </SiteChosenService>
 
       <div
         v-if="!isStillFree || isSlotTaken"

@@ -16,6 +16,12 @@ const booking = computed(() => data.value!.booking);
 const cancellation = computed(() => data.value!.cancellation);
 const isCancelled = computed(() => booking.value.status === "cancelled");
 
+const bookedService = computed(() => ({
+  name: booking.value.serviceName,
+  durationMinutes: booking.value.serviceDurationMinutes,
+  priceCents: booking.value.servicePriceCents,
+}));
+
 const when = computed(() =>
   formatBookingTime(booking.value.date, booking.value.startMinute, booking.value.endMinute),
 );
@@ -80,6 +86,11 @@ function cancelBooking() {
         <span class="text-base font-bold text-foreground">{{ booking.serviceName }}</span>
         <span>{{ when }}</span>
         <span v-if="store.address">{{ store.address }}</span>
+        <SiteServiceDetailsLink
+          :service-id="booking.serviceId"
+          :booked="bookedService"
+          class="self-start"
+        />
       </SurfaceCard>
 
       <SiteBookingLinks

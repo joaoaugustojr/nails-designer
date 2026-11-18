@@ -3,7 +3,10 @@ import { CheckIcon, XIcon } from "@lucide/vue";
 
 import type { ApiGet } from "~/types/api";
 
-defineProps<{ service: ApiGet<"/api/catalog">["services"][number] | null }>();
+defineProps<{
+  service: ApiGet<"/api/catalog">["services"][number] | null;
+  isInBookingFlow?: boolean;
+}>();
 const isOpen = defineModel<boolean>("open", { required: true });
 </script>
 
@@ -26,7 +29,10 @@ const isOpen = defineModel<boolean>("open", { required: true });
           </Button>
         </SheetClose>
 
-        <div class="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <div
+          class="flex min-h-0 flex-1 flex-col overflow-y-auto"
+          :class="{ 'pb-[env(safe-area-inset-bottom)]': isInBookingFlow }"
+        >
           <SitePhotoGallery v-if="service.photos.length" :photos="service.photos" />
 
           <div class="flex flex-col gap-3 px-5 pt-4" :class="{ 'pt-16': !service.photos.length }">
@@ -55,7 +61,10 @@ const isOpen = defineModel<boolean>("open", { required: true });
           </div>
         </div>
 
-        <div class="border-t border-border px-5 pt-3.5 pb-[calc(22px+env(safe-area-inset-bottom))]">
+        <div
+          v-if="!isInBookingFlow"
+          class="border-t border-border px-5 pt-3.5 pb-[calc(22px+env(safe-area-inset-bottom))]"
+        >
           <Button as-child class="w-full">
             <NuxtLink :to="`/book/${service.id}`">Agendar este serviço</NuxtLink>
           </Button>

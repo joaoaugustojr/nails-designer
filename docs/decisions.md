@@ -401,3 +401,14 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 
 - The booking day strip gets a calendar button next to the arrows, using the same `Calendar` as the agenda. Picking a day moves the strip to start on that day and selects it; the arrows keep working as before.
 - `GET /api/services/:id/availability` computes free slots for the whole bookable range and returns `openDates` (days with at least one free slot for that service). The calendar disables every other day — closed, past, time off or fully booked — not just closed weekdays.
+
+### "Saiba mais" in the booking flow (2026-11-18)
+
+- Both booking steps show the chosen service with `SiteChosenService` (step 2 swaps the duration/price line for the day, time and price). It has a "Saiba mais" link that opens the same `SiteServiceDetails` sheet as the home page, without the "Agendar este serviço" button, since the client is already booking it.
+- The same link (`SiteServiceDetailsLink`) appears on the thank-you and "my booking" pages; `GET /api/bookings/:token` now returns `serviceId`. The link hides when the service was deleted or deactivated (it is no longer in the catalog).
+
+### Bookings show the price they were made at (2026-11-18)
+
+- A booking keeps the service name, duration and price it was made with (`serviceName`, `serviceDurationMinutes`, `servicePriceCents`); later changes to the service never alter it.
+- The "Saiba mais" sheet on the thank-you and "my booking" pages shows those booked values; only the description, photos and "O que inclui" come from the current service.
+- The admin agenda shows the booked price next to the service name; the client's total spent already sums the booked prices.
