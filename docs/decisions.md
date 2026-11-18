@@ -471,3 +471,10 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 
 - **alinepratanails.site is DNS only** (grey cloud), which supersedes "both records proxied" in "Own domain": through the Cloudflare proxy, requests to the server lost packets and took 0.3–2.8 s; direct they take about 0.2 s. `www` is a CNAME to the apex, Caddy redirects it to `https://alinepratanails.site` and issues the HTTPS certificates itself (the Cloudflare universal certificate is not in the path).
 - **The `.env` on the server keeps no admin password:** `NUXT_ADMIN_PASSWORD` only seeds the first user and was removed after the first login; the password lives hashed in the database.
+
+### Panel installable as an app (2026-11-18)
+
+- **The panel can be installed on the phone's home screen** ("Adicionar à tela inicial" / "Instalar app") and opens on the agenda in its own window, without the browser bar. `/manifest.webmanifest` is built from the store settings (name, logo; white label), with `start_url: /admin`, `scope: /` and `display: standalone`.
+- **Linked from `/admin/**` pages only:** the owner installs the panel; the client site stays a plain site, with no install prompt for clients.
+- **Icons are the logo:** `/icon/192.png` and `/icon/512.png` (the sizes Android asks for) and `/favicon.ico` (180 px, also `apple-touch-icon`) come from one helper, `sendStoreIcon`; the home-screen name on iOS is the store name (`apple-mobile-web-app-title`).
+- No service worker: installing no longer needs one, and the panel is useless offline anyway.

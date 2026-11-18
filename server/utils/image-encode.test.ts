@@ -39,7 +39,7 @@ describe("encodePreviewJpeg", () => {
 describe("encodeIconPng", () => {
   it("fits the logo in a 180 px square PNG", async () => {
     const webp = await encodeWebp(await phonePhoto(400, 300));
-    const output = await sharp(await encodeIconPng(webp)).metadata();
+    const output = await sharp(await encodeIconPng(webp, 180)).metadata();
 
     expect(output.format).toBe("png");
     expect([output.width, output.height]).toEqual([180, 180]);

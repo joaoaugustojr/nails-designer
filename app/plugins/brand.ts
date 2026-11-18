@@ -32,6 +32,7 @@ export default defineNuxtPlugin(async () => {
   const iconUrl = computed(() =>
     store.value?.logoPath ? `/favicon.ico?v=${store.value.logoPath.split("/").pop()}` : undefined,
   );
+  const route = useRouter().currentRoute;
   const themeColor = useThemeColor();
 
   useHead({
@@ -44,8 +45,17 @@ export default defineNuxtPlugin(async () => {
       { key: "icon", rel: "icon", type: "image/png", href: iconUrl },
       { key: "apple-touch-icon", rel: "apple-touch-icon", href: iconUrl },
     ],
-    meta: [{ key: "theme-color", name: "theme-color", content: themeColor }],
+    meta: [
+      { key: "theme-color", name: "theme-color", content: themeColor },
+      { key: "apple-mobile-web-app-title", name: "apple-mobile-web-app-title", content: name },
+    ],
   });
+
+  useHead(() => ({
+    link: route.value.path.startsWith("/admin")
+      ? [{ key: "manifest", rel: "manifest", href: "/manifest.webmanifest" }]
+      : [],
+  }));
 
   useSeoMeta({
     ogType: "website",
