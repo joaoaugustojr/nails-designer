@@ -1,13 +1,27 @@
 <script setup lang="ts">
-import { ChevronLeftIcon, ChevronRightIcon } from "@lucide/vue";
+import { type DateValue, parseDate } from "@internationalized/date";
+import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "@lucide/vue";
 
 const props = defineProps<{
   days: { date: string; startMinutes: number[] }[];
+  firstDate: string;
+  lastDate: string;
+  openDates: string[];
   canGoBack: boolean;
   canGoForward: boolean;
 }>();
 const selected = defineModel<string | null>({ required: true });
-const emit = defineEmits<{ back: []; forward: [] }>();
+const emit = defineEmits<{ back: []; forward: []; pick: [date: string] }>();
+
+const isCalendarOpen = ref(false);
+const calendarValue = computed(() => (selected.value ? parseDate(selected.value) : undefined));
+const isFull = (day: DateValue) => !props.openDates.includes(day.toString());
+
+function pickFromCalendar(value: DateValue | undefined) {
+  if (!value) return;
+  isCalendarOpen.value = false;
+  emit("pick", value.toString());
+}
 
 const heading = computed(() => {
   const months = [...new Set(props.days.map((day) => dateParts(day.date).longMonth))];
@@ -33,6 +47,30 @@ const dayButtons = computed(() =>
     <div class="flex items-center justify-between">
       <h2 class="text-[17px] font-bold">{{ heading }}</h2>
       <div class="flex gap-1">
+        <Popover v-model:open="isCalendarOpen">
+          <PopoverTrigger as-child>
+            <Button
+              variant="outline"
+              size="icon-lg"
+              class="relative size-9 bg-card after:absolute after:-inset-1"
+              aria-label="Escolher o dia no calendário"
+            >
+              <CalendarIcon aria-hidden="true" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent class="w-auto p-0" align="end">
+            <Calendar
+              :model-value="calendarValue"
+              :default-placeholder="calendarValue ?? parseDate(firstDate)"
+              :min-value="parseDate(firstDate)"
+              :max-value="parseDate(lastDate)"
+              :is-date-disabled="isFull"
+              locale="pt-BR"
+              class="[--cell-size:--spacing(10)]"
+              @update:model-value="pickFromCalendar"
+            />
+          </PopoverContent>
+        </Popover>
         <Button
           variant="outline"
           size="icon-lg"

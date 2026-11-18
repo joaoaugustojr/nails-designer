@@ -154,9 +154,17 @@ export async function findServiceAvailability(serviceId: number, query: Availabi
   const firstDate = todayIn(settings.timezone, now);
   const lastDate = addDays(firstDate, settings.maxDaysAhead);
   const from = query.from && query.from > firstDate ? query.from : firstDate;
-  const dates = Array.from({ length: query.days }, (_, index) => addDays(from, index)).filter(
-    (date) => date <= lastDate,
+  const to = addDays(from, query.days - 1);
+  const bookableDates = Array.from({ length: settings.maxDaysAhead + 1 }, (_, index) =>
+    addDays(firstDate, index),
   );
+  // The whole bookable range is computed so the calendar can disable full and closed days.
+  const allDays = await freeStartMinutes(db, {
+    dates: bookableDates,
+    durationMinutes: service.durationMinutes,
+    settings,
+    now,
+  });
 
   return {
     service: {
@@ -168,13 +176,7 @@ export async function findServiceAvailability(serviceId: number, query: Availabi
     },
     firstDate,
     lastDate,
-    days: dates.length
-      ? await freeStartMinutes(db, {
-          dates,
-          durationMinutes: service.durationMinutes,
-          settings,
-          now,
-        })
-      : [],
+    openDates: allDays.filter((day) => day.startMinutes.length).map((day) => day.date),
+    days: allDays.filter((day) => day.date >= from && day.date <= to),
   };
 }

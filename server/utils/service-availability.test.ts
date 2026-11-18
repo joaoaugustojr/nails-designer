@@ -93,6 +93,9 @@ describe("findServiceAvailability", () => {
       .insert(timeOff)
       .values({ startsAt: at("2026-11-17", "00:00"), endsAt: at("2026-11-18", "00:00") });
     expect(await startsByDate({ days: 2 })).toEqual(["2026-11-17: ", "2026-11-18: 10"]);
+    expect((await findServiceAvailability(serviceId, { days: 1 })).openDates).toEqual([
+      "2026-11-18",
+    ]);
   });
 
   it("refuses inactive or unknown services", async () => {

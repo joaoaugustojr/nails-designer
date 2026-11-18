@@ -53,6 +53,11 @@ const nextStep = computed(() =>
 function movePage(direction: 1 | -1) {
   from.value = addDays(pageStart.value, direction * DAYS_PER_PAGE);
 }
+
+function pickDate(date: string) {
+  from.value = date;
+  selectedDate.value = date;
+}
 </script>
 
 <template>
@@ -65,11 +70,15 @@ function movePage(direction: 1 | -1) {
       <SiteDayPicker
         v-model="selectedDate"
         :days="days"
+        :first-date="data.firstDate"
+        :last-date="data.lastDate"
+        :open-dates="data.openDates"
         :can-go-back="canGoBack"
         :can-go-forward="canGoForward"
         :class="{ 'opacity-60': status === 'pending' }"
         @back="movePage(-1)"
         @forward="movePage(1)"
+        @pick="pickDate"
       />
 
       <section class="flex flex-col gap-2.5">

@@ -396,3 +396,8 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 
 - "Salvar na agenda" and "Como chegar" also appear on `/bookings/<token>` under the booking card, while the booking has not started (hidden once cancelled or under way). Both pages use the same `SiteBookingLinks` component.
 - A full-width **"Copiar link do agendamento"** button under them copies the absolute `/bookings/<token>` link (VueUse `useClipboard`, with the legacy fallback), and reads "Link copiado" for 2 s. Until WhatsApp sends the link, this is how a client keeps it.
+
+### Calendar on the client's day picker (2026-11-18)
+
+- The booking day strip gets a calendar button next to the arrows, using the same `Calendar` as the agenda. Picking a day moves the strip to start on that day and selects it; the arrows keep working as before.
+- `GET /api/services/:id/availability` computes free slots for the whole bookable range and returns `openDates` (days with at least one free slot for that service). The calendar disables every other day — closed, past, time off or fully booked — not just closed weekdays.
