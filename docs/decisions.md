@@ -438,3 +438,7 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - **Services list:** dragged by a grip handle on each card (the card itself holds a link and a switch); the new order saves on drop (`PUT /api/admin/services/order`).
 - **Cover photos and service photos:** the whole tile drags after a long press on touch (`delay` with `delayOnTouchOnly`), so a swipe over the grid still scrolls the page. Covers save on drop (`PUT /api/admin/store/covers` with the full list, refused if it is not the same set). Service photos save with the form's Salvar: new uploads return their ids and the full order goes to `PUT /api/admin/services/:id/photos/order`, so a new photo can become the cover before saving.
 - No keyboard reordering for now (SortableJS has none).
+
+### "Salvar na agenda" by device (2026-11-18)
+
+- A downloaded `.ics` did not reach the calendar on phones: iOS saved it to Files, and Android has no default app for it. The button still points to `GET /api/bookings/:token/calendar`, which now decides by user agent: iPhone, iPad and Mac get the `.ics` inline (iOS shows its native "Add to Calendar"); everything else is redirected to a prefilled Google Calendar link. It opens in a new tab so the thank-you page stays.

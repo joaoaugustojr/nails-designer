@@ -53,3 +53,16 @@ export function calendarFile(event: CalendarEvent, now = new Date()) {
   ];
   return `${lines.map(foldLine).join("\r\n")}\r\n`;
 }
+
+const GOOGLE_CALENDAR_URL = "https://calendar.google.com/calendar/render";
+
+export function googleCalendarUrl(event: Omit<CalendarEvent, "uid">) {
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: event.summary,
+    dates: `${utcStamp(event.startsAt)}/${utcStamp(event.endsAt)}`,
+    details: event.description,
+    ...(event.location ? { location: event.location } : {}),
+  });
+  return `${GOOGLE_CALENDAR_URL}?${params}`;
+}

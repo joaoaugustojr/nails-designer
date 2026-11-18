@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { calendarFile } from "./calendar";
+import { calendarFile, googleCalendarUrl } from "./calendar";
 
 const event = {
   uid: "abc@booking",
@@ -41,5 +41,16 @@ describe("calendarFile", () => {
     expect(lines.every((line) => encoder.encode(line).length <= 75)).toBe(true);
     expect(file.replace(/\r\n /g, "")).toContain(`DESCRIPTION:${"ç".repeat(100)}`);
     expect(file).not.toContain("LOCATION");
+  });
+});
+
+describe("googleCalendarUrl", () => {
+  it("prefills a Google Calendar event in UTC", () => {
+    const url = new URL(googleCalendarUrl(event));
+    expect(url.searchParams.get("action")).toBe("TEMPLATE");
+    expect(url.searchParams.get("dates")).toBe("20261118T170000Z/20261118T180000Z");
+    expect(url.searchParams.get("text")).toBe(event.summary);
+    expect(url.searchParams.get("location")).toBe(event.location);
+    expect(url.searchParams.get("details")).toBe(event.description);
   });
 });

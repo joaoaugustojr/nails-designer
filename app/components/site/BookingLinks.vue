@@ -20,7 +20,7 @@ function copyLink() {
 <template>
   <div class="grid grid-cols-2 gap-2.5">
     <Button as-child variant="outline" class="h-12 rounded-xl bg-card text-sm">
-      <a :href="`/api/bookings/${token}/calendar`" download="agendamento.ics">
+      <a :href="`/api/bookings/${token}/calendar`" target="_blank" rel="noopener">
         <CalendarPlusIcon aria-hidden="true" />
         Salvar na agenda
       </a>
