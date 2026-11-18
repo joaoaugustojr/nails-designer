@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { formatFullDay } from "./dates";
 import { formatDuration } from "./duration";
 import { centsToPriceInput, formatPrice, formatPriceShort, parsePrice } from "./money";
-import { formatPhone, whatsappUrl } from "./phone";
+import { formatPhone, maskPhone, whatsappUrl } from "./phone";
 import { initials, plural } from "./text";
 
 describe("parsePrice", () => {
@@ -60,6 +60,24 @@ describe("formatPhone", () => {
     ["123", "123"],
   ])("formats %s as %s", (phone, label) => {
     expect(formatPhone(phone)).toBe(label);
+  });
+});
+
+describe("maskPhone", () => {
+  it.each([
+    ["", ""],
+    ["1", "(1"],
+    ["11", "(11"],
+    ["119", "(11) 9"],
+    ["1191234", "(11) 9123-4"],
+    ["1133334444", "(11) 3333-4444"],
+    ["11912345678", "(11) 91234-5678"],
+    ["119123456789", "(11) 91234-5678"],
+    ["+55 11 91234-5678", "(11) 91234-5678"],
+    ["(11) 9123-", "(11) 9123"],
+    ["abc", ""],
+  ])("masks %s as %s", (typed, masked) => {
+    expect(maskPhone(typed)).toBe(masked);
   });
 });
 

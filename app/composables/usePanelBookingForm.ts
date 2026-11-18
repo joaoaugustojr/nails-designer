@@ -88,10 +88,6 @@ export function usePanelBookingForm(prefill: NewBookingPrefill) {
     form.phone = formatPhone(client.phone);
   }
 
-  function formatPhoneField() {
-    form.phone = formatPhone(form.phone);
-  }
-
   async function save() {
     const parsed = panelBookingSchema.safeParse({
       serviceId: form.serviceId,
@@ -137,7 +133,6 @@ export function usePanelBookingForm(prefill: NewBookingPrefill) {
     endTime,
     suggestions,
     chooseClient,
-    formatPhoneField,
     save,
   };
 }

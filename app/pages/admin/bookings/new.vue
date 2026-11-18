@@ -14,7 +14,6 @@ const {
   endTime,
   suggestions,
   chooseClient,
-  formatPhoneField,
   save,
 } = usePanelBookingForm(prefill);
 const { isWhatsappEnabled } = useRuntimeConfig().public;
@@ -60,14 +59,10 @@ const conflictText = computed(() => {
 
       <Field :data-invalid="!!errors.phone || undefined">
         <FieldLabel for="client-phone">Celular (WhatsApp)</FieldLabel>
-        <Input
+        <PhoneInput
           id="client-phone"
           v-model="form.phone"
-          type="tel"
-          inputmode="tel"
-          placeholder="(00) 00000-0000"
           :aria-invalid="!!errors.phone || undefined"
-          @blur="formatPhoneField"
         />
         <FieldError v-if="errors.phone">{{ errors.phone }}</FieldError>
       </Field>

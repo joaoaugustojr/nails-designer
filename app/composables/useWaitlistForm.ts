@@ -49,10 +49,6 @@ export function useWaitlistForm(serviceId: number) {
       : [...form.periods, period];
   }
 
-  function formatPhoneField() {
-    form.phone = formatPhone(form.phone);
-  }
-
   function reset() {
     Object.assign(form, { dates: [], periods: [], note: "" });
     errors.value = {};
@@ -87,7 +83,6 @@ export function useWaitlistForm(serviceId: number) {
     calendarDates,
     selectDates,
     togglePeriod,
-    formatPhoneField,
     reset,
     send,
   };

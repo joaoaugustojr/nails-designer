@@ -26,7 +26,6 @@ const {
   calendarDates,
   selectDates,
   togglePeriod,
-  formatPhoneField,
   reset,
   send,
 } = useWaitlistForm(props.service.id);
@@ -150,15 +149,11 @@ watch(isOpen, (open) => {
 
           <Field :data-invalid="!!errors.phone || undefined">
             <FieldLabel for="waitlist-phone">Celular (WhatsApp)</FieldLabel>
-            <Input
+            <PhoneInput
               id="waitlist-phone"
               v-model="form.phone"
-              type="tel"
-              inputmode="tel"
               autocomplete="tel-national"
-              placeholder="(00) 00000-0000"
               :aria-invalid="!!errors.phone || undefined"
-              @blur="formatPhoneField"
             />
             <FieldError v-if="errors.phone">{{ errors.phone }}</FieldError>
           </Field>

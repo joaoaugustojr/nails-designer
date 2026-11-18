@@ -28,10 +28,6 @@ export function useBookingForm(choice: { serviceId: number; date: string; startM
   const isSaving = ref(false);
   let idempotencyKey: string | null = null;
 
-  function formatPhoneField() {
-    form.phone = formatPhone(form.phone);
-  }
-
   async function confirm() {
     idempotencyKey ??= newIdempotencyKey();
     const parsed = bookingSchema.safeParse({ ...choice, ...form, idempotencyKey });
@@ -52,5 +48,5 @@ export function useBookingForm(choice: { serviceId: number; date: string; startM
     }
   }
 
-  return { form, errors, error, isSlotTaken, isSaving, formatPhoneField, confirm };
+  return { form, errors, error, isSlotTaken, isSaving, confirm };
 }

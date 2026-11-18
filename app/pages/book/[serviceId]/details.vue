@@ -17,7 +17,7 @@ const isStillFree = computed(
   () => data.value?.days[0]?.date === date && data.value.days[0].startMinutes.includes(startMinute),
 );
 
-const { form, errors, error, isSlotTaken, isSaving, formatPhoneField, confirm } = useBookingForm({
+const { form, errors, error, isSlotTaken, isSaving, confirm } = useBookingForm({
   serviceId,
   date,
   startMinute,
@@ -70,15 +70,11 @@ const when = computed(() => {
         </Field>
         <Field :data-invalid="!!errors.phone || undefined">
           <FieldLabel for="booking-phone">Celular (WhatsApp)</FieldLabel>
-          <Input
+          <PhoneInput
             id="booking-phone"
             v-model="form.phone"
-            type="tel"
-            inputmode="tel"
             autocomplete="tel-national"
-            placeholder="(00) 00000-0000"
             :aria-invalid="!!errors.phone || undefined"
-            @blur="formatPhoneField"
           />
           <FieldDescription v-if="isWhatsappEnabled">
             A confirmação e os lembretes chegam no seu WhatsApp.
