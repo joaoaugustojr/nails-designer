@@ -466,3 +466,8 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 
 - WhatsApp showed the Nuxt logo next to the link: it skips a WebP icon and falls back to `/favicon.ico`, which was still the framework's default file. That file is gone; **`/favicon.ico` is now a route that serves the store's logo as a 180 px square PNG** (404 without a logo, never a framework default). This supersedes "Tab icon: the store's logo, falling back to `/favicon.ico`".
 - Pages link it as `icon` and `apple-touch-icon` with `?v=<logo file name>`, so a new logo is a new URL and no browser keeps the old one.
+
+### DNS only, launch settings (2026-11-18)
+
+- **alinepratanails.site is DNS only** (grey cloud), which supersedes "both records proxied" in "Own domain": through the Cloudflare proxy, requests to the server lost packets and took 0.3–2.8 s; direct they take about 0.2 s. `www` is a CNAME to the apex, Caddy redirects it to `https://alinepratanails.site` and issues the HTTPS certificates itself (the Cloudflare universal certificate is not in the path).
+- **The `.env` on the server keeps no admin password:** `NUXT_ADMIN_PASSWORD` only seeds the first user and was removed after the first login; the password lives hashed in the database.
