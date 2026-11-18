@@ -4,7 +4,9 @@ import { CalendarIcon } from "@lucide/vue";
 import type { ApiGet } from "~/types/api";
 
 const props = defineProps<{ client: ApiGet<"/api/admin/clients">["items"][number] }>();
-const emit = defineEmits<{ cancelNext: [] }>();
+const emit = defineEmits<{ cancelNext: []; remove: [] }>();
+
+const { isOwner } = usePanelUser();
 
 const timezone = useStoreTimezone();
 
@@ -31,6 +33,8 @@ const nextVisit = computed(() => {
     .filter(Boolean)
     .join(" · ");
 });
+
+const canRemove = computed(() => isOwner.value && !props.client.nextBookingId);
 
 const cancellations = computed(() =>
   props.client.cancellations
@@ -78,15 +82,19 @@ const cancellations = computed(() =>
       </div>
     </dl>
 
-    <div class="flex flex-wrap items-center justify-between gap-x-2">
-      <div v-if="nextVisit" class="flex items-center gap-3">
-        <span
-          class="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1.5 text-xs font-bold text-secondary-foreground"
-        >
-          <CalendarIcon :size="14" aria-hidden="true" />
-          {{ nextVisit }}
-        </span>
+    <div class="flex items-center justify-between gap-3">
+      <span
+        v-if="nextVisit"
+        class="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1.5 text-xs font-bold text-secondary-foreground"
+      >
+        <CalendarIcon :size="14" class="shrink-0" aria-hidden="true" />
+        <span class="truncate">{{ nextVisit }}</span>
+      </span>
+      <span v-else class="text-xs text-muted-foreground">Sem agendamento futuro</span>
+      <div class="flex shrink-0 items-center gap-3">
+        <span v-if="cancellations" class="text-xs text-muted-foreground">{{ cancellations }}</span>
         <Button
+          v-if="nextVisit"
           variant="quiet"
           size="inline"
           :aria-label="`Cancelar o próximo atendimento de ${client.name}`"
@@ -94,9 +102,16 @@ const cancellations = computed(() =>
         >
           Cancelar
         </Button>
+        <Button
+          v-else-if="canRemove"
+          variant="quiet"
+          size="inline"
+          :aria-label="`Remover ${client.name}`"
+          @click="emit('remove')"
+        >
+          Remover
+        </Button>
       </div>
-      <span v-else class="text-xs text-muted-foreground">Sem agendamento futuro</span>
-      <span v-if="cancellations" class="text-xs text-muted-foreground">{{ cancellations }}</span>
     </div>
   </SurfaceCard>
 </template>

@@ -1,9 +1,11 @@
-import { asc, count, desc, eq, or, type SQL, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, or, type SQL, sql } from "drizzle-orm";
 
 import type { Database } from "../db/client";
 import { bookings, clients } from "../db/schema";
 
 export const CLIENTS_PAGE_SIZE = 20;
+
+export const REMOVED_CLIENT_NAME = "Cliente removida";
 
 // Not awaited here, so it can run on its own or inside a batch.
 export function upsertClient(db: Database, client: { phone: string; name: string }) {
@@ -83,4 +85,34 @@ export async function listClients({
     items: rows.slice(0, CLIENTS_PAGE_SIZE),
     hasMore: rows.length > CLIENTS_PAGE_SIZE,
   };
+}
+
+// Her personal data is erased (LGPD) but her bookings stay, so the store's history adds up.
+// A client with an upcoming booking is refused: that booking is cancelled first.
+export async function removeClient(id: number, now = new Date()) {
+  const db = await useDb();
+  const client = await db.query.clients.findFirst({
+    where: eq(clients.id, id),
+    columns: { id: true },
+  });
+  if (!client) throw createError({ statusCode: 404, statusMessage: "Client not found" });
+
+  const upcoming = await db.query.bookings.findFirst({
+    where: and(
+      eq(bookings.clientId, id),
+      eq(bookings.status, "confirmed"),
+      gt(bookings.startsAt, now),
+    ),
+    columns: { id: true },
+  });
+  if (upcoming)
+    throw createError({ statusCode: 409, statusMessage: "Client has an upcoming booking" });
+
+  await db.batch([
+    db
+      .update(bookings)
+      .set({ clientName: REMOVED_CLIENT_NAME, clientPhone: "" })
+      .where(eq(bookings.clientId, id)),
+    db.delete(clients).where(eq(clients.id, id)),
+  ]);
 }

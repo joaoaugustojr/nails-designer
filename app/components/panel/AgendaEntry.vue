@@ -34,7 +34,7 @@ const placeholder = computed(() => {
         {{ entry.serviceName }} · {{ formatPriceShort(entry.servicePriceCents) }}
       </span>
       <div class="flex gap-4">
-        <Button as-child variant="link" size="inline">
+        <Button v-if="entry.clientPhone" as-child variant="link" size="inline">
           <a :href="whatsappUrl(entry.clientPhone)" target="_blank" rel="noopener">WhatsApp</a>
         </Button>
         <Button variant="quiet" size="inline" @click="emit('cancel', entry.id, entry.clientName)">

@@ -4,8 +4,16 @@ import { SearchIcon } from "@lucide/vue";
 definePageMeta({ layout: "panel" });
 useHead({ title: "Clientes" });
 
-const { search, clients, total, hasMore, isLoadingMore, loadMore, cancelNextBooking } =
-  useClients();
+const {
+  search,
+  clients,
+  total,
+  hasMore,
+  isLoadingMore,
+  loadMore,
+  cancelNextBooking,
+  removeClient,
+} = useClients();
 const { requests: waitlist, resolve } = useWaitlist();
 </script>
 
@@ -50,6 +58,7 @@ const { requests: waitlist, resolve } = useWaitlist();
         :key="client.id"
         :client="client"
         @cancel-next="cancelNextBooking(client)"
+        @remove="removeClient(client)"
       />
       <p v-if="!clients.length" class="py-10 text-center text-sm text-muted-foreground">
         {{

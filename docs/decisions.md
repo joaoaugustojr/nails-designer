@@ -442,3 +442,11 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 ### "Salvar na agenda" by device (2026-11-18)
 
 - A downloaded `.ics` did not reach the calendar on phones: iOS saved it to Files, and Android has no default app for it. The button still points to `GET /api/bookings/:token/calendar`, which now decides by user agent: iPhone, iPad and Mac get the `.ics` inline (iOS shows its native "Add to Calendar"); everything else is redirected to a prefilled Google Calendar link. It opens in a new tab so the thank-you page stays.
+
+### Removing a client (2026-11-18)
+
+- **The owner removes a client from her card in Clientes** ("Remover", after a confirm; owner-only on the server, hidden for admins). This supersedes "a client with history cannot be deleted" from phase 2.
+- **Anonymize, not delete history:** the client row is deleted (her name and phone are gone, LGPD) and her bookings stay with `client_id` null (`ON DELETE SET NULL`), name "Cliente removida" and an empty phone, so the agenda and the store's totals still add up. The agenda hides WhatsApp for those bookings.
+- **Refused while she has an upcoming confirmed booking** (409; the button is hidden then): cancel it first.
+- **She can book again:** her phone is free, so a new booking creates a new client with no past history.
+- **Migration note:** drizzle-kit rebuilds `bookings` to change the foreign key (SQLite cannot alter one) and drops its overlap triggers with the old table; `0003_client_removal` recreates them by hand. Any later rebuild of `bookings` must do the same.

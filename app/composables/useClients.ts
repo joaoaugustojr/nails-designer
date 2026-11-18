@@ -9,6 +9,7 @@ export function useClients() {
 
   const { data: firstPage, refresh } = useFetch("/api/admin/clients", { query });
   const confirmCancel = useCancelBooking();
+  const { confirmAction } = useConfirmDialog();
   type Client = NonNullable<typeof firstPage.value>["items"][number];
 
   const morePages = ref<Client[]>([]);
@@ -42,5 +43,29 @@ export function useClients() {
     if (await confirmCancel(client.nextBookingId, client.name)) await refresh();
   }
 
-  return { search, clients, total, hasMore, isLoadingMore, loadMore, cancelNextBooking };
+  async function removeClient(client: Client) {
+    const isRemoved = await confirmAction({
+      title: `Remover ${client.name}?`,
+      description:
+        "O nome e o telefone dela são apagados. Os atendimentos passados continuam na agenda como “Cliente removida”. Se ela agendar de novo, entra como cliente nova.",
+      confirmLabel: "Remover",
+      pendingLabel: "Removendo…",
+      isDestructive: true,
+      action: async () => {
+        await $fetch(`/api/admin/clients/${client.id}`, { method: "DELETE" });
+      },
+    });
+    if (isRemoved) await refresh();
+  }
+
+  return {
+    search,
+    clients,
+    total,
+    hasMore,
+    isLoadingMore,
+    loadMore,
+    cancelNextBooking,
+    removeClient,
+  };
 }

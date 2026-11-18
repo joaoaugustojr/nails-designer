@@ -162,10 +162,8 @@ export const bookings = sqliteTable(
     id: integer().primaryKey({ autoIncrement: true }),
     // Null once the service is deleted; the snapshot below keeps the history readable.
     serviceId: integer().references(() => services.id, { onDelete: "set null" }),
-    // A client with bookings cannot be deleted: her history would be lost.
-    clientId: integer()
-      .notNull()
-      .references(() => clients.id, { onDelete: "restrict" }),
+    // Null once the client is removed; her bookings stay, anonymized, for the store's history.
+    clientId: integer().references(() => clients.id, { onDelete: "set null" }),
     serviceName: text().notNull(),
     serviceDurationMinutes: integer().notNull(),
     servicePriceCents: integer().notNull(),

@@ -1,16 +1,24 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { eq } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createDatabase, type Database, migrateDatabase } from "../db/client";
 import { bookings, clients } from "../db/schema";
-import { CLIENTS_PAGE_SIZE, listClients, upsertClient } from "./clients";
+import {
+  CLIENTS_PAGE_SIZE,
+  listClients,
+  removeClient,
+  REMOVED_CLIENT_NAME,
+  upsertClient,
+} from "./clients";
 
 const dir = mkdtempSync(join(tmpdir(), "nails-clients-"));
 const db: Database = createDatabase(`file:${join(dir, "test.db")}`);
 // useDb is a Nuxt server auto-import; point it at the test database.
 vi.stubGlobal("useDb", async () => db);
+vi.stubGlobal("createError", (error: object) => Object.assign(new Error(), error));
 const NOW = new Date("2026-11-17T12:00:00Z");
 const HOUR = 60 * 60 * 1000;
 let tokens = 0;
@@ -156,5 +164,36 @@ describe("queryClients", () => {
     expect(first.items).toHaveLength(CLIENTS_PAGE_SIZE);
     expect(second).toMatchObject({ hasMore: false });
     expect(second.items).toHaveLength(3);
+  });
+});
+
+describe("removeClient", () => {
+  const ana = { phone: "11912345678", name: "Ana" };
+  const clientIdOf = async (phone: string) =>
+    (await db.query.clients.findFirst({ where: eq(clients.phone, phone) }))?.id;
+
+  it("erases her data, keeps her bookings, and lets her book again as a new client", async () => {
+    const past = await book(ana, -48);
+    const id = (await clientIdOf(ana.phone))!;
+
+    await removeClient(id, NOW);
+
+    expect(await clientIdOf(ana.phone)).toBeUndefined();
+    const kept = await db.query.bookings.findFirst({ where: eq(bookings.id, past.id) });
+    expect(kept).toMatchObject({
+      clientId: null,
+      clientName: REMOVED_CLIENT_NAME,
+      clientPhone: "",
+    });
+
+    await book(ana, 24);
+    expect(await clientIdOf(ana.phone)).not.toBe(id);
+  });
+
+  it("refuses while she has an upcoming booking", async () => {
+    await book(ana, 24);
+    await expect(removeClient((await clientIdOf(ana.phone))!, NOW)).rejects.toMatchObject({
+      statusCode: 409,
+    });
   });
 });
