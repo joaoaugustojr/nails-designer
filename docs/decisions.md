@@ -454,3 +454,10 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 ### Panel tabs wait for their data (2026-11-18)
 
 - Switching tabs showed each page before its data arrived (switches off, empty lists), then filled it in; a reload did not, because the server renders with the data. The panel composables (`useAgenda`, `useClients`, `useWaitlist`, `useSchedule`, `useStoreSettings`, `usePanelUsers`) now start their fetches, call every other composable, and `await` the fetches last; pages `await` them. New data-loading composables follow the same shape.
+
+### Nightly backup (2026-11-18)
+
+- **`deploy/backup.sh`, run by the server's cron**, needs only Docker and curl on the host. The database snapshot is taken in the running app container with Node's built-in `node:sqlite` (`VACUUM INTO`, consistent while the app writes; the image has no `sqlite3` binary), which replaces the planned `sqlite3 .backup`. A throwaway `rclone/rclone` container mounts the data volume read-only and uploads.
+- **Layout in the R2 bucket:** `nails/db/nails-YYYY-MM-DD.db`, one per day, old ones deleted by an R2 lifecycle rule on `nails/db/` (30 days); `nails/uploads/` gets `rclone copy`, which never deletes, so a photo removed by mistake can still be restored.
+- **Settings in `/srv/nails/backup.env`** (template: `deploy/backup.env.example`), apart from the app's `.env` so the app never holds the R2 keys. The R2 token is limited to the bucket.
+- **healthchecks.io** gets `/start` and then the script's exit code, so a failed or missed night sends an email.

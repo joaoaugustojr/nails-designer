@@ -57,8 +57,8 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [x] Fold every migration into a single `0000_init` (overlap triggers kept) and realign local databases.
 - [x] Dockerfile (Node 24, multi-stage, arm64; the linux-arm64 check of `sharp` and libsql happens with the first CI build). Ship `server/db/migrations` next to `.output` (same relative path), set `NUXT_APP_SECRET`, `NUXT_DB_URL` on the volume and `NUXT_SITE_URL`. `NUXT_PUBLIC_*` values are read at runtime, so the same image serves WhatsApp on or off.
 - [x] `deploy/compose.yaml` (project `nails`, one service, one volume) and `deploy/server-deploy.sh`.
-- [ ] **(you)** On the box: `/srv/nails`, `.env`, dedicated deploy key restricted in `authorized_keys`, Caddy block, Cloudflare DNS record.
-- [ ] GitHub Actions: test → build arm64 → push GHCR → deploy on push to `main`. Upload a photo after the first deploy to prove `sharp` loaded its arm64 binary. **(you)** add the repository secrets.
+- [x] **(you)** On the box: `/srv/nails`, `.env`, dedicated deploy key restricted in `authorized_keys`, Caddy block, Cloudflare DNS record.
+- [x] GitHub Actions: test → build arm64 → push GHCR → deploy on push to `main`. Upload a photo after the first deploy to prove `sharp` loaded its arm64 binary. **(you)** add the repository secrets.
 - [ ] Nightly backup to R2 + healthchecks ping. **(you)** install the cron entry.
 
 ## Phase 6 — WhatsApp
