@@ -6,8 +6,7 @@ const {
   isNew,
   listPath,
   form,
-  photos,
-  pendingPhotos,
+  photoTiles,
   errors,
   formError,
   isSaving,
@@ -38,11 +37,13 @@ useHead({ title });
       <Field>
         <FieldTitle>Fotos</FieldTitle>
         <PanelServicePhotos
-          v-model:pending="pendingPhotos"
-          :photos="photos"
+          v-model:tiles="photoTiles"
           :max="SERVICE_MAX_PHOTOS"
           @remove="removePhoto"
         />
+        <FieldDescription>
+          A primeira é a capa. Toque e segure uma foto para arrastá-la.
+        </FieldDescription>
       </Field>
 
       <Field :data-invalid="!!errors.name || undefined">

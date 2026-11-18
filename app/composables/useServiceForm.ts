@@ -2,6 +2,16 @@ import { serviceSchema } from "#shared/schemas/service";
 
 import type { ApiGet } from "~/types/api";
 
+type Photo = ApiGet<"/api/admin/services/:id">["photos"][number];
+
+export type PhotoTile = { key: string; src: string } & ({ photoId: number } | { file: File });
+
+const savedTile = (photo: Photo): PhotoTile => ({
+  key: `photo-${photo.id}`,
+  src: photo.path,
+  photoId: photo.id,
+});
+
 type FieldName = "name" | "details" | "includes" | "priceCents" | "durationMinutes";
 
 const DEFAULT_DURATION_MINUTES = 60;
@@ -26,7 +36,7 @@ export function useServiceForm(serviceId: string) {
   const isNew = serviceId === "new";
   const listPath = "/admin/services";
 
-  const { data: service, refresh } = useFetch<ApiGet<"/api/admin/services/:id">>(
+  const { data: service } = useFetch<ApiGet<"/api/admin/services/:id">>(
     `/api/admin/services/${serviceId}`,
     { immediate: !isNew },
   );
@@ -39,7 +49,7 @@ export function useServiceForm(serviceId: string) {
     durationMinutes: DEFAULT_DURATION_MINUTES,
     active: true,
   });
-  const pendingPhotos = ref<File[]>([]);
+  const photoTiles = ref<PhotoTile[]>([]);
   const errors = ref<Partial<Record<FieldName, string>>>({});
   const formError = ref("");
   const isSaving = ref(false);
@@ -57,6 +67,8 @@ export function useServiceForm(serviceId: string) {
         durationMinutes: loaded.durationMinutes,
         active: loaded.active,
       });
+      const pendingTiles = photoTiles.value.filter((tile) => "file" in tile);
+      photoTiles.value = [...loaded.photos.map(savedTile), ...pendingTiles];
     },
     { immediate: true },
   );
@@ -82,13 +94,22 @@ export function useServiceForm(serviceId: string) {
   }
 
   async function uploadPendingPhotos(id: number) {
-    if (!pendingPhotos.value.length) return;
+    const files = photoTiles.value.flatMap((tile) => ("file" in tile ? [tile.file] : []));
+    if (!files.length) return [];
     const body = new FormData();
-    const photos = await Promise.all(pendingPhotos.value.map(shrinkImage));
-    photos.forEach((photo, index) =>
-      body.append("photos", photo, pendingPhotos.value[index]!.name),
+    const photos = await Promise.all(files.map(shrinkImage));
+    photos.forEach((photo, index) => body.append("photos", photo, files[index]!.name));
+    const { ids } = await $fetch(`/api/admin/services/${id}/photos`, { method: "POST", body });
+    return ids;
+  }
+
+  async function savePhotos(id: number) {
+    const uploadedIds = (await uploadPendingPhotos(id)).values();
+    const ids = photoTiles.value.map((tile) =>
+      "photoId" in tile ? tile.photoId : uploadedIds.next().value!,
     );
-    await $fetch(`/api/admin/services/${id}/photos`, { method: "POST", body });
+    if (!ids.length) return;
+    await $fetch(`/api/admin/services/${id}/photos/order`, { method: "PUT", body: { ids } });
   }
 
   async function save() {
@@ -100,8 +121,11 @@ export function useServiceForm(serviceId: string) {
     try {
       const { id } = isNew
         ? await $fetch("/api/admin/services", { method: "POST", body: input })
-        : await $fetch(`/api/admin/services/${serviceId}`, { method: "PATCH", body: input });
-      await uploadPendingPhotos(id);
+        : await $fetch<{ id: number }>(`/api/admin/services/${serviceId}`, {
+            method: "PATCH",
+            body: input,
+          });
+      await savePhotos(id);
       await navigateTo(listPath);
     } catch {
       formError.value = "Não foi possível salvar. Confira as fotos e tente novamente.";
@@ -120,7 +144,11 @@ export function useServiceForm(serviceId: string) {
         await $fetch(`/api/admin/services/${serviceId}/photos/${photoId}`, { method: "DELETE" });
       },
     });
-    if (isRemoved) await refresh();
+    if (isRemoved) {
+      photoTiles.value = photoTiles.value.filter(
+        (tile) => !("photoId" in tile) || tile.photoId !== photoId,
+      );
+    }
   }
 
   async function removeService() {
@@ -141,8 +169,7 @@ export function useServiceForm(serviceId: string) {
     isNew,
     listPath,
     form,
-    photos: computed(() => service.value?.photos ?? []),
-    pendingPhotos,
+    photoTiles,
     errors,
     formError,
     isSaving,

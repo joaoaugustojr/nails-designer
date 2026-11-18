@@ -431,3 +431,10 @@ The mockups are portrait phones; the site must also work sideways, on tablets an
 - **Days a client may ask for:** open weekdays within the open agenda, checked on both sides with the same helpers (`bookableRange`, `isOpenWeekday`).
 - **On/off:** `settings.isWaitlistEnabled` (on by default), a rule in Horários > Regras that saves on change; the site reads it from `/api/store`. Off hides the link and the server refuses new requests (403).
 - Calendar day cells are `type="button"`: inside a form, a plain `<button>` submitted it on every tap.
+
+### Drag-and-drop ordering (2026-11-18)
+
+- **Library:** `vue-draggable-plus` (SortableJS). shadcn-vue has no sortable component; SortableJS handles touch on phones. Shared options in `app/utils/sortable.ts`.
+- **Services list:** dragged by a grip handle on each card (the card itself holds a link and a switch); the new order saves on drop (`PUT /api/admin/services/order`).
+- **Cover photos and service photos:** the whole tile drags after a long press on touch (`delay` with `delayOnTouchOnly`), so a swipe over the grid still scrolls the page. Covers save on drop (`PUT /api/admin/store/covers` with the full list, refused if it is not the same set). Service photos save with the form's Salvar: new uploads return their ids and the full order goes to `PUT /api/admin/services/:id/photos/order`, so a new photo can become the cover before saving.
+- No keyboard reordering for now (SortableJS has none).

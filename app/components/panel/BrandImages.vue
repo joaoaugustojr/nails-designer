@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { LoaderCircleIcon, PlusIcon, XIcon } from "@lucide/vue";
+import { VueDraggable } from "vue-draggable-plus";
 
 import { STORE_MAX_COVERS } from "#shared/schemas/store";
 
@@ -14,7 +15,14 @@ const emit = defineEmits<{
   uploadLogo: [file: File];
   addCover: [file: File];
   removeCover: [index: number];
+  reorderCovers: [paths: string[]];
 }>();
+
+const covers = ref([...props.coverPaths]);
+watch(
+  () => props.coverPaths,
+  (paths) => (covers.value = [...paths]),
+);
 
 const canAddCover = computed(() => props.canEdit && props.coverPaths.length < STORE_MAX_COVERS);
 const isUploading = computed(() => props.uploading !== null);
@@ -73,13 +81,20 @@ function pickCover(event: Event) {
 
     <div class="flex flex-col gap-2">
       <p class="text-sm font-medium">Fotos de capa</p>
-      <div class="grid grid-cols-2 gap-2">
+      <VueDraggable
+        v-model="covers"
+        v-bind="LONG_PRESS_SORTABLE_OPTIONS"
+        :disabled="!canEdit"
+        draggable=".cover-tile"
+        class="grid grid-cols-2 gap-2"
+        @update="emit('reorderCovers', covers)"
+      >
         <div
-          v-for="(path, index) in coverPaths"
+          v-for="(path, index) in covers"
           :key="path"
-          class="relative aspect-[2/1] overflow-hidden rounded-xl bg-secondary"
+          class="cover-tile relative aspect-[2/1] overflow-hidden rounded-xl bg-secondary select-none"
         >
-          <img :src="path" alt="" class="size-full object-cover" />
+          <img :src="path" alt="" class="pointer-events-none size-full object-cover" />
           <button
             v-if="canEdit"
             type="button"
@@ -115,9 +130,10 @@ function pickCover(event: Event) {
             @change="pickCover"
           />
         </label>
-      </div>
+      </VueDraggable>
       <p class="text-xs text-muted-foreground">
-        Até {{ STORE_MAX_COVERS }} fotos. Com mais de uma, o site alterna entre elas.
+        Até {{ STORE_MAX_COVERS }} fotos. Com mais de uma, o site alterna entre elas na ordem acima;
+        toque e segure uma capa para arrastá-la.
       </p>
     </div>
   </div>

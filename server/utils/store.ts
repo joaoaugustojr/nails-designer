@@ -92,3 +92,11 @@ export async function deleteStoreCover(index: number) {
   await writeSettings({ coverPaths: coverPaths.filter((_, position) => position !== index) });
   await deleteUpload(path);
 }
+
+export async function reorderStoreCovers(paths: string[]) {
+  const { coverPaths } = await readSettings();
+  const isSameSet =
+    paths.length === coverPaths.length && coverPaths.every((path) => paths.includes(path));
+  if (!isSameSet) throw createError({ statusCode: 400, statusMessage: "Covers changed" });
+  await writeSettings({ coverPaths: paths });
+}

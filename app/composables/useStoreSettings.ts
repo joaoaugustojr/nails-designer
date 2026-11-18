@@ -110,6 +110,16 @@ export function useStoreSettings() {
     if (isRemoved) await reload();
   }
 
+  async function reorderCovers(paths: string[]) {
+    error.value = "";
+    try {
+      await $fetch("/api/admin/store/covers", { method: "PUT", body: { paths } });
+    } catch {
+      error.value = "Não foi possível salvar a nova ordem. Tente novamente.";
+    }
+    await reload();
+  }
+
   return {
     canEdit,
     store,
@@ -122,5 +132,6 @@ export function useStoreSettings() {
     uploadLogo,
     addCover,
     removeCover,
+    reorderCovers,
   };
 }

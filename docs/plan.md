@@ -29,6 +29,7 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [x] Panel users: owner creates (name, email, password) and removes admins; the owner cannot be removed.
 - [x] My account: every panel user changes her own name and password (current password required; other sessions end).
 - [x] Owner resets an admin's password (no "forgot password" flow).
+- [x] Drag-and-drop ordering of services, cover photos and service photos (touch: long press on photos, grip handle on services).
 
 ## Phase 3 — Client booking
 

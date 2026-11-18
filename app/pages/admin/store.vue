@@ -15,6 +15,7 @@ const {
   uploadLogo,
   addCover,
   removeCover,
+  reorderCovers,
 } = useStoreSettings();
 
 async function logout() {
@@ -44,6 +45,7 @@ async function logout() {
         @upload-logo="uploadLogo"
         @add-cover="addCover"
         @remove-cover="removeCover"
+        @reorder-covers="reorderCovers"
       />
 
       <fieldset :disabled="!canEdit" class="flex flex-col gap-4 disabled:opacity-70">

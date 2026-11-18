@@ -1,4 +1,5 @@
 import { and, asc, eq, max } from "drizzle-orm";
+import type { BatchItem } from "drizzle-orm/batch";
 
 import { SERVICE_MAX_PHOTOS, type ServiceInput } from "#shared/schemas/service";
 
@@ -96,13 +97,17 @@ export async function addServicePhotos(id: number, images: Uint8Array[]) {
     .select({ order: max(servicePhotos.sortOrder) })
     .from(servicePhotos)
     .where(eq(servicePhotos.serviceId, id));
-  await db.insert(servicePhotos).values(
-    paths.map((path, index) => ({
-      serviceId: id,
-      path,
-      sortOrder: nextOrder(last?.order) + index,
-    })),
-  );
+  const inserted = await db
+    .insert(servicePhotos)
+    .values(
+      paths.map((path, index) => ({
+        serviceId: id,
+        path,
+        sortOrder: nextOrder(last?.order) + index,
+      })),
+    )
+    .returning({ id: servicePhotos.id });
+  return inserted.map((photo) => photo.id);
 }
 
 export async function deleteServicePhoto(serviceId: number, photoId: number) {
@@ -113,4 +118,32 @@ export async function deleteServicePhoto(serviceId: number, photoId: number) {
     .returning({ path: servicePhotos.path });
   if (!deleted) throw createError({ statusCode: 404, statusMessage: "Photo not found" });
   await deleteUpload(deleted.path);
+}
+
+async function runInBatch(updates: BatchItem<"sqlite">[]) {
+  const [first, ...rest] = updates;
+  if (!first) return;
+  const db = await useDb();
+  await db.batch([first, ...rest]);
+}
+
+export async function reorderServices(ids: number[]) {
+  const db = await useDb();
+  await runInBatch(
+    ids.map((id, index) =>
+      db.update(services).set({ sortOrder: index }).where(eq(services.id, id)),
+    ),
+  );
+}
+
+export async function reorderServicePhotos(serviceId: number, ids: number[]) {
+  const db = await useDb();
+  await runInBatch(
+    ids.map((id, index) =>
+      db
+        .update(servicePhotos)
+        .set({ sortOrder: index })
+        .where(and(eq(servicePhotos.id, id), eq(servicePhotos.serviceId, serviceId))),
+    ),
+  );
 }
