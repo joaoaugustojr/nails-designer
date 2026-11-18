@@ -59,7 +59,7 @@ Steps marked **(you)** are done by hand, guided step by step; the rest is code w
 - [x] `deploy/compose.yaml` (project `nails`, one service, one volume) and `deploy/server-deploy.sh`.
 - [x] **(you)** On the box: `/srv/nails`, `.env`, dedicated deploy key restricted in `authorized_keys`, Caddy block, Cloudflare DNS record.
 - [x] GitHub Actions: test → build arm64 → push GHCR → deploy on push to `main`. Upload a photo after the first deploy to prove `sharp` loaded its arm64 binary. **(you)** add the repository secrets.
-- [ ] Nightly backup to R2 + healthchecks ping. **(you)** install the cron entry.
+- [x] Nightly backup to R2 + healthchecks ping. **(you)** install the cron entry.
 
 ## Phase 6 — WhatsApp
 

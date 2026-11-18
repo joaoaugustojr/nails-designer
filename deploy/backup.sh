@@ -15,9 +15,12 @@ trap 'curl -fsS -m 10 --retry 3 "$HEALTHCHECK_URL/$?" > /dev/null || true' EXIT
 
 # VACUUM INTO gives a consistent copy while the app keeps writing. The image has no sqlite3
 # binary, so Node's built-in SQLite does it.
+# SQLite creates a missing file instead of failing, which would back up an empty database.
 docker compose exec -T web node --no-warnings -e '
   const { DatabaseSync } = require("node:sqlite");
-  require("node:fs").rmSync("/data/backup.db", { force: true });
+  const fs = require("node:fs");
+  if (!fs.existsSync("/data/nails.db")) throw new Error("/data/nails.db not found");
+  fs.rmSync("/data/backup.db", { force: true });
   new DatabaseSync("/data/nails.db").exec("VACUUM INTO '\''/data/backup.db'\''");
 '
 
