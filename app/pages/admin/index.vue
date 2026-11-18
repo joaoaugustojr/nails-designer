@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "@lucide/vue";
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, Share2Icon } from "@lucide/vue";
 
 definePageMeta({ layout: "panel" });
 useHead({ title: "Agenda" });
@@ -12,6 +12,12 @@ const bookingPath = computed(() =>
   newBookingPath({ date: agenda.value?.date, from: route.fullPath }),
 );
 
+const { data: store } = useStoreInfo();
+const siteUrl = useRequestURL().origin;
+const shareLink = computed(() =>
+  whatsappShareUrl(`Agende seu horário em ${store.value?.name ?? ""}: ${siteUrl}`),
+);
+
 async function onBlocked() {
   isBlocking.value = false;
   await refresh();
@@ -22,6 +28,16 @@ async function onBlocked() {
   <div>
     <PanelHeader title="Agenda">
       <div class="flex gap-2">
+        <Button as-child size="md" variant="outline">
+          <a
+            :href="shareLink"
+            target="_blank"
+            rel="noopener"
+            aria-label="Compartilhar agenda no WhatsApp"
+          >
+            <Share2Icon aria-hidden="true" />
+          </a>
+        </Button>
         <Button size="md" variant="outline" @click="isBlocking = !isBlocking">Bloquear</Button>
         <Button as-child size="md">
           <NuxtLink :to="bookingPath">

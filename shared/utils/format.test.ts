@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { formatFullDay } from "./dates";
 import { formatDuration } from "./duration";
 import { centsToPriceInput, formatPrice, formatPriceShort, parsePrice } from "./money";
-import { formatPhone, maskPhone, whatsappUrl } from "./phone";
+import { formatPhone, maskPhone, whatsappShareUrl, whatsappUrl } from "./phone";
 import { initials, plural } from "./text";
 
 describe("parsePrice", () => {
@@ -78,6 +78,14 @@ describe("maskPhone", () => {
     ["abc", ""],
   ])("masks %s as %s", (typed, masked) => {
     expect(maskPhone(typed)).toBe(masked);
+  });
+});
+
+describe("whatsappShareUrl", () => {
+  it("lets the sender pick the contact", () => {
+    expect(whatsappShareUrl("Agende: https://x.com")).toBe(
+      "https://wa.me/?text=Agende%3A%20https%3A%2F%2Fx.com",
+    );
   });
 });
 

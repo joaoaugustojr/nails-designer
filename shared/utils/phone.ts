@@ -27,3 +27,7 @@ export function whatsappUrl(digits: string, message?: string) {
   const text = message ? `?text=${encodeURIComponent(message)}` : "";
   return `https://wa.me/${international}${text}`;
 }
+
+export function whatsappShareUrl(message: string) {
+  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+}
